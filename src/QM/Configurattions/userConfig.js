@@ -17,7 +17,7 @@ class userAllocationConfig {
         this.LastLoginTime;
         this.LastLogoutTime;
         this.Language_ID;
-        this.SetPassword;
+        //this.SetPassword;
         this.FailedLogins;
         this.LastPasswordChangeTime;
         this.UserToken;
