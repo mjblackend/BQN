@@ -15,7 +15,8 @@ var config = {
 
 if (fs.exists(filepath))
 {
-    config = JSON.parse(fs.readFileSync(filepath));
+    var content = fs.readFileSync(filepath);
+    config = JSON.parse(content);
 }
 
 
