@@ -7,7 +7,7 @@ class branchData {
         this.visitData = {};
         this.userActivitiesData = {};
         this.transaction = {};
-        this.settings = {};
+        this.settings = {}; //If there is a settings save on db
     }
 }
 module.exports = branchData;
