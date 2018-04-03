@@ -4,12 +4,18 @@
 //for now when working on DB, we will use Getall to retrieve everything
 //later when the repository returns data from server, the server will implement getbyFilter API.
 var mssql = require("mssql");
+var fs = require("fs");
+var filepath="dbconfig.txt";
+var config =JSON.parse(fs.readFileSync(filepath)); ;
+/*
 var config = {
     user: "sa",
     password: "fileworx@123",
     server: "majd",
     database: "new"
 };
+*/
+
 var connection = null;
 
 //Get All entities
