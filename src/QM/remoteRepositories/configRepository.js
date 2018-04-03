@@ -5,6 +5,10 @@
 //later when the repository returns data from server, the server will implement getbyFilter API.
 var mssql = require("mssql");
 var fs = require("fs");
+var logger = require("../../common/logger");
+
+
+
 var filepath="dbconfig.txt";
 var config = {
     user: "sa",
@@ -20,33 +24,51 @@ if (fs.exists(filepath))
 }
 
 
-
 var connection = null;
+
 
 //Get All entities
 var GetAll = async function (entityname) {
-    if (connection == null)
-    {
-        connection = await mssql.connect(config);
+    try{
+        if (connection == null)
+        {
+            connection = await mssql.connect(config);
+        }
+    
+        var request= new mssql.Request();
+        var command = "select * from T_" + entityname;
+        var Results = await request.query(command);
+        return Results;
     }
-
-    var request= new mssql.Request();
-    var command = "select * from T_" + entityname;
-    var Results = await request.query(command);
-    return Results;
+    catch(error)
+    {
+        logger.logError(error);
+        return undefined;
+    }
 };
 
 //Get By Filter
 var GetByFilter = async function (entityname, FilterName, FilterValue) {
-    if (connection == null)
+
+    try{
+
+
+        if (connection == null)
+        {
+            connection = await mssql.connect(config);
+        }
+    
+        var request= new mssql.Request();
+        var command = "select * from T_" + entityname + " where " + FilterName + " = " + FilterValue;
+        var Results = await request.query(command);
+        return Results;
+    }
+    catch(error)
     {
-        connection = await mssql.connect(config);
+        logger.logError(error);
+        return undefined;
     }
 
-    var request= new mssql.Request();
-    var command = "select * from T_" + entityname + " where " + FilterName + " = " + FilterValue;
-    var Results = await request.query(command);
-    return Results;
 };
 
 module.exports.GetAll = GetAll;
