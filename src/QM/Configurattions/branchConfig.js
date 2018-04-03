@@ -6,10 +6,45 @@ class branchConfig {
         this.Identity;
         this.SystemUsername;
         this.SystemPassword;
-        this.Settings={}; //array of settings from the config and common config
+        this.Settings = {}; //array of settings from the config and common config
         this.Version;
         this.ServerDate;
         this.ServerTimeZone;
+
+
+
+        //The Other attributes from other configs
+        this.Counters = {};
+        this.Services = {};
+        this.KButtons = {};
+        this.Users = {};
+        this.Segments = {};
+        this.PriorityRanges = {};
+        this.UsersAllocation = {};
+        this.Halls = {};
+        this.segmentsAllocation = {};
+        this.servicesAllocation = {};
+        this.serviceSegmentAllocations = {};
+
+        //public ServiceConfigEntity[] ServicesConfigurations;
+        //public KButtonEntity[] KButtons;
+        //public LanguageEntity[] Languages;
+        //public ReportEntity[] Reports;
+        //public PriorityRangeEntity[] PriorityRanges;
+        //public CustomerIdentificationEntity[] CustomerIdentificationService;
+        //public OrganizationLanguagesEntity[] OrganizationLanguages;
+        //public QueueBranchEntity QueueBranch;
+        //public CalendarEntity[] Calendars;
+        //public AlertEntity[] Alerts;
+        //public ServiceGroupEntity[] ServiceGroups;
+        //public HoldingReasonEntity[] HoldingResons; 
+        //public AdvertisementEntity[] Advertisements;
+        //public CaptionEntity[] Captions;
+        //public PlayerEntity[] Players;
+        //public FileStorageEntity FileStorage;
+        //public HallEntity[] Halls;
+
+
     }
 }
 
