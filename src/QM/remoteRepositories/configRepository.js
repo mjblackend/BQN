@@ -6,15 +6,19 @@
 var mssql = require("mssql");
 var fs = require("fs");
 var filepath="dbconfig.txt";
-var config =JSON.parse(fs.readFileSync(filepath)); ;
-/*
 var config = {
     user: "sa",
     password: "fileworx@123",
     server: "majd",
     database: "new"
 };
-*/
+
+if (fs.exists(filepath))
+{
+    config = JSON.parse(fs.readFileSync(filepath));
+}
+
+
 
 var connection = null;
 
