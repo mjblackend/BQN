@@ -1,7 +1,8 @@
 class visitData {
     constructor() {
-        this.visitID;
-        this.transactions = {};
+        this.visitID=0;
+        this.customerID=0;
+        this.transactions_IDs = {};
     }
 }
 

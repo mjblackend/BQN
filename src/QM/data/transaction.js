@@ -1,17 +1,15 @@
 class transaction {
     constructor() {
-        //Attributes
+        //Attribute
         this.ID;
         this.TicketSequence;
         this.Symbol;
-        this.QueueID;
+        this.ServiceID;
         this.SegmentID;
         this.Priority;
         this.OrderOfServing;
-        this.Language;
         this.Note;
         this.RecallNo;
-        this.IdentServiceIDs;
         this.HoldCount;
         this.HoldReasonID;
         this.Appointment_ID;
@@ -24,10 +22,10 @@ class transaction {
         this.LastOfVisit;
         this.ReminderState;
         this.IntegrationID;
-        this.SMSTicket;
-        this.Customer_ID;
+        this.SMSTicket;  //to be delayed
         this.DisplayTicketNumber;
         this.Hall_ID;
+        this.Branch_ID;
 
 
         //Times
@@ -37,13 +35,13 @@ class transaction {
         this.ServiceSeconds;
         this.HoldingSeconds;
         this.LastCallTime;
-        this.EndTime;
+        this.EndServingTime;
         this.WaitingStartTime;
         this.PriorityTime;
         this.StartServingTime;
         this.CreationTime;
         this.CloseTime;
-        this.LastQueueUpdateSent;
+        
 
         //Counter and User IDs
         this.CounterID;
@@ -62,22 +60,6 @@ class transaction {
             //Return the priority of this transaction; using priority time and priority
         };
 
-        //,[CustomerName] in customer atrributes
-        //,[HallNumber] //replaced in hall ID
-        //,[CustomerInformation] customer attributes
-        //this.CustomerID;
-        //,[CI_1]
-        //,[CI_2]
-        //,[CFQuestion1ID]
-        //,[CFAnswer1ID]
-        //,[CFQuestion2ID]
-        //,[CFAnswer2ID]
-        //,[CFQuestion3ID]
-        //,[CFAnswer3ID]
-        //,[SelfServiceStartTime]
-        //,[SelfServiceParameters]
-        //,[CustomerPhotoURL]
-        //,[CustomerMobile]
     }
 }
 module.exports = transaction;

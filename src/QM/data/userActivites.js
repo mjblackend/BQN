@@ -1,4 +1,5 @@
 class userActivites {
+    //don't add the login/logout activies. 
     constructor() {
         this.ID;
         this.Type;
@@ -10,8 +11,7 @@ class userActivites {
         this.Duration;
         this.CalenderDuration;
         this.Closed;
-        this.Reported;
-    }
+   }
 }
 module.exports = userActivites;
 
