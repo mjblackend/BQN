@@ -1,14 +1,14 @@
 class hallConfig {
     constructor() {
-        this.ID;
-        this.OrgID;
-        this.QueueBranch_ID;
-        this.Number;
-        this.Color;
-        this.GuidingText_L1;
-        this.GuidingText_L2;
-        this.GuidingText_L3;
-        this.GuidingText_L4;
+        this.id;
+        this.orgID;
+        this.branch_ID;
+        this.number;
+        this.color;
+        this.guidingText_L1;
+        this.guidingText_L2;
+        this.guidingText_L3;
+        this.guidingText_L4;
     }
 }
 

@@ -1,11 +1,11 @@
 class segmentAllocation {
     constructor() {
-        this.ID;
-        this.OrgID;
-        this.QueueBranch_ID;
-        this.Segment_ID;
-        this.Counter_ID;
-        this.User_ID;
+        this.id;
+        this.orgID;
+        this.branch_ID;
+        this.segment_ID;
+        this.counter_ID;
+        this.user_ID;
     }
 }
 module.exports = segmentAllocation;

@@ -1,9 +1,10 @@
 //User branch allocation saved on server
 class userAllocationConfig {
     constructor() {
+        this.orgID;
         this.userID;
         this.branchID;
-        this.Supervising;
+        this.supervising;
         this.monitoring;
         this.serving;
         this.alertReceiving;

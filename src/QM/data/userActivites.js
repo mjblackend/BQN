@@ -1,16 +1,16 @@
 class userActivites {
     //don't add the login/logout activies. 
     constructor() {
-        this.ID;
-        this.Type;
-        this.EmployeeID;
-        this.CounterID;
-        this.StartTime;
-        this.EndTime;
-        this.LastActionTime;
-        this.Duration;
-        this.CalenderDuration;
-        this.Closed;
+        this.id;
+        this.type;
+        this.user_ID;
+        this.counter_ID;
+        this.startTime;
+        this.endTime;
+        this.lastActionTime;
+        this.duration;
+        this.calenderDuration;
+        this.closed;
    }
 }
 module.exports = userActivites;

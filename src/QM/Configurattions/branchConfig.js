@@ -1,12 +1,12 @@
 class branchConfig {
     constructor() {
-        this.ID;
-        this.OrgID;
-        this.Identity;
-        this.Settings = {}; //array of settings from the config and common config
-        this.Counters = {};
-        this.UsersAllocation = {};
-        this.Halls = {};
+        this.id;
+        this.org_ID;
+        this.identity;
+        this.settings = {}; //array of settings from the config and common config
+        this.counters = {};
+        this.usersAllocation = {};
+        this.halls = {};
         this.segmentsAllocation = {};
         this.servicesAllocation = {};
         

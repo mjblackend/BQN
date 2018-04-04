@@ -1,7 +1,7 @@
 class branch_ServiceConfig {
     constructor() {
-        this.branchID;
-        this.serviceID;
+        this.branch_ID;
+        this.service_ID;
     }
 }
 

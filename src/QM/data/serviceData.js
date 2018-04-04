@@ -1,7 +1,7 @@
 class serviceData {
     constructor() {
-    this.ID;
-    this.Available;            
+    this.id;
+    this.available;            
         
     }
 }

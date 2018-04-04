@@ -1,7 +1,7 @@
 class priorityRange {
     constructor() {
-        this.ID;
-        this.OrgID;
+        this.id;
+        this.orgID;
         this.Symbol;
         this.Priority;
         this.MinSlipNo;

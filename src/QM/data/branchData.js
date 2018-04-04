@@ -2,6 +2,7 @@
 
 class branchData {
     constructor() {
+        this.id;
         this.countersData = {};
         this.userData = {};
         this.visitData = {};

@@ -1,23 +1,23 @@
 class customerAttributesConfig {
     constructor() {
         this.ID;
-        this.OrgID;
-        this.Type_LV;
-        this.Key_L1;
-        this.Key_L2;
-        this.Key_L3;
-        this.Key_L4;
-        this.Alias_L1;
-        this.Alias_L2;
-        this.Alias_L3;
-        this.Alias_L4;
-        this.IsCustomerID;
-        this.Priority;
-        this.Value;
-        this.Caption_L1;
-        this.Caption_L2;
-        this.Caption_L3;
-        this.Caption_L4;
+        this.org_ID;
+        this.type_LV;
+        this.key_L1;
+        this.key_L2;
+        this.key_L3;
+        this.key_L4;
+        this.alias_L1;
+        this.alias_L2;
+        this.alias_L3;
+        this.alias_L4;
+        this.isCustomer_ID;
+        this.priority;
+        this.value;
+        this.caption_L1;
+        this.caption_L2;
+        this.caption_L3;
+        this.caption_L4;
     }
 }
 module.exports = customerAttributesConfig;
