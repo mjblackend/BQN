@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "lint": "esw *.js src",
     "lint:watch": "npm run lint -- --watch",
-    "test": "mocha -R spec src/QM/remoteRepositories/configRepository.spec.js"
+    "test": "mocha -R spec src/qm/localRepositories/repositoriesManager.spec.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -23,6 +23,7 @@
     "morgan": "~1.9.0",
     "mssql": "^4.1.0",
     "npm": "^5.8.0",
-    "should": "^13.2.1"
+    "should": "^13.2.1",
+    "sqlite3": "^4.0.0"
   }
 }
