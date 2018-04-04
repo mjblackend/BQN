@@ -1,7 +1,7 @@
 class service_segmentConfig {
     constructor() {
-        this.segmentID;
-        this.serviceID;
+        this.segment_ID;
+        this.service_ID;
         this.priorityRange;
     }
 }

@@ -2,7 +2,7 @@
 class userAllocationConfig {
     constructor() {
         this.id;
-        this.orgID;
+        this.org_ID;
         this.department_ID;
         this.loginName;
         this.password;

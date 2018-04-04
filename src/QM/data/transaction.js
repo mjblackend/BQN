@@ -2,7 +2,7 @@ class transaction {
     constructor() {
         //Attribute
         this.id;
-        this.orgID;
+        this.org_ID;
         this.branch_ID;
 
         this.ticketSequence;
@@ -14,17 +14,17 @@ class transaction {
         this.note;
         this.recallNo;
         this.holdCount;
-        this.holdReasonID;
+        this.holdReason_ID;
         this.appointment_ID;
         this.servingSession;
         this.origin;
         this.state;
         this.servingType;
-        this.visitID;
+        this.visit_ID;
         this.serveStep;
         this.lastOfVisit;
         this.reminderState;
-        this.integrationID;
+        this.integration_ID;
         this.smsTicket;  //to be delayed
         this.displayTicketNumber;
         this.hall_ID;
@@ -48,13 +48,13 @@ class transaction {
         //Counter and User IDs
         this.counter_ID;
         this.user_ID;
-        this.transferredByEmpID;
-        this.transferredByWinID;
-        this.transferredFromServiceID;
-        this.heldByWinID;
-        this.dispensedByEmp;
-        this.dispensedByWin;
-        this.assignedByWinID;
+        this.transferredByUser_ID;
+        this.transferredByCounter_ID;
+        this.transferredFromService_ID;
+        this.heldByCounter_ID;
+        this.dispensedByUser_ID;
+        this.dispensedByCounter_ID;
+        this.assignedByCounter_ID;
 
 
 
