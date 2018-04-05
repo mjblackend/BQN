@@ -59,10 +59,10 @@ class transaction {
         this.dispensedByUser_ID = INT_NULL;
         this.dispensedByCounter_ID = INT_NULL;
         this.assignedByCounter_ID = INT_NULL;
-    };
+    }
 
     timeProirityValue() {
         //Return the priority of this transaction; using priority time and priority
-    };
+    }
 }
 module.exports = transaction;

@@ -32,7 +32,7 @@ var transactionRep = function (db) {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
                     var filter = " ";
                     for (var i = 0; i < filterKeys.length; i++) {
-                        filter = filter + filterKeys[i] + " = ? "
+                        filter = filter + filterKeys[i] + " = ? ";
                         if (i != (filterKeys.length - 1)) {
                             filter = filter + " and ";
                         }
@@ -44,7 +44,7 @@ var transactionRep = function (db) {
                     return transactions;
                 }
                 else {
-                    return await getAll();
+                    return await this.getAll();
                 }
             }
             catch (error) {
@@ -86,7 +86,7 @@ var transactionRep = function (db) {
                     //Prepare the values array
                     var values = "";
                     for (var i = 0; i < attributes.length; i++) {
-                        values = values + "\"" + transaction[attributes[i].toString()] + "\""
+                        values = values + "\"" + transaction[attributes[i].toString()] + "\"";
                         if (i != (attributes.length - 1)) {
                             values = values + ",";
                         }

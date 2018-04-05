@@ -1,4 +1,3 @@
-var sqlite3 = require("./aa-sqlite");
 var CurrentSeqNumber = 0;
 
 //Get the ID for the first time
@@ -7,7 +6,7 @@ var getNewIDFromDB = async function (db) {
     let sql = "SELECT * FROM seq";
     var sqlRecord = await that.all(sql);
     if (sqlRecord != undefined && sqlRecord[0].seqNumber > 0) {
-        return sqlRecord[0].seqNumber
+        return sqlRecord[0].seqNumber;
     }
     return -1;
 };

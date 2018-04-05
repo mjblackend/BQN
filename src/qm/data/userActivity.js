@@ -1,5 +1,4 @@
 const INT_NULL = -1;
-const STRING_NULL = "";
 const TIME_NULL = 0;
 
 class userActivity {

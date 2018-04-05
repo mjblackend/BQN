@@ -14,25 +14,25 @@ var GetValuesFromObject = function (userActivity) {
     //Prepare the values array
     var values = "";
     for (var i = 0; i < attributes.length; i++) {
-        values = values + "\"" + userActivity[attributes[i].toString()] + "\""
+        values = values + "\"" + userActivity[attributes[i].toString()] + "\"";
         if (i != (attributes.length - 1)) {
             values = values + ",";
         }
     }
     return values;
-}
+};
 
 //Create columns for sql lite query
 var GetFilterColumnsFromObject = function (filterKeys) {
     var filter = " ";
     for (var i = 0; i < filterKeys.length; i++) {
-        filter = filter + filterKeys[i] + " = ? "
+        filter = filter + filterKeys[i] + " = ? ";
         if (i != (filterKeys.length - 1)) {
             filter = filter + " and ";
         }
     }
     return filter;
-}
+};
 
 var userActivitiesRep = function (db) {
     try {
@@ -63,7 +63,7 @@ var userActivitiesRep = function (db) {
                     return userActivites;
                 }
                 else {
-                    return await getAll();
+                    return await this.getAll();
                 }
             }
             catch (error) {
