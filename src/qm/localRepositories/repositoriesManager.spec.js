@@ -23,6 +23,14 @@ describe('Test Transaction Repo', function () {
         var result = await repositoriesMgr.transactionRep.getAll();
         (result !== undefined).should.true();
     });
+
+    it('Create New transaction', async function () {
+        var transactioninst = new transaction();
+        transactioninst.org_ID = 1;
+        var result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
+        result.should.true();
+    });
+
     it('ADD OR UPDATE Trancaction With ID = 5', async function () {
         var transactioninst = new transaction();
         transactioninst.id = 5;
@@ -55,6 +63,14 @@ describe('Test User Activity Repo', function () {
         var result = await repositoriesMgr.userActivitiesRep.getAll();
         (result !== undefined).should.true();
     });
+
+    it('Create New Activity', async function () {
+        var userActivityinst = new userActivity();
+        userActivityinst.org_ID = 1;
+        var result = await repositoriesMgr.userActivitiesRep.addOrUpdate(userActivityinst);
+        result.should.true();
+    });
+
     it('ADD OR UPDATE Activity With ID = 5', async function () {
         var userActivityinst = new userActivity();
         userActivityinst.id = 5;

@@ -2,6 +2,7 @@
 //do counter functions of user table on the DB
 var logger = require("../../common/logger");
 var userActivity = require("../data/userActivity");
+var idGenerator = require("./idGenerator");
 
 //User Activity Attributes
 var t_UserActivity = new userActivity();
@@ -97,12 +98,17 @@ var userActivitiesRep = function (db) {
         this.addOrUpdate = async function (userActivity) {
             try {
                 if (userActivity) {
+                    var that = this.db;
+
+                    //Generate ID in not exists
+                    if (userActivity.id <= 0) {
+                        userActivity.id = await idGenerator.getNewID(that);
+                    }
 
                     //Prepare the values array
                     var values = GetValuesFromObject(userActivity);
 
                     //Do the Query
-                    var that = this.db;
                     let sql = " insert or replace into userActivites (" + attributesStr + ") values (" + values + ")";
                     var isSuccess = await that.run(sql);
                     return isSuccess;

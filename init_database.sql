@@ -62,3 +62,10 @@ CREATE TABLE IF NOT EXISTS userActivites(
         calenderDuration  integer NULL,
         closed  integer NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS seq(
+        seqID text PRIMARY KEY,
+        seqNumber NUMERIC NOT NULL
+);
+
+INSERT OR IGNORE INTO seq (seqID,seqNumber) values ("OBJECT", "100");

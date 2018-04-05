@@ -2,6 +2,7 @@
 //do counter functions of user table on the DB
 var logger = require("../../common/logger");
 var transaction = require("../data/transaction");
+var idGenerator = require("./idGenerator");
 
 //Transaction Attributes
 var transactioninst = new transaction();
@@ -77,19 +78,22 @@ var transactionRep = function (db) {
         this.addOrUpdate = async function (transaction) {
             try {
                 if (transaction) {
-
+                    var that = this.db;
+                    //Generate ID in not exists
+                    if (transaction.id <= 0) {
+                        transaction.id = await idGenerator.getNewID(that);
+                    }
                     //Prepare the values array
-                    var values ="";
+                    var values = "";
                     for (var i = 0; i < attributes.length; i++) {
-                        values = values + "\"" + transaction[attributes[i].toString()] + "\"" 
+                        values = values + "\"" + transaction[attributes[i].toString()] + "\""
                         if (i != (attributes.length - 1)) {
                             values = values + ",";
                         }
                     }
 
                     //Do the Query
-                    var that = this.db;
-                    let sql = " insert or replace into transactions (" + attributesStr + ") values ("   +  values + ")";
+                    let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
                     var isSuccess = await that.run(sql);
                     return isSuccess;
                 }
