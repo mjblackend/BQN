@@ -5,7 +5,7 @@ var logger = require("../../common/logger");
 var transactionRep = require("./transactionRep");
 var userActivitiesRep = require("./userActivitiesRep");
 
-
+"use strict";
 
 //Initialize DB connection
 //Initialize Repositories with the DB connection

@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 var db;
-
+"use strict";
 exports.db = db;
 
 exports.open=function(path) {

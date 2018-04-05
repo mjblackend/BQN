@@ -1,3 +1,4 @@
+"use strict";
 var should = require("should");
 var mocha = require("mocha");
 var describe = mocha.describe;

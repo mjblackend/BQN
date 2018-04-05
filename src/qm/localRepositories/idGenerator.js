@@ -1,3 +1,4 @@
+"use strict";
 var CurrentSeqNumber = 0;
 
 //Get the ID for the first time

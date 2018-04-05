@@ -1,6 +1,6 @@
 //GetAll(entityname);
 //GetByFilter(entityname,FilterName, FilterValue)
-
+"use strict";
 //for now when working on DB, we will use Getall to retrieve everything
 //later when the repository returns data from server, the server will implement getbyFilter API.
 var mssql = require("mssql");

@@ -1,6 +1,6 @@
+/*eslint no-unused-vars: "off"*/
+"use strict";
 //only functions and reference of branch data and configuration service.
-
-
 //Issue Ticket 
 var issueTicket = function (ticketInfo)
 {
