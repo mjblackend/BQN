@@ -9,12 +9,16 @@ var userActivity = require("../data/userActivity");
 
 should.toString();
 
-describe('Start database testing', function () {
+describe('Database testing', function () {
     it('DB initialize Successfully', async function () {
         var result = await repositoriesMgr.initialize();
         result.should.equal(0);
     });
+});
 
+
+
+describe('Test Transaction Repo', function () {
     it('Get All Transactions', async function () {
         var result = await repositoriesMgr.transactionRep.getAll();
         (result !== undefined).should.true();
@@ -43,8 +47,10 @@ describe('Start database testing', function () {
             (result).should.true();
         }
     });
+});
 
 
+describe('Test User Activity Repo', function () {
     it('Get All user Activities', async function () {
         var result = await repositoriesMgr.userActivitiesRep.getAll();
         (result !== undefined).should.true();
