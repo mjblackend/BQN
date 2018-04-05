@@ -3,7 +3,7 @@ var mocha = require('mocha');
 var describe = mocha.describe;
 var it = mocha.it;
 var repositoriesManager = require("./repositoriesManager");
-var repositoriesMgr=new repositoriesManager();
+var repositoriesMgr = new repositoriesManager();
 var transaction = require("../data/transaction");
 
 should.toString();
@@ -19,13 +19,26 @@ describe('Start database testing', function () {
     });
     it('ADD OR UPDATE Trancaction With ID = 5', async function () {
         var transactioninst = new transaction();
-        transactioninst.id=5;
-        transactioninst.org_ID=1;
+        transactioninst.id = 5;
+        transactioninst.org_ID = 1;
         var result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
         result.should.true();
     });
     it('Get Transaction by ID, ID = 5 ', async function () {
-        var result = await repositoriesMgr.transactionRep.getFilterBy(["id"],["5"]);
+        var result = await repositoriesMgr.transactionRep.getFilterBy(["id"], ["5"]);
         (result !== undefined).should.true();
+    });
+    it('Delete Transaction, ID = 6 ', async function () {
+        var transactioninst = new transaction();
+        transactioninst.id = 6;
+        transactioninst.org_ID = 1;
+        var result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
+        if (result == true) {
+            result = await repositoriesMgr.transactionRep.delete(transactioninst);
+            (result !== undefined).should.true();
+        }
+        else {
+            (result).should.true();
+        }
     });
 });

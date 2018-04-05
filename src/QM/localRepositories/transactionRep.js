@@ -51,6 +51,27 @@ var transactionRep = function (db) {
             }
         };
 
+        this.delete = async function (transaction) {
+            try {
+                if (transaction) {
+                    //Do the Query
+                    var that = this.db;
+                    let sql = " delete from transactions where id = " + transaction.id;
+                    var isSuccess = await that.run(sql);
+                    return isSuccess;
+                }
+                else {
+                    return false;
+                }
+
+            }
+            catch (error) {
+                logger.logError(error);
+                return false;
+            }
+        };
+
+
 
         this.addOrUpdate = async function (transaction) {
             try {
@@ -68,17 +89,17 @@ var transactionRep = function (db) {
                     //Do the Query
                     var that = this.db;
                     let sql = " insert or replace into transactions (" + attributesStr + ") values ("   +  values + ")";
-                    var transactions = await that.run(sql);
-                    return transactions;
+                    var isSuccess = await that.run(sql);
+                    return isSuccess;
                 }
                 else {
-                    return transaction;
+                    return false;
                 }
 
             }
             catch (error) {
                 logger.logError(error);
-                return undefined;
+                return false;
             }
         };
 
