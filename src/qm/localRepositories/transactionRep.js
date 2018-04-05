@@ -9,6 +9,46 @@ var transactioninst = new transaction();
 var attributes = Object.getOwnPropertyNames(transactioninst);
 var attributesStr = attributes.join(",");
 
+
+//Prepare Values for insert or update
+var GetValuesFromObject = function (transaction) {
+    try{
+    //Prepare the values array
+    var values = "";
+    for (var i = 0; i < attributes.length; i++) {
+        values = values + "\"" + transaction[attributes[i].toString()] + "\"";
+        if (i != (attributes.length - 1)) {
+            values = values + ",";
+        }
+    }
+    return values;
+    }
+    catch (error) {
+        logger.logError(error);
+        return "";
+    }
+};
+
+//Create columns for sql lite query
+var GetFilterColumnsFromObject = function (filterKeys) {
+    try{
+        var filter = " ";
+        for (var i = 0; i < filterKeys.length; i++) {
+            filter = filter + filterKeys[i] + " = ? ";
+            if (i != (filterKeys.length - 1)) {
+                filter = filter + " and ";
+            }
+        }
+        return filter;
+    }
+    catch (error) {
+        logger.logError(error);
+        return "";
+    }
+};
+
+
+
 var transactionRep = function (db) {
     try {
         this.db = db;
@@ -30,14 +70,7 @@ var transactionRep = function (db) {
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    var filter = " ";
-                    for (var i = 0; i < filterKeys.length; i++) {
-                        filter = filter + filterKeys[i] + " = ? ";
-                        if (i != (filterKeys.length - 1)) {
-                            filter = filter + " and ";
-                        }
-                    }
-
+                    var filter = GetFilterColumnsFromObject(filterKeys);
                     var that = this.db;
                     let sql = "SELECT * FROM transactions where " + filter;
                     var transactions = await that.get(sql, filterValues);
@@ -84,13 +117,7 @@ var transactionRep = function (db) {
                         transaction.id = await idGenerator.getNewID(that);
                     }
                     //Prepare the values array
-                    var values = "";
-                    for (var i = 0; i < attributes.length; i++) {
-                        values = values + "\"" + transaction[attributes[i].toString()] + "\"";
-                        if (i != (attributes.length - 1)) {
-                            values = values + ",";
-                        }
-                    }
+                    var values = GetValuesFromObject(transaction);
 
                     //Do the Query
                     let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";

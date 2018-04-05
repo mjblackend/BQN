@@ -11,6 +11,7 @@ var attributesStr = attributes.join(",");
 
 //Prepare Values for insert or update
 var GetValuesFromObject = function (userActivity) {
+    try{
     //Prepare the values array
     var values = "";
     for (var i = 0; i < attributes.length; i++) {
@@ -20,18 +21,29 @@ var GetValuesFromObject = function (userActivity) {
         }
     }
     return values;
+    }
+    catch (error) {
+        logger.logError(error);
+        return "";
+    }
 };
 
 //Create columns for sql lite query
 var GetFilterColumnsFromObject = function (filterKeys) {
-    var filter = " ";
-    for (var i = 0; i < filterKeys.length; i++) {
-        filter = filter + filterKeys[i] + " = ? ";
-        if (i != (filterKeys.length - 1)) {
-            filter = filter + " and ";
+    try{
+        var filter = " ";
+        for (var i = 0; i < filterKeys.length; i++) {
+            filter = filter + filterKeys[i] + " = ? ";
+            if (i != (filterKeys.length - 1)) {
+                filter = filter + " and ";
+            }
         }
+        return filter;
     }
-    return filter;
+    catch (error) {
+        logger.logError(error);
+        return "";
+    }
 };
 
 var userActivitiesRep = function (db) {

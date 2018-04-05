@@ -14,7 +14,7 @@ exports.open=function(path) {
     });
 };
 
-// any query: insert/delete/update
+//Any query: insert/delete/update
 exports.run=function(query) {
     return new Promise(function(resolve, reject) {
         this.db.run(query, 
@@ -25,7 +25,7 @@ exports.run=function(query) {
     })    ;
 };
 
-// first row read
+//First row read
 exports.get=function(query, params) {
     return new Promise(function(resolve, reject) {
         this.db.get(query, params, function(err, row)  {
@@ -37,7 +37,7 @@ exports.get=function(query, params) {
     }) ;
 };
 
-// set of rows read
+//Set of rows read
 exports.all=function(query, params) {
     return new Promise(function(resolve, reject) {
         if(params == undefined) params=[];
