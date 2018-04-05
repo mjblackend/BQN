@@ -2,8 +2,9 @@
 //do counter functions of user table on the DB
 var logger = require("../../common/logger");
 var transaction = require("../data/transaction");
-var transactioninst = new transaction();
 
+//Transaction Attributes
+var transactioninst = new transaction();
 var attributes = Object.getOwnPropertyNames(transactioninst);
 var attributesStr = attributes.join(",");
 

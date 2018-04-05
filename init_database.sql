@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS transactions(
 
 CREATE TABLE IF NOT EXISTS userActivites(
         id NUMERIC PRIMARY KEY,
+        org_ID NUMERIC NOT NULL,
+        branch_ID NUMERIC NOT NULL,
         type  integer NOT NULL,
         user_ID  NUMERIC NOT NULL,
         counter_ID  NUMERIC NOT NULL,
