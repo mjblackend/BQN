@@ -5,6 +5,8 @@ var logger = require("../../common/logger");
 var transactionRep = require("./transactionRep");
 var userActivitiesRep = require("./userActivitiesRep");
 
+
+
 //Initialize DB connection
 //Initialize Repositories with the DB connection
 //Exports (Collection of Repositories or the Repositories themselves) to be used by other classes
