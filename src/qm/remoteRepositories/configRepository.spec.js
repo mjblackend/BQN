@@ -10,19 +10,19 @@ should.toString();
 
 describe('Start testing SQL DB', function () {
     it('Getting Branches', async function () {
-        var result = await configRepository.GetAll("QueueBranch");
+        let result = await configRepository.GetAll("QueueBranch");
         //(true).should.true();
         ((result !== undefined || result !== undefined) && result.recordset.length > 0).should.true();
 
     });
     it('Getting Counters',async function () {
-        var result =  await configRepository.GetAll("counter");
+        let result =  await configRepository.GetAll("counter");
         //(true).should.true();
         ((result !== undefined || result !== undefined) && result.recordset.length > 0).should.true();
     });
 
     it('Getting All Entities',async function () {
-        var result =  await configRepository.GetAllEntities();
+        let result =  await configRepository.GetAllEntities();
         //(true).should.true();
         (result !== undefined || result !== undefined).should.true();
     });

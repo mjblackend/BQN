@@ -24,18 +24,18 @@ var repositoriesManager = function () {
 var initialize = async function () {
     try {
 
-        var result = false;
+        let result = false;
 
         // open the database
         //Run the upgrade script
         result = await sqlite3.open("./db/queuing.db");
 
         //Run the initialize script
-        var sql = fs.readFileSync("init_database.sql").toString();
-        var scriptArray = sql.replace("\r\n", "").split(";");
+        let sql = fs.readFileSync("init_database.sql").toString();
+        let scriptArray = sql.replace("\r\n", "").split(";");
         scriptArray = scriptArray.slice(0, scriptArray.length - 1);
         if (scriptArray != undefined) {
-            for (var i = 0; i < scriptArray.length; i++) {
+            for (let i = 0; i < scriptArray.length; i++) {
                 result = await sqlite3.run(scriptArray[i]);
                 if (result == false) {
                     return common.error;

@@ -14,8 +14,8 @@ var attributesStr = attributes.join(",");
 var GetValuesFromObject = function (transaction) {
     try{
     //Prepare the values array
-    var values = "";
-    for (var i = 0; i < attributes.length; i++) {
+    let values = "";
+    for (let i = 0; i < attributes.length; i++) {
         values = values + "\"" + transaction[attributes[i].toString()] + "\"";
         if (i != (attributes.length - 1)) {
             values = values + ",";
@@ -32,8 +32,8 @@ var GetValuesFromObject = function (transaction) {
 //Create columns for sql lite query
 var GetFilterColumnsFromObject = function (filterKeys) {
     try{
-        var filter = " ";
-        for (var i = 0; i < filterKeys.length; i++) {
+        let filter = " ";
+        for (let i = 0; i < filterKeys.length; i++) {
             filter = filter + filterKeys[i] + " = ? ";
             if (i != (filterKeys.length - 1)) {
                 filter = filter + " and ";
@@ -56,9 +56,9 @@ var transactionRep = function (db) {
 
         this.getAll = async function () {
             try {
-                var that = this.db;
+                let that = this.db;
                 let sql = "SELECT * FROM transactions";
-                var transactions = await that.all(sql);
+                let transactions = await that.all(sql);
                 return transactions;
             }
             catch (error) {
@@ -70,10 +70,10 @@ var transactionRep = function (db) {
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    var filter = GetFilterColumnsFromObject(filterKeys);
-                    var that = this.db;
+                    let filter = GetFilterColumnsFromObject(filterKeys);
+                    let that = this.db;
                     let sql = "SELECT * FROM transactions where " + filter;
-                    var transactions = await that.get(sql, filterValues);
+                    let transactions = await that.get(sql, filterValues);
                     return transactions;
                 }
                 else {
@@ -90,9 +90,9 @@ var transactionRep = function (db) {
             try {
                 if (transaction) {
                     //Do the Query
-                    var that = this.db;
+                    let that = this.db;
                     let sql = " delete from transactions where id = " + transaction.id;
-                    var isSuccess = await that.run(sql);
+                    let isSuccess = await that.run(sql);
                     return isSuccess;
                 }
                 else {
@@ -111,17 +111,17 @@ var transactionRep = function (db) {
         this.addOrUpdate = async function (transaction) {
             try {
                 if (transaction) {
-                    var that = this.db;
+                    let that = this.db;
                     //Generate ID in not exists
                     if (transaction.id <= 0) {
                         transaction.id = await idGenerator.getNewID(that);
                     }
                     //Prepare the values array
-                    var values = GetValuesFromObject(transaction);
+                    let values = GetValuesFromObject(transaction);
 
                     //Do the Query
                     let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
-                    var isSuccess = await that.run(sql);
+                    let isSuccess = await that.run(sql);
                     return isSuccess;
                 }
                 else {

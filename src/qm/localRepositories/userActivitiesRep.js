@@ -13,8 +13,8 @@ var attributesStr = attributes.join(",");
 var GetValuesFromObject = function (userActivity) {
     try{
     //Prepare the values array
-    var values = "";
-    for (var i = 0; i < attributes.length; i++) {
+    let values = "";
+    for (let i = 0; i < attributes.length; i++) {
         values = values + "\"" + userActivity[attributes[i].toString()] + "\"";
         if (i != (attributes.length - 1)) {
             values = values + ",";
@@ -31,8 +31,8 @@ var GetValuesFromObject = function (userActivity) {
 //Create columns for sql lite query
 var GetFilterColumnsFromObject = function (filterKeys) {
     try{
-        var filter = " ";
-        for (var i = 0; i < filterKeys.length; i++) {
+        let filter = " ";
+        for (let i = 0; i < filterKeys.length; i++) {
             filter = filter + filterKeys[i] + " = ? ";
             if (i != (filterKeys.length - 1)) {
                 filter = filter + " and ";
@@ -53,9 +53,9 @@ var userActivitiesRep = function (db) {
         //Get All User Activities
         this.getAll = async function () {
             try {
-                var that = this.db;
+                let that = this.db;
                 let sql = "SELECT * FROM userActivites";
-                var userActivites = await that.all(sql);
+                let userActivites = await that.all(sql);
                 return userActivites;
             }
             catch (error) {
@@ -68,10 +68,10 @@ var userActivitiesRep = function (db) {
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    var filter = GetFilterColumnsFromObject(filterKeys);
-                    var that = this.db;
+                    let filter = GetFilterColumnsFromObject(filterKeys);
+                    let that = this.db;
                     let sql = "SELECT * FROM userActivites where " + filter;
-                    var userActivites = await that.get(sql, filterValues);
+                    let userActivites = await that.get(sql, filterValues);
                     return userActivites;
                 }
                 else {
@@ -89,9 +89,9 @@ var userActivitiesRep = function (db) {
             try {
                 if (userActivity) {
                     //Do the Query
-                    var that = this.db;
+                    let that = this.db;
                     let sql = " delete from userActivites where id = " + userActivity.id;
-                    var isSuccess = await that.run(sql);
+                    let isSuccess = await that.run(sql);
                     return isSuccess;
                 }
                 else {
@@ -110,7 +110,7 @@ var userActivitiesRep = function (db) {
         this.addOrUpdate = async function (userActivity) {
             try {
                 if (userActivity) {
-                    var that = this.db;
+                    let that = this.db;
 
                     //Generate ID in not exists
                     if (userActivity.id <= 0) {
@@ -118,11 +118,11 @@ var userActivitiesRep = function (db) {
                     }
 
                     //Prepare the values array
-                    var values = GetValuesFromObject(userActivity);
+                    let values = GetValuesFromObject(userActivity);
 
                     //Do the Query
                     let sql = " insert or replace into userActivites (" + attributesStr + ") values (" + values + ")";
-                    var isSuccess = await that.run(sql);
+                    let isSuccess = await that.run(sql);
                     return isSuccess;
                 }
                 else {

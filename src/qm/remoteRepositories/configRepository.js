@@ -16,7 +16,7 @@ var config = {
 };
 
 if (fs.exists(filepath)) {
-    var content = fs.readFileSync(filepath);
+    let content = fs.readFileSync(filepath);
     config = JSON.parse(content);
 }
 
@@ -30,12 +30,12 @@ var GetAllEntities = async function () {
             connection = await mssql.connect(config);
         }
 
-        var dbConfigs = new DBConfigs();
+        let dbConfigs = new DBConfigs();
 
         //Branches
-        var request = new mssql.Request();
-        var command = "select id,OrgID as org_ID,[identity],name_L1,name_L2,name_L3,name_L4 from T_QueueBranch";
-        var Results = await request.query(command);
+        let request = new mssql.Request();
+        let command = "select id,OrgID as org_ID,[identity],name_L1,name_L2,name_L3,name_L4 from T_QueueBranch";
+        let Results = await request.query(command);
         if (Results != undefined && Results.recordset != undefined && Results.recordset.length > 0) {
             dbConfigs.branches = Results.recordset;
         }
@@ -161,9 +161,9 @@ var GetAll = async function (entityname) {
             connection = await mssql.connect(config);
         }
 
-        var request = new mssql.Request();
-        var command = "select * from T_" + entityname;
-        var Results = await request.query(command);
+        let request = new mssql.Request();
+        let command = "select * from T_" + entityname;
+        let Results = await request.query(command);
         return Results;
     }
     catch (error) {
@@ -182,9 +182,9 @@ var GetByFilter = async function (entityname, FilterName, FilterValue) {
             connection = await mssql.connect(config);
         }
 
-        var request = new mssql.Request();
-        var command = "select * from T_" + entityname + " where " + FilterName + " = " + FilterValue;
-        var Results = await request.query(command);
+        let request = new mssql.Request();
+        let command = "select * from T_" + entityname + " where " + FilterName + " = " + FilterValue;
+        let Results = await request.query(command);
         return Results;
     }
     catch (error) {
