@@ -3,12 +3,15 @@ class serviceConfig {
         this.id;
         this.org_ID;
         this.department_ID;
+        this.name_L1;
+        this.name_L2;
+        this.name_L3;
+        this.name_L4;
         this.serviceConfig_ID;
         this.identificationValue;
         this.calendar_ID;
         this.numberOfTickets;
         this.orderOfServing;
-        this.serviceSegmentPriorityRange = {}; //service_segmentConfig
         this.serviceGroup_ID;
         this.addAnotherToThisService;
         this.addThisToAnotherService;

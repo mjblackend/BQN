@@ -1,6 +1,5 @@
 class segmentAllocation {
     constructor() {
-        this.id;
         this.org_ID;
         this.branch_ID;
         this.segment_ID;
