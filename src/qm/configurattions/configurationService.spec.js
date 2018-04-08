@@ -10,7 +10,7 @@ should.toString();
 
 describe('Start testing SQL DB', function () {
     it('Initialize Configration successfully', async function () {
-        var result = await configurationService.initialize();
+        let result = await configurationService.initialize();
         (result).should.true();
     });
 });

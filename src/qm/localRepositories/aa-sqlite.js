@@ -54,7 +54,7 @@ exports.all=function(query, params) {
 // each row returned one by one 
 exports.each=function(query, params, action) {
     return new Promise(function(resolve, reject) {
-        var db = this.db;
+        let db = this.db;
         db.serialize(function() {
             db.each(query, params, function(err, row)  {
                 if(err) reject("Read error: " + err.message);
