@@ -214,8 +214,10 @@ var cacheServerEnities = async function () {
 
 
         //User Allocation Config
-        attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as User_ID", "Supervising", "Monitoring", "Serving", "AlertReceiving"];
-        Results = await configRepository.GetAll(attributes, "R_QueueBranch_User");
+        let UserAllocation = require("./UserAllocation_Config");
+        let tUserAllocation = new UserAllocation();
+        attributes = Object.getOwnPropertyNames(tUserAllocation);
+        Results = await configRepository.GetAll(attributes, "X_USERS_BRANCHES");
         if (Results && Results.length > 0) {
             ConfigsCache.branch_UsersAllocations = Results;
         }

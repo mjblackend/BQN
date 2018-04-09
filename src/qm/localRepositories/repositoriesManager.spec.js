@@ -6,6 +6,7 @@ var repositoriesManager = require("./repositoriesManager");
 var repositoriesMgr = new repositoriesManager();
 var transaction = require("../data/transaction");
 var userActivity = require("../data/userActivity");
+var common = require("../../common/common");
 
 should.toString();
 
@@ -26,7 +27,7 @@ describe('Test Transaction Repo', function () {
         let transactioninst = new transaction();
         transactioninst.org_ID = 1;
         let result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
-        result.should.true();
+        (result == common.success).should.true();
     });
 
     it('ADD OR UPDATE Trancaction With ID = 5', async function () {
@@ -34,7 +35,7 @@ describe('Test Transaction Repo', function () {
         transactioninst.id = 5;
         transactioninst.org_ID = 1;
         let result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
-        result.should.true();
+        (result == common.success).should.true();
     });
     it('Get Transaction by ID, ID = 5 ', async function () {
         let result = await repositoriesMgr.transactionRep.getFilterBy(["id"], ["5"]);
@@ -45,12 +46,12 @@ describe('Test Transaction Repo', function () {
         transactioninst.id = 6;
         transactioninst.org_ID = 1;
         let result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
-        if (result == true) {
+        if (result == common.success) {
             result = await repositoriesMgr.transactionRep.delete(transactioninst);
-            (result !== undefined).should.true();
+            (result == common.success).should.true();
         }
         else {
-            (result).should.true();
+            (result == common.success).should.true();
         }
     });
 });
@@ -65,7 +66,7 @@ describe('Test User Activity Repo', function () {
         let userActivityinst = new userActivity();
         userActivityinst.org_ID = 1;
         let result = await repositoriesMgr.userActivitiesRep.addOrUpdate(userActivityinst);
-        result.should.true();
+        (result == common.success).should.true();
     });
 
     it('ADD OR UPDATE Activity With ID = 5', async function () {
@@ -73,7 +74,7 @@ describe('Test User Activity Repo', function () {
         userActivityinst.id = 5;
         userActivityinst.org_ID = 1;
         let result = await repositoriesMgr.userActivitiesRep.addOrUpdate(userActivityinst);
-        result.should.true();
+        (result == common.success).should.true();
     });
     it('Get Activity by ID, ID = 5 ', async function () {
         let result = await repositoriesMgr.userActivitiesRep.getFilterBy(["id"], ["5"]);
@@ -84,12 +85,12 @@ describe('Test User Activity Repo', function () {
         userActivityinst.id = 6;
         userActivityinst.org_ID = 1;
         let result = await repositoriesMgr.userActivitiesRep.addOrUpdate(userActivityinst);
-        if (result == true) {
+        if (result == common.success) {
             result = await repositoriesMgr.userActivitiesRep.delete(userActivityinst);
-            (result !== undefined).should.true();
+            (result == common.success).should.true();
         }
         else {
-            (result).should.true();
+            (result == common.success).should.true();
         }
     });
 });

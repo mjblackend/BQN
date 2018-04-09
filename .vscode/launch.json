@@ -5,6 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run mocha Command manager",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [
+                "${workspaceFolder}\\src\\qm\\logic\\queueCommandManager.spec.js",
+                "--no-timeouts"
+            ],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "NODE_ENV": "testing"
+            }
+        },
+        {
+            
             "name": "Run mocha local",
             "type": "node",
             "request": "launch",
@@ -27,7 +44,7 @@
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceFolder}\\src\\qm\\configurattions\\configurationService.spec.js",
+                "${workspaceFolder}\\src\\qm\\configurations\\configurationService.spec.js",
                 "--no-timeouts"
             ],
             "cwd": "${workspaceRoot}",

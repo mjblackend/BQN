@@ -3,6 +3,7 @@
 var logger = require("../../common/logger");
 var transaction = require("../data/transaction");
 var idGenerator = require("./idGenerator");
+var common = require("../../common/common");
 
 //Transaction Attributes
 var transactioninst = new transaction();
@@ -30,7 +31,7 @@ var GetValuesFromObject = function (transaction) {
 };
 
 //Create columns for sql lite query
-var GetFilterColumnsFromObject = function (filterKeys) {
+var GetFilterColumnsFromObject = function (filterKeys , filterValues) {
     try{
         let filter = " ";
         for (let i = 0; i < filterKeys.length; i++) {
@@ -70,10 +71,10 @@ var transactionRep = function (db) {
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    let filter = GetFilterColumnsFromObject(filterKeys);
+                    let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
                     let that = this.db;
                     let sql = "SELECT * FROM transactions where " + filter;
-                    let transactions = await that.get(sql, filterValues);
+                    let transactions = await that.all(sql, filterValues);
                     return transactions;
                 }
                 else {
@@ -93,16 +94,23 @@ var transactionRep = function (db) {
                     let that = this.db;
                     let sql = " delete from transactions where id = " + transaction.id;
                     let isSuccess = await that.run(sql);
-                    return isSuccess;
+                    if (isSuccess)
+                    {
+                        return common.success;
+                    }
+                    else
+                    {
+                        return common.error;
+                    }
                 }
                 else {
-                    return false;
+                    return common.error;
                 }
 
             }
             catch (error) {
                 logger.logError(error);
-                return false;
+                return common.error;
             }
         };
 
@@ -122,16 +130,23 @@ var transactionRep = function (db) {
                     //Do the Query
                     let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
                     let isSuccess = await that.run(sql);
-                    return isSuccess;
+                    if (isSuccess)
+                    {
+                        return common.success;
+                    }
+                    else
+                    {
+                        return common.error;
+                    }
                 }
                 else {
-                    return false;
+                    return common.error;
                 }
 
             }
             catch (error) {
                 logger.logError(error);
-                return false;
+                return common.error;
             }
         };
 

@@ -3,6 +3,7 @@
 var logger = require("../../common/logger");
 var userActivity = require("../data/userActivity");
 var idGenerator = require("./idGenerator");
+var common = require("../../common/common");
 
 //User Activity Attributes
 var t_UserActivity = new userActivity();
@@ -71,7 +72,7 @@ var userActivitiesRep = function (db) {
                     let filter = GetFilterColumnsFromObject(filterKeys);
                     let that = this.db;
                     let sql = "SELECT * FROM userActivites where " + filter;
-                    let userActivites = await that.get(sql, filterValues);
+                    let userActivites = await that.all(sql, filterValues);
                     return userActivites;
                 }
                 else {
@@ -92,16 +93,23 @@ var userActivitiesRep = function (db) {
                     let that = this.db;
                     let sql = " delete from userActivites where id = " + userActivity.id;
                     let isSuccess = await that.run(sql);
-                    return isSuccess;
+                    if (isSuccess)
+                    {
+                        return common.success;
+                    }
+                    else
+                    {
+                        return common.error;
+                    }
                 }
                 else {
-                    return false;
+                    return common.error;
                 }
 
             }
             catch (error) {
                 logger.logError(error);
-                return false;
+                return common.error;
             }
         };
 
@@ -123,16 +131,23 @@ var userActivitiesRep = function (db) {
                     //Do the Query
                     let sql = " insert or replace into userActivites (" + attributesStr + ") values (" + values + ")";
                     let isSuccess = await that.run(sql);
-                    return isSuccess;
+                    if (isSuccess)
+                    {
+                        return common.success;
+                    }
+                    else
+                    {
+                        return common.error;
+                    }
                 }
                 else {
-                    return false;
+                    return common.error;
                 }
 
             }
             catch (error) {
                 logger.logError(error);
-                return false;
+                return common.error;
             }
         };
     }
