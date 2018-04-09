@@ -125,7 +125,7 @@ var cacheServerEnities = async function () {
 
 
         //User Allocation Config
-        attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as User_ID","Supervising","Monitoring","Serving","AlertReceiving"];
+        attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as User_ID", "Supervising", "Monitoring", "Serving", "AlertReceiving"];
         Results = await configRepository.GetAll(attributes, "R_QueueBranch_User");
         if (Results && Results.length > 0) {
             ConfigsCache.branch_UsersAllocations = Results;
@@ -153,13 +153,7 @@ var cacheServerEnities = async function () {
 var initialize = async function () {
     try {
         var result = await cacheServerEnities();
-        if (result == common.success) {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return result;
     }
     catch (error) {
         logger.logError(error);
