@@ -26,7 +26,7 @@ var FilterTheReservedColumnNames = async function (columns) {
     let Filtered = [];
     if (columns) {
         for (let i = 0; i < columns.length; i++) {
-            if (columns[i].toLowerCase() == "identity") {
+            if (columns[i].toLowerCase() == "identity" || columns[i].toLowerCase() == "key" || columns[i].toLowerCase() == "value") {
                 Filtered.push("[" + columns[i] + "]");
             }
             else

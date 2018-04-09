@@ -11,71 +11,72 @@ var populateEntities = async function () {
 
         if (ConfigsCache.branches && ConfigsCache.branches.length > 0) {
             for (let i = 0; i < ConfigsCache.branches.length; i++) {
-                let BranchID= ConfigsCache.branches[i].ID;
-
+                let BranchID = ConfigsCache.branches[i].ID;
+                let BranchConfigID = ConfigsCache.branches[i].BranchConfig_ID;
                 //Assign counters
-                if(ConfigsCache.counters && ConfigsCache.counters.length >0)
-                {
+                if (ConfigsCache.counters && ConfigsCache.counters.length > 0) {
                     ConfigsCache.branches[i].counters = ConfigsCache.counters.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
-                else
-                {
+                else {
                     ConfigsCache.branches[i].counters = [];
                 }
 
                 //Branch Users Allocations
-                if(ConfigsCache.branch_UsersAllocations && ConfigsCache.branch_UsersAllocations.length >0)
-                {
+                if (ConfigsCache.branch_UsersAllocations && ConfigsCache.branch_UsersAllocations.length > 0) {
                     ConfigsCache.branches[i].usersAllocations = ConfigsCache.branch_UsersAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
-                else
-                {
+                else {
                     ConfigsCache.branches[i].usersAllocations = [];
                 }
 
                 //Halls
-                if(ConfigsCache.halls && ConfigsCache.halls.length >0)
-                {
+                if (ConfigsCache.halls && ConfigsCache.halls.length > 0) {
                     ConfigsCache.branches[i].halls = ConfigsCache.halls.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
-                else
-                {
+                else {
                     ConfigsCache.branches[i].halls = [];
                 }
 
                 //Segment Allocations
-                if(ConfigsCache.segmentsAllocations && ConfigsCache.segmentsAllocations.length >0)
-                {
+                if (ConfigsCache.segmentsAllocations && ConfigsCache.segmentsAllocations.length > 0) {
                     ConfigsCache.branches[i].segmentsAllocations = ConfigsCache.segmentsAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
-                else
-                {
+                else {
                     ConfigsCache.branches[i].segmentsAllocations = [];
                 }
 
                 //Serives allocations
-                if(ConfigsCache.servicesAllocations && ConfigsCache.servicesAllocations.length >0)
-                {
+                if (ConfigsCache.servicesAllocations && ConfigsCache.servicesAllocations.length > 0) {
                     ConfigsCache.branches[i].servicesAllocations = ConfigsCache.servicesAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
-                else
-                {
+                else {
                     ConfigsCache.branches[i].servicesAllocations = [];
+                }
+
+                //commonConfigs
+                if (ConfigsCache.commonConfigs && ConfigsCache.commonConfigs.length > 0) {
+                    ConfigsCache.branches[i].settings = ConfigsCache.commonConfigs.filter(function (value) {
+                        return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else {
+                    ConfigsCache.branches[i].settings = [];
                 }
 
             }
@@ -219,6 +220,15 @@ var cacheServerEnities = async function () {
             ConfigsCache.branch_UsersAllocations = Results;
         }
 
+
+        //Common Config
+        let CommonConfig = require("./CommonConfig_Config");
+        let tCommonConfig = new CommonConfig();
+        attributes = Object.getOwnPropertyNames(tCommonConfig);
+        Results = await configRepository.GetAll(attributes, "T_CommonConfig");
+        if (Results && Results.length > 0) {
+            ConfigsCache.commonConfigs = Results;
+        }
 
 
         //Branches
