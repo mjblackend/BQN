@@ -14,7 +14,7 @@ describe('Start Queuing Command Manager Test', function () {
         let result = await queueCommandManager.initialize();
         (result === common.success).should.true();
     });
-    it('Issue Ticket', async function () {
+    it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" successfully', async function () {
 
         var ticketInfo = {
             segmentid: "325",
@@ -24,10 +24,34 @@ describe('Start Queuing Command Manager Test', function () {
             origin: "0"
         };
         let result = await queueCommandManager.issueTicket(ticketInfo);
-
-
-        //(true).should.true();
         (result === common.success).should.true();
 
+    });
+
+    it('Issue Ticket segmentid: "325" serviceid: "366" branchid: "106" successfully', async function () {
+
+        var ticketInfo = {
+            segmentid: "325",
+            serviceid: "366",
+            branchid: "106",
+            languageindex: "0",
+            origin: "0"
+        };
+        let result = await queueCommandManager.issueTicket(ticketInfo);
+        (result === common.success).should.true();
+
+    });
+
+    it('Issue Ticket segmentid: "325" serviceid: "386" branchid: "106" throws error', async function () {
+
+        var ticketInfo = {
+            segmentid: "325",
+            serviceid: "386",
+            branchid: "106",
+            languageindex: "0",
+            origin: "0"
+        };
+        let result = await queueCommandManager.issueTicket(ticketInfo);
+        (result === common.error).should.true();
     });
 });
