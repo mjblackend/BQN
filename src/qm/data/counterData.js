@@ -5,7 +5,7 @@ class counterData {
     this.lockStateTime;
     this.currentState_ID;        //this is a state and the user used in, can be replaced by current user ID and state
     this.currentTransaction_ID;  //the transaction ID serving
-    this.availableActions={};
+    this.availableActions=[];
     }
 }
 module.exports = counterData;

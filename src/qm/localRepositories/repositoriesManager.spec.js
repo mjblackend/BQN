@@ -16,8 +16,6 @@ describe('Database testing', function () {
     });
 });
 
-
-
 describe('Test Transaction Repo', function () {
     it('Get All Transactions', async function () {
         let result = await repositoriesMgr.transactionRep.getAll();
@@ -56,7 +54,6 @@ describe('Test Transaction Repo', function () {
         }
     });
 });
-
 
 describe('Test User Activity Repo', function () {
     it('Get All user Activities', async function () {
