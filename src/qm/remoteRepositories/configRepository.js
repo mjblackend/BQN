@@ -36,7 +36,7 @@ var FilterTheReservedColumnNames = async function (columns) {
         }
     }
     return Filtered;
-}
+};
 
 
 

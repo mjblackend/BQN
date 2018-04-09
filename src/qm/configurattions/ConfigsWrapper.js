@@ -3,11 +3,11 @@ class ConfigsWrapper {
         this.branches = [];
         this.counters = [];
         this.serviceConfigs = [];
-        this.segmentsAllocation = [];
+        this.segmentsAllocations = [];
         this.segments = [];
         this.serviceSegmentPriorityRanges = [];
         this.priorityRanges = [];
-        this.serviceAllocations = [];
+        this.servicesAllocations = [];
         this.serviceWorkFlow = [];
         this.branch_serviceAllocations = [];
         this.users = [];

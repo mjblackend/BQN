@@ -5,8 +5,96 @@ var configRepository = require("../remoteRepositories/configRepository");
 var ConfigsWrapper = require("./ConfigsWrapper");
 var ConfigsCache = new ConfigsWrapper();
 
+//Populate branch cofigs
+var populateEntities = async function () {
+    try {
+
+        if (ConfigsCache.branches && ConfigsCache.branches.length > 0) {
+            for (let i = 0; i < ConfigsCache.branches.length; i++) {
+                let BranchID= ConfigsCache.branches[i].ID;
+
+                //Assign counters
+                if(ConfigsCache.counters && ConfigsCache.counters.length >0)
+                {
+                    ConfigsCache.branches[i].counters = ConfigsCache.counters.filter(function (value) {
+                        return value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else
+                {
+                    ConfigsCache.branches[i].counters = [];
+                }
+
+                //Branch Users Allocations
+                if(ConfigsCache.branch_UsersAllocations && ConfigsCache.branch_UsersAllocations.length >0)
+                {
+                    ConfigsCache.branches[i].usersAllocations = ConfigsCache.branch_UsersAllocations.filter(function (value) {
+                        return value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else
+                {
+                    ConfigsCache.branches[i].usersAllocations = [];
+                }
+
+                //Halls
+                if(ConfigsCache.halls && ConfigsCache.halls.length >0)
+                {
+                    ConfigsCache.branches[i].halls = ConfigsCache.halls.filter(function (value) {
+                        return value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else
+                {
+                    ConfigsCache.branches[i].halls = [];
+                }
+
+                //Segment Allocations
+                if(ConfigsCache.segmentsAllocations && ConfigsCache.segmentsAllocations.length >0)
+                {
+                    ConfigsCache.branches[i].segmentsAllocations = ConfigsCache.segmentsAllocations.filter(function (value) {
+                        return value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else
+                {
+                    ConfigsCache.branches[i].segmentsAllocations = [];
+                }
+
+                //Serives allocations
+                if(ConfigsCache.servicesAllocations && ConfigsCache.servicesAllocations.length >0)
+                {
+                    ConfigsCache.branches[i].servicesAllocations = ConfigsCache.servicesAllocations.filter(function (value) {
+                        return value.QueueBranch_ID == BranchID;
+                    }
+                    );
+                }
+                else
+                {
+                    ConfigsCache.branches[i].servicesAllocations = [];
+                }
+
+            }
+        }
+
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
 var cacheServerEnities = async function () {
     try {
+
+        let result = common.success;
 
         //Counters
         let counter = require("./Counter_Config");
@@ -59,7 +147,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tSegmentAllocation);
         Results = await configRepository.GetAll(attributes, "T_SegmentAllocation");
         if (Results && Results.length > 0) {
-            ConfigsCache.segmentsAllocation = Results;
+            ConfigsCache.segmentsAllocations = Results;
         }
 
 
@@ -80,7 +168,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tServiceAllocation);
         Results = await configRepository.GetAll(attributes, "T_ServiceAllocation");
         if (Results && Results.length > 0) {
-            ConfigsCache.serviceAllocations = Results;
+            ConfigsCache.servicesAllocations = Results;
         }
 
 
@@ -142,7 +230,9 @@ var cacheServerEnities = async function () {
             ConfigsCache.branches = Results;
         }
 
-        return common.success;
+        result = await populateEntities();
+
+        return result;
     }
     catch (error) {
         logger.logError(error);
