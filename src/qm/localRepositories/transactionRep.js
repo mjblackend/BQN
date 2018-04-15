@@ -2,9 +2,8 @@
 //do counter functions of user table on the DB
 var logger = require("../../common/logger");
 var transaction = require("../data/transaction");
-var idGenerator = require("./idGenerator");
 var common = require("../../common/common");
-
+var idGenerator=require("./idGenerator");
 //Transaction Attributes
 var transactioninst = new transaction();
 var attributes = Object.getOwnPropertyNames(transactioninst);
@@ -31,7 +30,7 @@ var GetValuesFromObject = function (transaction) {
 };
 
 //Create columns for sql lite query
-var GetFilterColumnsFromObject = function (filterKeys , filterValues) {
+var GetFilterColumnsFromObject = function (filterKeys) {
     try{
         let filter = " ";
         for (let i = 0; i < filterKeys.length; i++) {
@@ -71,7 +70,7 @@ var transactionRep = function (db) {
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
+                    let filter = GetFilterColumnsFromObject(filterKeys);
                     let that = this.db;
                     let sql = "SELECT * FROM transactions where " + filter;
                     let transactions = await that.all(sql, filterValues);
@@ -120,10 +119,6 @@ var transactionRep = function (db) {
             try {
                 if (transaction) {
                     let that = this.db;
-                    //Generate ID in not exists
-                    if (transaction.id <= 0) {
-                        transaction.id = await idGenerator.getNewID(that);
-                    }
                     //Prepare the values array
                     let values = GetValuesFromObject(transaction);
 
@@ -132,6 +127,7 @@ var transactionRep = function (db) {
                     let isSuccess = await that.run(sql);
                     if (isSuccess)
                     {
+                        await idGenerator.UpdateSeqOnDB(that);
                         return common.success;
                     }
                     else

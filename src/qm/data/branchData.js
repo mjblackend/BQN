@@ -1,5 +1,4 @@
 //The settings inside the BD and not from the server
-
 class branchData {
     constructor() {
         this.id;
@@ -7,7 +6,7 @@ class branchData {
         this.userData = [];
         this.visitData = [];
         this.userActivitiesData = [];
-        this.transaction = [];
+        this.transactionsData = [];
         this.servicesData=[];
         this.ticketSeqData=[];
  }

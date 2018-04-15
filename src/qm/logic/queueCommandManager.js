@@ -1,74 +1,53 @@
 /*eslint no-unused-vars: "off"*/
 "use strict";
 var configurationService = require("../configurations/configurationService");
-var repositoriesManager = require("../localRepositories/repositoriesManager");
+var dataService = require("../data/dataService");
+var transactionManager = require("../logic/transactionManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
 var transaction = require("../data/transaction");
 
-var repositoriesMgr = new repositoriesManager();
+
 
 var initialize = async function (ticketInfo) {
-    let result = await repositoriesMgr.initialize();
-    if (result == common.success) {
-        return await configurationService.initialize();
+    try {
+        let result = await transactionManager.initialize();
+        if (result == common.success) {
+            result = await configurationService.initialize();
+            if (result == common.success) {
+                return await dataService.initialize();
+            }
+        }
+        return common.error;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
     }
 };
 
 
 //only functions and reference of branch data and configuration service.
 //Issue Ticket 
-var issueTicket = async function (ticketInfo) {
-    try
-    {
+var issueTicket = function (ticketInfo) {
+    try {
         let result;
         let BranchID = ticketInfo["branchid"];
         let SegmentID = ticketInfo["segmentid"];
         let ServiceID = ticketInfo["serviceid"];
         let LanguageIndex = ticketInfo["languageindex"];
         let Origin = ticketInfo["origin"];
-    
-        let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
-            return value.Segment_ID == SegmentID && value.Service_ID == ServiceID;
-        }
-        );
-    
-        if (!serviceSegmentPriorityRange) {
-            throw (new Error("error: the Service is not allocated on Segment"));
-        }
-    
-        let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
-            return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
-        }
-        );
-    
-        var transactions = await repositoriesMgr.transactionRep.getFilterBy(["branch_ID", "segment_ID", "service_ID"], [BranchID, SegmentID, ServiceID]);
-    
-        let ticketSequence = 0;
-        if (transactions && transactions.length > 0) {
-            let maxTransaction = transactions[0];
-            for (let i = 0; i < transactions.length; i++) {
-                if (transactions[i].ticketSequence > maxTransaction.ticketSequence) {
-                    maxTransaction = transactions[i];
-                }
-            }
-            ticketSequence = maxTransaction.ticketSequence + 1;
-        }
-        else {
-            ticketSequence = PriorityRange.MinSlipNo;
-        }
-    
+        let OrgID = ticketInfo["orgid"];
+
         let transactioninst = new transaction();
-        transactioninst.org_ID = 1;
+        transactioninst.org_ID = OrgID;
         transactioninst.branch_ID = BranchID;
-        transactioninst.ticketSequence = ticketSequence;
-        transactioninst.symbol = PriorityRange.Symbol;
-        transactioninst.priority = PriorityRange.Priority;
         transactioninst.service_ID = ServiceID;
         transactioninst.segment_ID = SegmentID;
-        transactioninst.creationTime = Date.now();
-        result = await repositoriesMgr.transactionRep.addOrUpdate(transactioninst);
-        console.log("transactioninst ID=" + transactioninst.id + " ,ticketSequence= " + transactioninst.ticketSequence);
+
+        result = transactionManager.issueSingleTicket(transactioninst);
+        ticketInfo.displayTicketNumber = transactioninst.displayTicketNumber;
+        //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
         return result;
     }
     catch (error) {
@@ -183,6 +162,38 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
+
+//Deassign Counter from BMS
+var processCommand = function (apiMessage) {
+    try {
+        let result = common.error;
+        if (apiMessage) {
+            switch (apiMessage.title) {
+                case "issueTicket":
+                    result = this.issueTicket(apiMessage.payload);
+                    break;
+                default:
+                    result = common.error;
+            }
+            return result;
+        }
+        else {
+            return result;
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
+
+
+
+
+
 module.exports.initialize = initialize;
 module.exports.issueTicket = issueTicket;
 module.exports.issueTicketMulti = issueTicketMulti;
@@ -206,5 +217,5 @@ module.exports.counterCustomState = counterCustomState;
 module.exports.counterFinsihServing = counterFinsihServing;
 module.exports.checkInAppointment = checkInAppointment;
 module.exports.counterDeassignFromBMS = counterDeassignFromBMS;
-
+module.exports.processCommand = processCommand;
 

@@ -1,18 +1,18 @@
 "use strict";
+var common = require("../../common/common");
+var logger = require("../../common/logger");
 var CurrentSeqNumber = 0;
 
-//Get the ID for the first time
-var getNewIDFromDB = async function (db) {
-    var that = db;
-    let sql = "SELECT * FROM seq";
-    var sqlRecord = await that.all(sql);
-    if (sqlRecord != undefined && sqlRecord[0].seqNumber > 0) {
-        return sqlRecord[0].seqNumber;
-    }
-    return -1;
+
+
+
+//get new ID from memory
+var getNewID = function () {
+    CurrentSeqNumber = CurrentSeqNumber + 1;
+    return CurrentSeqNumber;
 };
 
-//Update to the new ID
+//Update the current number
 var UpdateSeqOnDB = async function (db) {
     var that = db;
     var sql = "update seq SET seqNumber = \"" + CurrentSeqNumber + "\"";
@@ -22,26 +22,35 @@ var UpdateSeqOnDB = async function (db) {
     }
 };
 
-//Generate New ID
-var getNewID = async function (db) {
-    //Get the Sequence for the first time
-    if (CurrentSeqNumber == 0) {
-        CurrentSeqNumber = await getNewIDFromDB(db);
-    }
-    //Increase the Seq with 1
-    CurrentSeqNumber = CurrentSeqNumber + 1;
 
-    //Update the Seq
-    var result = await UpdateSeqOnDB(db);
-    if (result) {
-        return CurrentSeqNumber;
-    }
-    else {
-        return -1;
+//get the current Sequence number
+var getCurrentSeqNumberFromDB = async function (db) {
+    try {
+        var that = db;
+        let sql = "SELECT * FROM seq";
+        var sqlRecord = await that.all(sql);
+        if (sqlRecord != undefined && sqlRecord[0].seqNumber > 0) {
+            return sqlRecord[0].seqNumber;
+        }
+        return common.error;
+    } catch (error) {
+        logger.logError(error);
+        return common.error;
     }
 
 };
 
+//get the current Sequence number
+var initialize = async function (db) {
+    CurrentSeqNumber = await getCurrentSeqNumberFromDB(db);
+    if (CurrentSeqNumber > 0) {
+        return common.success;
+    }
+};
 
 
+
+module.exports.initialize = initialize;
 module.exports.getNewID = getNewID;
+module.exports.CurrentSeqNumber = CurrentSeqNumber;
+module.exports.UpdateSeqOnDB = UpdateSeqOnDB;

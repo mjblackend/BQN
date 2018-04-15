@@ -8,8 +8,8 @@ var common = require("../../common/common");
 
 should.toString();
 
-describe('Start testing SQL DB', function () {
-    it('Initialize Configration successfully', async function () {
+describe('Configration Service Test', function () {
+    it('Initialize Configration Service successfully', async function () {
         let result = await configurationService.initialize();
         (result === common.success).should.true();
     });

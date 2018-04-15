@@ -4,6 +4,7 @@ var fs = require("fs");
 var logger = require("../../common/logger");
 var transactionRep = require("./transactionRep");
 var userActivitiesRep = require("./userActivitiesRep");
+var idGenerator = require("./idGenerator");
 
 "use strict";
 
@@ -43,9 +44,12 @@ var initialize = async function () {
             }
         }
 
+        await idGenerator.initialize(sqlite3);
+        
         //Initialize Repos
         this.transactionRep = new transactionRep(sqlite3);
         this.userActivitiesRep = new userActivitiesRep(sqlite3);
+
 
         // close the database connection
         //db.close();

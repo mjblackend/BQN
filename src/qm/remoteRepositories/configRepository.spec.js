@@ -8,7 +8,7 @@ var it = mocha.it;
 
 should.toString();
 
-describe('Start testing SQL DB', function () {
+describe('Remote SQL DB Repos Test', function () {
     it('Getting Branches', async function () {
         let result = await configRepository.GetAll(undefined,"T_QueueBranch");
         //(true).should.true();

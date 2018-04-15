@@ -13,9 +13,9 @@ class QueueBranch_config {
         this.settings ; //array of settings from the config and common config
         this.counters ;
         this.usersAllocations ;
-        this.halls ;
         this.segmentsAllocations ;
         this.servicesAllocations ;
+        this.halls ;
     }
 }
 

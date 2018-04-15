@@ -3,80 +3,81 @@ var logger = require("../../common/logger");
 var common = require("../../common/common");
 var configRepository = require("../remoteRepositories/configRepository");
 var ConfigsWrapper = require("./ConfigsWrapper");
-var ConfigsCache = new ConfigsWrapper();
+var configsCache = new ConfigsWrapper();
+var fs = require("fs");
 
 //Populate branch cofigs
 var populateEntities = async function () {
     try {
 
-        if (ConfigsCache.branches && ConfigsCache.branches.length > 0) {
-            for (let i = 0; i < ConfigsCache.branches.length; i++) {
-                let BranchID = ConfigsCache.branches[i].ID;
-                let BranchConfigID = ConfigsCache.branches[i].BranchConfig_ID;
+        if (configsCache.branches && configsCache.branches.length > 0) {
+            for (let i = 0; i < configsCache.branches.length; i++) {
+                let BranchID = configsCache.branches[i].ID;
+                let BranchConfigID = configsCache.branches[i].BranchConfig_ID;
                 //Assign counters
-                if (ConfigsCache.counters && ConfigsCache.counters.length > 0) {
-                    ConfigsCache.branches[i].counters = ConfigsCache.counters.filter(function (value) {
+                if (configsCache.counters && configsCache.counters.length > 0) {
+                    configsCache.branches[i].counters = configsCache.counters.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].counters = [];
+                    configsCache.branches[i].counters = [];
                 }
 
                 //Branch Users Allocations
-                if (ConfigsCache.branch_UsersAllocations && ConfigsCache.branch_UsersAllocations.length > 0) {
-                    ConfigsCache.branches[i].usersAllocations = ConfigsCache.branch_UsersAllocations.filter(function (value) {
+                if (configsCache.branch_UsersAllocations && configsCache.branch_UsersAllocations.length > 0) {
+                    configsCache.branches[i].usersAllocations = configsCache.branch_UsersAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].usersAllocations = [];
+                    configsCache.branches[i].usersAllocations = [];
                 }
 
                 //Halls
-                if (ConfigsCache.halls && ConfigsCache.halls.length > 0) {
-                    ConfigsCache.branches[i].halls = ConfigsCache.halls.filter(function (value) {
+                if (configsCache.halls && configsCache.halls.length > 0) {
+                    configsCache.branches[i].halls = configsCache.halls.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].halls = [];
+                    configsCache.branches[i].halls = [];
                 }
 
                 //Segment Allocations
-                if (ConfigsCache.segmentsAllocations && ConfigsCache.segmentsAllocations.length > 0) {
-                    ConfigsCache.branches[i].segmentsAllocations = ConfigsCache.segmentsAllocations.filter(function (value) {
+                if (configsCache.segmentsAllocations && configsCache.segmentsAllocations.length > 0) {
+                    configsCache.branches[i].segmentsAllocations = configsCache.segmentsAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].segmentsAllocations = [];
+                    configsCache.branches[i].segmentsAllocations = [];
                 }
 
                 //Serives allocations
-                if (ConfigsCache.servicesAllocations && ConfigsCache.servicesAllocations.length > 0) {
-                    ConfigsCache.branches[i].servicesAllocations = ConfigsCache.servicesAllocations.filter(function (value) {
+                if (configsCache.servicesAllocations && configsCache.servicesAllocations.length > 0) {
+                    configsCache.branches[i].servicesAllocations = configsCache.servicesAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].servicesAllocations = [];
+                    configsCache.branches[i].servicesAllocations = [];
                 }
 
                 //commonConfigs
-                if (ConfigsCache.commonConfigs && ConfigsCache.commonConfigs.length > 0) {
-                    ConfigsCache.branches[i].settings = ConfigsCache.commonConfigs.filter(function (value) {
+                if (configsCache.commonConfigs && configsCache.commonConfigs.length > 0) {
+                    configsCache.branches[i].settings = configsCache.commonConfigs.filter(function (value) {
                         return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
                     }
                     );
                 }
                 else {
-                    ConfigsCache.branches[i].settings = [];
+                    configsCache.branches[i].settings = [];
                 }
 
             }
@@ -90,7 +91,7 @@ var populateEntities = async function () {
     }
 };
 
-
+/*eslint complexity: ["error", 100]*/
 //Cache Server Configs from DB
 var cacheServerEnities = async function () {
     try {
@@ -103,7 +104,7 @@ var cacheServerEnities = async function () {
         let attributes = Object.getOwnPropertyNames(counterInst);
         let Results = await configRepository.GetAll(attributes, "T_Counter");
         if (Results && Results.length > 0) {
-            ConfigsCache.counters = Results;
+            configsCache.counters = Results;
         }
 
         //Halls
@@ -112,7 +113,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(hallInst);
         Results = await configRepository.GetAll(attributes, "T_Hall");
         if (Results && Results.length > 0) {
-            ConfigsCache.halls = Results;
+            configsCache.halls = Results;
         }
 
         //PriorityRanges
@@ -121,7 +122,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tPriorityRange);
         Results = await configRepository.GetAll(attributes, "T_PriorityRange");
         if (Results && Results.length > 0) {
-            ConfigsCache.priorityRanges = Results;
+            configsCache.priorityRanges = Results;
         }
 
 
@@ -129,7 +130,7 @@ var cacheServerEnities = async function () {
         attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as Service_ID"];
         Results = await configRepository.GetAll(attributes, "R_QueueBranch_Service");
         if (Results && Results.length > 0) {
-            ConfigsCache.branch_serviceAllocations = Results;
+            configsCache.branch_serviceAllocations = Results;
         }
 
         //segments
@@ -138,7 +139,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tSegment);
         Results = await configRepository.GetAll(attributes, "T_Segment");
         if (Results && Results.length > 0) {
-            ConfigsCache.segments = Results;
+            configsCache.segments = Results;
         }
 
 
@@ -148,7 +149,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tSegmentAllocation);
         Results = await configRepository.GetAll(attributes, "T_SegmentAllocation");
         if (Results && Results.length > 0) {
-            ConfigsCache.segmentsAllocations = Results;
+            configsCache.segmentsAllocations = Results;
         }
 
 
@@ -159,7 +160,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tService);
         Results = await configRepository.GetAll(attributes, "T_Service");
         if (Results && Results.length > 0) {
-            ConfigsCache.services = Results;
+            configsCache.services = Results;
         }
 
 
@@ -169,7 +170,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tServiceAllocation);
         Results = await configRepository.GetAll(attributes, "T_ServiceAllocation");
         if (Results && Results.length > 0) {
-            ConfigsCache.servicesAllocations = Results;
+            configsCache.servicesAllocations = Results;
         }
 
 
@@ -180,7 +181,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tServiceConfig);
         Results = await configRepository.GetAll(attributes, "T_ServiceConfig");
         if (Results && Results.length > 0) {
-            ConfigsCache.serviceConfigs = Results;
+            configsCache.serviceConfigs = Results;
         }
 
 
@@ -190,7 +191,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tServiceSegmentPriorityRange);
         Results = await configRepository.GetAll(attributes, "T_ServiceSegmentPriorityRange");
         if (Results && Results.length > 0) {
-            ConfigsCache.serviceSegmentPriorityRanges = Results;
+            configsCache.serviceSegmentPriorityRanges = Results;
         }
 
         //Service Workflow Config
@@ -199,7 +200,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tServiceWorkflow);
         Results = await configRepository.GetAll(attributes, "T_ServiceWorkflow");
         if (Results && Results.length > 0) {
-            ConfigsCache.serviceWorkFlow = Results;
+            configsCache.serviceWorkFlow = Results;
         }
 
 
@@ -209,7 +210,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tUser);
         Results = await configRepository.GetAll(attributes, "T_User");
         if (Results && Results.length > 0) {
-            ConfigsCache.users = Results;
+            configsCache.users = Results;
         }
 
 
@@ -219,7 +220,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tUserAllocation);
         Results = await configRepository.GetAll(attributes, "X_USERS_BRANCHES");
         if (Results && Results.length > 0) {
-            ConfigsCache.branch_UsersAllocations = Results;
+            configsCache.branch_UsersAllocations = Results;
         }
 
 
@@ -229,7 +230,7 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(tCommonConfig);
         Results = await configRepository.GetAll(attributes, "T_CommonConfig");
         if (Results && Results.length > 0) {
-            ConfigsCache.commonConfigs = Results;
+            configsCache.commonConfigs = Results;
         }
 
 
@@ -239,10 +240,11 @@ var cacheServerEnities = async function () {
         attributes = Object.getOwnPropertyNames(branchInst);
         Results = await configRepository.GetAll(attributes, "T_QueueBranch");
         if (Results && Results.length > 0) {
-            ConfigsCache.branches = Results;
+            configsCache.branches = Results;
         }
 
         result = await populateEntities();
+
 
         return result;
     }
@@ -254,8 +256,16 @@ var cacheServerEnities = async function () {
 
 var initialize = async function () {
     try {
-        var result = await cacheServerEnities();
-        return result;
+        if (common.moch) {
+            let configs = await fs.readFileSync("Configs.json");
+            this.configsCache = JSON.parse(configs);
+            return common.success;
+        }
+        else {
+            var result = await cacheServerEnities();
+            return result;
+        }
+
     }
     catch (error) {
         logger.logError(error);
@@ -265,4 +275,4 @@ var initialize = async function () {
 
 
 module.exports.initialize = initialize;
-module.exports.configsCache = ConfigsCache;
+module.exports.configsCache = configsCache;
