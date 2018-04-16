@@ -81,7 +81,6 @@ var transactionRep = function (db) {
 
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
-                let dbValues =[];
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
                     let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
                     let that = this.db;

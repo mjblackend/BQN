@@ -30,9 +30,16 @@ const SegmentAllocationType = {
     Customize: 2
 };
 
+const commands = {
+    IssueTicket: "issueTicket",
+    Next: "next"
+};
+
+
 
 module.exports.SegmentAllocationType = SegmentAllocationType;
 module.exports.EmployeeActiontypes = EmployeeActiontypes;
 module.exports.StateType = StateType;
+module.exports.commands = commands;
 
 

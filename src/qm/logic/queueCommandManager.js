@@ -6,10 +6,11 @@ var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
+var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 
 
-
+//Initialize everything
 var initialize = async function (ticketInfo) {
     try {
         let result = await transactionManager.initialize();
@@ -73,14 +74,22 @@ var counterNext = function (counterInfo) {
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
         let LanguageIndex = counterInfo["languageindex"];
-        let CurrentCustomerTransaction;
-        let NextCustomerTransaction;
-
-        result = userActivityManager.next(OrgID, BranchID, CounterID, LanguageIndex);
+        let args = [];
+        result = userActivityManager.next(OrgID, BranchID, CounterID);
         if (result == common.success) {
-            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, LanguageIndex, CurrentCustomerTransaction);
+            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID,  args);
             if (result == common.success) {
-                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID, LanguageIndex, NextCustomerTransaction);
+                args = [];
+                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID,  args);
+                if (result == common.success) {
+                    if (args) {
+                        counterInfo.displayTicketNumber = args[args.length - 1].displayTicketNumber;
+                    }
+                    else
+                    {
+                        counterInfo.displayTicketNumber = "...";
+                    }
+                }
             }
         }
         return common.success;
@@ -187,15 +196,17 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
-
 //Deassign Counter from BMS
 var processCommand = function (apiMessage) {
     try {
         let result = common.error;
         if (apiMessage) {
             switch (apiMessage.title) {
-                case "issueTicket":
+                case enums.commands.IssueTicket:
                     result = this.issueTicket(apiMessage.payload);
+                    break;
+                case enums.commands.Next:
+                    result = this.counterNext(apiMessage.payload);
                     break;
                 default:
                     result = common.error;

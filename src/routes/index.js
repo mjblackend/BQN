@@ -21,11 +21,18 @@ router.post('/processCommand', function (req, res, next) {
 
 });
 
-/*
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+  try {
+    res.render('index', { title: 'Test APIs page', message: 'Hello there!' });
+  }
+  catch (error) {
+    logger.log(error);
+    res.end('end');
+  }
+
 });
-*/
+
+
 
 
 module.exports = router;

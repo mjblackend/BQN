@@ -1,13 +1,16 @@
 var logger = require("../../common/logger");
 var common = require("../../common/common");
 var enums = require("../../common/enums");
+var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
 var visitData = require("../data/visitData");
 var TicketSeqData = require("../data/ticketSeqData");
-const Separators = ["", " ", "-", "/", "."];
 var idGenerator = require("../localRepositories/idGenerator");
+var counterData = require("../data/counterData");
+const Separators = ["", " ", "-", "/", "."];
+
 
 //Initialize
 var initialize = async function () {
@@ -150,15 +153,16 @@ var prepareDisplayTicketNumber = function (transaction, PriorityRangeMaxNo, Sepa
 
 var timeProirityValue = function (transaction) {
     //Return the priority of this transaction; using priority time and priority
-    return ((new Date() - transaction.priorityTime) * transaction.priority * 1000)
+    return ((new Date() - transaction.priorityTime) * transaction.priority * 1000);
 };
 
-var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustomerTransaction) {
+var finishCurrentCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
     try {
-        CurrentCustomerTransaction = undefined;
+
+        let CurrentCustomerTransaction = new transaction();
+
         //Get Max Seq
         let Now = new Date();
-        let Today = Now.setHours(0, 0, 0, 0);
         //Get Branch Data
         let BracnhData = dataService.branchesData.find(function (value) {
             return value.id == BranchID;
@@ -179,7 +183,7 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustome
             }
             if (Current_Counter_Data && Current_Counter_Data.currentTransaction_ID) {
                 CurrentCustomerTransaction = BracnhData.transactionsData.find(function (transaction_Data) {
-                    return transaction_Data.id == Current_Counter_Data.currentTransaction_ID
+                    return transaction_Data.id == Current_Counter_Data.currentTransaction_ID;
                 }
                 );
                 Current_Counter_Data.currentTransaction_ID = undefined;
@@ -187,9 +191,16 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustome
                     CurrentCustomerTransaction.state = enums.StateType.closed;
                     CurrentCustomerTransaction.endServingTime = Now;
                     CurrentCustomerTransaction.closeTime = Now;
-                    CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + (CurrentCustomerTransaction.arrivalTime - CurrentCustomerTransaction.startServingTime);
+                    CurrentCustomerTransaction.serviceSeconds =  CurrentCustomerTransaction.serviceSeconds + ( CurrentCustomerTransaction.arrivalTime -  CurrentCustomerTransaction.startServingTime);
+                    
+                    //Remove the transaction from memory
+                    let CurrentCustomerTransactionID= CurrentCustomerTransaction.id;
                     BracnhData.transactionsData = BracnhData.transactionsData.filter(function (transaction_Data) {
-                        return transaction_Data.id != CurrentCustomerTransaction.id;
+                        return transaction_Data.id !=  CurrentCustomerTransactionID;
+                    }
+                    );
+                    BracnhData.visitData= BracnhData.visitData.filter(function (visitData) {
+                        return visitData.visit_ID !=  CurrentCustomerTransactionID;
                     }
                     );
                 }
@@ -197,6 +208,7 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustome
             //Update the old
             if (CurrentCustomerTransaction) {
                 UpdateTransaction(CurrentCustomerTransaction);
+                resultArgs.push(CurrentCustomerTransaction);
             }
         }
 
@@ -212,14 +224,13 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustome
 
 
 //Get Next Customer
-var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextCustomerTransaction) {
+var getNextCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
     try {
 
-        NextCustomerTransaction = undefined;
-        CurrentCustomerTransaction = undefined;
+        let NextCustomerTransaction = new transaction();
         //Get Max Seq
         let Now = new Date();
-        let Today = Now.setHours(0, 0, 0, 0);
+
         //Get Branch Data
         let BracnhData = dataService.branchesData.find(function (value) {
             return value.id == BranchID;
@@ -228,7 +239,7 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextC
 
         //Branch Config
         var branch = configurationService.configsCache.branches.find(function (value) {
-            return value.ID = BranchID
+            return value.ID = BranchID;
         });
 
         //Branch Counters to get the specific counter
@@ -236,10 +247,8 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextC
             return value.ID = CounterID;
         });
 
-        var segments_IDs = [];
-        var services_IDs = [];
         var allocated_segments = [];
-        var isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll)
+        var isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll);
 
         //Get Allocated Segments
         if (!isAllSegments_Allocated && branch.segmentsAllocations && branch.segmentsAllocations.length > 0) {
@@ -286,7 +295,7 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextC
             if (transactions && transactions.length > 0) {
                 NextCustomerTransaction = transactions[0];
                 for (let i = 0; i < transactions.length; i++) {
-                    if (timeProirityValue(NextCustomerTransaction) < timeProirityValue(transactions[i])) {
+                    if (timeProirityValue( NextCustomerTransaction) < timeProirityValue(transactions[i])) {
                         NextCustomerTransaction = transactions[i];
                     }
                 }
@@ -298,20 +307,20 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextC
                 NextCustomerTransaction.counter_ID = CounterID;
                 NextCustomerTransaction.serveStep = 1;
                 NextCustomerTransaction.lastOfVisit = 1;
-                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + (NextCustomerTransaction.startServingTime - NextCustomerTransaction.arrivalTime);
+                NextCustomerTransaction.waitingSeconds =  NextCustomerTransaction.waitingSeconds + ( NextCustomerTransaction.startServingTime -  NextCustomerTransaction.arrivalTime);
 
                 let found = false;
                 for (let i = 0; i < BracnhData.countersData.length; i++) {
                     if (BracnhData.countersData[i].id == CounterID) {
                         found = true;
-                        BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
+                        BracnhData.countersData[i].currentTransaction_ID =  NextCustomerTransaction.id;
                         break;
                     }
                 }
                 if (!found) {
                     let tcounterData = new counterData();
-                    tcounterData.id = NextCustomerTransaction.counter_ID;
-                    tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
+                    tcounterData.id =  NextCustomerTransaction.counter_ID;
+                    tcounterData.currentTransaction_ID =  NextCustomerTransaction.id;
                     BracnhData.countersData.push(tcounterData);
                 }
             }
@@ -319,8 +328,9 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextC
 
 
         //update the new
-        if (NextCustomerTransaction) {
-            UpdateTransaction(NextCustomerTransaction);
+        if ( NextCustomerTransaction) {
+            UpdateTransaction( NextCustomerTransaction);
+            resultArgs.push(NextCustomerTransaction);
         }
         return common.success;
     }
