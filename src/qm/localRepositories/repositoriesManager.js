@@ -11,17 +11,6 @@ var idGenerator = require("./idGenerator");
 //Initialize DB connection
 //Initialize Repositories with the DB connection
 //Exports (Collection of Repositories or the Repositories themselves) to be used by other classes
-var repositoriesManager = function () {
-    try {
-        //this.db = null;
-        this.initialize = initialize;
-    }
-    catch (error) {
-        logger.logError(error);
-    }
-};
-
-
 var initialize = async function () {
     try {
 
@@ -45,7 +34,7 @@ var initialize = async function () {
         }
 
         await idGenerator.initialize(sqlite3);
-        
+
         //Initialize Repos
         this.transactionRep = new transactionRep(sqlite3);
         this.userActivitiesRep = new userActivitiesRep(sqlite3);
@@ -63,5 +52,6 @@ var initialize = async function () {
 
 
 
-module.exports = repositoriesManager;
+module.exports.transactionRep = transactionRep;
+module.exports.userActivitiesRep = userActivitiesRep;
 module.exports.initialize = initialize;

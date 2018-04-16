@@ -3,7 +3,7 @@
 var logger = require("../../common/logger");
 var transaction = require("../data/transaction");
 var common = require("../../common/common");
-var idGenerator=require("./idGenerator");
+var idGenerator = require("./idGenerator");
 //Transaction Attributes
 var transactioninst = new transaction();
 var attributes = Object.getOwnPropertyNames(transactioninst);
@@ -12,16 +12,16 @@ var attributesStr = attributes.join(",");
 
 //Prepare Values for insert or update
 var GetValuesFromObject = function (transaction) {
-    try{
-    //Prepare the values array
-    let values = "";
-    for (let i = 0; i < attributes.length; i++) {
-        values = values + "\"" + transaction[attributes[i].toString()] + "\"";
-        if (i != (attributes.length - 1)) {
-            values = values + ",";
+    try {
+        //Prepare the values array
+        let values = "";
+        for (let i = 0; i < attributes.length; i++) {
+            values = values + "\"" + transaction[attributes[i].toString()] + "\"";
+            if (i != (attributes.length - 1)) {
+                values = values + ",";
+            }
         }
-    }
-    return values;
+        return values;
     }
     catch (error) {
         logger.logError(error);
@@ -29,14 +29,24 @@ var GetValuesFromObject = function (transaction) {
     }
 };
 
+
 //Create columns for sql lite query
-var GetFilterColumnsFromObject = function (filterKeys) {
-    try{
+var GetFilterColumnsFromObject = function (filterKeys, filterValues) {
+    try {
         let filter = " ";
         for (let i = 0; i < filterKeys.length; i++) {
-            filter = filter + filterKeys[i] + " = ? ";
-            if (i != (filterKeys.length - 1)) {
-                filter = filter + " and ";
+            if (Array.isArray(filterValues[i])) {
+                let values = filterValues[i].join(",");
+                filter = filter + filterKeys[i] + " in ("  +  values + ") ";
+                if (i != (filterKeys.length - 1)) {
+                    filter = filter + " and ";
+                }
+            }
+            else {
+                filter = filter + filterKeys[i] + " = " + filterValues[i] ;
+                if (i != (filterKeys.length - 1)) {
+                    filter = filter + " and ";
+                }
             }
         }
         return filter;
@@ -67,13 +77,16 @@ var transactionRep = function (db) {
             }
         };
 
+
+
         this.getFilterBy = async function (filterKeys, filterValues) {
             try {
+                let dbValues =[];
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    let filter = GetFilterColumnsFromObject(filterKeys);
+                    let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
                     let that = this.db;
                     let sql = "SELECT * FROM transactions where " + filter;
-                    let transactions = await that.all(sql, filterValues);
+                    let transactions = await that.all(sql);
                     return transactions;
                 }
                 else {
@@ -93,12 +106,10 @@ var transactionRep = function (db) {
                     let that = this.db;
                     let sql = " delete from transactions where id = " + transaction.id;
                     let isSuccess = await that.run(sql);
-                    if (isSuccess)
-                    {
+                    if (isSuccess) {
                         return common.success;
                     }
-                    else
-                    {
+                    else {
                         return common.error;
                     }
                 }
@@ -114,8 +125,7 @@ var transactionRep = function (db) {
         };
 
 
-
-        this.addOrUpdate = async function (transaction) {
+        this.Update = async function (transaction) {
             try {
                 if (transaction) {
                     let that = this.db;
@@ -125,13 +135,40 @@ var transactionRep = function (db) {
                     //Do the Query
                     let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
                     let isSuccess = await that.run(sql);
-                    if (isSuccess)
-                    {
+                    if (isSuccess) {
                         await idGenerator.UpdateSeqOnDB(that);
                         return common.success;
                     }
-                    else
-                    {
+                    else {
+                        return common.error;
+                    }
+                }
+                else {
+                    return common.error;
+                }
+
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+
+        this.Add = async function (transaction) {
+            try {
+                if (transaction) {
+                    let that = this.db;
+                    //Prepare the values array
+                    let values = GetValuesFromObject(transaction);
+
+                    //Do the Query
+                    let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
+                    let isSuccess = await that.run(sql);
+                    if (isSuccess) {
+                        await idGenerator.UpdateSeqOnDB(that);
+                        return common.success;
+                    }
+                    else {
                         return common.error;
                     }
                 }

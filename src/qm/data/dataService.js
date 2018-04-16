@@ -1,11 +1,12 @@
 //Contains and maintain configrations
 var logger = require("../../common/logger");
 var common = require("../../common/common");
+var enums = require("../../common/enums");
 var branchData = require("./branchData");
 var visitData = require("./visitData");
+var counterData = require("./counterData");
 var configurationService = require("../configurations/configurationService");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
-var repositoriesMgr = new repositoriesManager();
 var branchesData = [];
 
 
@@ -21,23 +22,46 @@ var cacheData = async function () {
             for (let i = 0; i < BranchesConfig.length; i++) {
                 let branch = new branchData();
                 branch.id = BranchesConfig[i].ID;
-                let transactionsData= await repositoriesMgr.transactionRep.getFilterBy(["branch_ID"], [branch.id]);
-                if (transactionsData)
-                {
+
+                //Get only the transactions for the day
+                let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
+                let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branch.id, States]);
+                if (transactionsData) {
                     //Get only the transactions for the day
-                    branch.transactionsData =transactionsData.filter(function (value) {
+                    branch.transactionsData = transactionsData.filter(function (value) {
+                        //Set the counter data
+                        if (value.creationTime > Today && value.counter_ID > 0) {
+                            let tcounterData = new counterData();
+                            tcounterData.id = value.counter_ID;
+                            tcounterData.currentTransaction_ID = value.id;
+
+                            let found = false;
+                            for (let i = 0; i < branch.countersData.length; i++) {
+                                if (branch.countersData[i].id == value.counter_ID) {
+                                    found = true;
+                                    branch.countersData[i].currentTransaction_ID = value.id;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                let tcounterData = new counterData();
+                                tcounterData.id = value.counter_ID;
+                                tcounterData.currentTransaction_ID = value.id;
+                                branch.countersData.push(tcounterData);
+                            }
+
+                        }
                         return value.creationTime > Today;
                     }
                     );
                 }
-            
+
                 if (branch.transactionsData) {
                     for (let i = 0; i < branch.transactionsData.length; i++) {
                         let transaction = branch.transactionsData[i];
                         //To Visit Data
-                        let VisitData ;
-                        if (branch.visitData)
-                        {
+                        let VisitData;
+                        if (branch.visitData) {
                             VisitData = branch.visitData.find(function (value) {
                                 return transaction.visit_ID == value.visit_ID;
                             });
@@ -69,7 +93,7 @@ var cacheData = async function () {
 
 var initialize = async function () {
     try {
-        let result = await repositoriesMgr.initialize();
+        let result = await repositoriesManager.initialize();
         if (result == common.success) {
             result = await cacheData();
         }

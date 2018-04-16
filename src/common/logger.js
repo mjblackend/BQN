@@ -13,6 +13,7 @@ var logError = function(error)
             return;
         }
     });
+    console.log(str);
 };
 
 

@@ -1,18 +1,51 @@
+var logger = require("../../common/logger");
+var common = require("../../common/common");
+var enums = require("../../common/enums");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
 var visitData = require("../data/visitData");
 var TicketSeqData = require("../data/ticketSeqData");
-var repositoriesMgr = new repositoriesManager();
-var logger = require("../../common/logger");
-var common = require("../../common/common");
 const Separators = ["", " ", "-", "/", "."];
 var idGenerator = require("../localRepositories/idGenerator");
 
 //Initialize
 var initialize = async function () {
-    let result = await repositoriesMgr.initialize();
+    let result = await repositoriesManager.initialize();
     return result;
+};
+
+
+//Update Transaction
+var UpdateTransaction = function (transaction) {
+    try {
+        //Get Branch Data
+        let BracnhData = dataService.branchesData.find(function (value) {
+            return value.id == transaction.branch_ID;
+        }
+        );
+        if (BracnhData != null && BracnhData.transactionsData != null) {
+            for (let i = 0; i < BracnhData.transactionsData.length; i++) {
+                if (BracnhData.transactionsData[i].id == transaction.id) {
+                    BracnhData.transactionsData[i] = transaction;
+                    break;
+                }
+            }
+
+            //Update To data base
+            repositoriesManager.transactionRep.Update(transaction);
+            return common.success;
+        }
+        else {
+            return common.error;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+
 };
 
 //Add or Update Transaction
@@ -55,7 +88,7 @@ var AddTransaction = function (transaction) {
             }
 
             //Update To data base
-            repositoriesMgr.transactionRep.addOrUpdate(transaction);
+            repositoriesManager.transactionRep.Add(transaction);
             return common.success;
         }
         else {
@@ -115,12 +148,198 @@ var prepareDisplayTicketNumber = function (transaction, PriorityRangeMaxNo, Sepa
     }
 };
 
+var timeProirityValue = function (transaction) {
+    //Return the priority of this transaction; using priority time and priority
+    return ((new Date() - transaction.priorityTime) * transaction.priority * 1000)
+};
+
+var finishCurrentCustomer = function (OrgID, BranchID, CounterID, CurrentCustomerTransaction) {
+    try {
+        CurrentCustomerTransaction = undefined;
+        //Get Max Seq
+        let Now = new Date();
+        let Today = Now.setHours(0, 0, 0, 0);
+        //Get Branch Data
+        let BracnhData = dataService.branchesData.find(function (value) {
+            return value.id == BranchID;
+        }
+        );
+
+        let result = common.error;
+        //Get the transactions that can be served
+        if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
+
+            //Finish Serving the previous Ticket if exists
+            let Current_Counter_Data;
+            for (let i = 0; i < BracnhData.countersData.length; i++) {
+                if (BracnhData.countersData[i].id == CounterID) {
+                    Current_Counter_Data = BracnhData.countersData[i];
+                    break;
+                }
+            }
+            if (Current_Counter_Data && Current_Counter_Data.currentTransaction_ID) {
+                CurrentCustomerTransaction = BracnhData.transactionsData.find(function (transaction_Data) {
+                    return transaction_Data.id == Current_Counter_Data.currentTransaction_ID
+                }
+                );
+                Current_Counter_Data.currentTransaction_ID = undefined;
+                if (CurrentCustomerTransaction) {
+                    CurrentCustomerTransaction.state = enums.StateType.closed;
+                    CurrentCustomerTransaction.endServingTime = Now;
+                    CurrentCustomerTransaction.closeTime = Now;
+                    CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + (CurrentCustomerTransaction.arrivalTime - CurrentCustomerTransaction.startServingTime);
+                    BracnhData.transactionsData = BracnhData.transactionsData.filter(function (transaction_Data) {
+                        return transaction_Data.id != CurrentCustomerTransaction.id;
+                    }
+                    );
+                }
+            }
+            //Update the old
+            if (CurrentCustomerTransaction) {
+                UpdateTransaction(CurrentCustomerTransaction);
+            }
+        }
+
+        result = common.success;
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
+//Get Next Customer
+var getNextCustomer = function (OrgID, BranchID, CounterID, LanguageIndex, NextCustomerTransaction) {
+    try {
+
+        NextCustomerTransaction = undefined;
+        CurrentCustomerTransaction = undefined;
+        //Get Max Seq
+        let Now = new Date();
+        let Today = Now.setHours(0, 0, 0, 0);
+        //Get Branch Data
+        let BracnhData = dataService.branchesData.find(function (value) {
+            return value.id == BranchID;
+        }
+        );
+
+        //Branch Config
+        var branch = configurationService.configsCache.branches.find(function (value) {
+            return value.ID = BranchID
+        });
+
+        //Branch Counters to get the specific counter
+        var counter = branch.counters.find(function (value) {
+            return value.ID = CounterID;
+        });
+
+        var segments_IDs = [];
+        var services_IDs = [];
+        var allocated_segments = [];
+        var isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll)
+
+        //Get Allocated Segments
+        if (!isAllSegments_Allocated && branch.segmentsAllocations && branch.segmentsAllocations.length > 0) {
+            allocated_segments = branch.segmentsAllocations.filter(function (value) {
+                return value.Counter_ID == CounterID;
+            }
+            );
+        }
+
+        //Get Allocated Service
+        var allocated_services = branch.servicesAllocations.filter(function (value) {
+            return value.Counter_ID == CounterID;
+        }
+        );
+
+        //Get the transactions that can be served
+        if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
+            //Get Servable Tickets
+            let transactions = BracnhData.transactionsData.filter(function (transaction_Data) {
+                var servable = false;
+                if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
+                    let tSegment = allocated_segments.find(function (segment) {
+                        return segment.Segment_ID == transaction_Data.segment_ID;
+                    }
+                    );
+                    if (!tSegment) {
+                        return servable;
+                    }
+                }
+                if (allocated_services && allocated_services.length > 0) {
+                    let tService = allocated_services.find(function (service) {
+                        return service.Service_ID == transaction_Data.service_ID;
+                    }
+                    );
+                    if (tService) {
+                        servable = true;
+                    }
+                }
+                return servable;
+            }
+            );
+
+            //Get Ticket With max Priority
+            if (transactions && transactions.length > 0) {
+                NextCustomerTransaction = transactions[0];
+                for (let i = 0; i < transactions.length; i++) {
+                    if (timeProirityValue(NextCustomerTransaction) < timeProirityValue(transactions[i])) {
+                        NextCustomerTransaction = transactions[i];
+                    }
+                }
+
+
+                //Start Serving the ticket
+                NextCustomerTransaction.startServingTime = Now;
+                NextCustomerTransaction.state = enums.StateType.Serving;
+                NextCustomerTransaction.counter_ID = CounterID;
+                NextCustomerTransaction.serveStep = 1;
+                NextCustomerTransaction.lastOfVisit = 1;
+                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + (NextCustomerTransaction.startServingTime - NextCustomerTransaction.arrivalTime);
+
+                let found = false;
+                for (let i = 0; i < BracnhData.countersData.length; i++) {
+                    if (BracnhData.countersData[i].id == CounterID) {
+                        found = true;
+                        BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
+                        break;
+                    }
+                }
+                if (!found) {
+                    let tcounterData = new counterData();
+                    tcounterData.id = NextCustomerTransaction.counter_ID;
+                    tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
+                    BracnhData.countersData.push(tcounterData);
+                }
+            }
+        }
+
+
+        //update the new
+        if (NextCustomerTransaction) {
+            UpdateTransaction(NextCustomerTransaction);
+        }
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
 //Issue ticket
 var issueSingleTicket = function (transaction) {
     try {
         let result = common.error;
         transaction.creationTime = Date.now();
-
+        transaction.priorityTime = transaction.creationTime;
+        transaction.arrivalTime = transaction.creationTime;
+        transaction.state = enums.StateType.Pending;
         //Get Range ID
         let ticketSequence = 0;
         let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
@@ -158,8 +377,7 @@ var issueSingleTicket = function (transaction) {
             if (ticketSeqData != null && ticketSeqData.time == Today) {
                 //Update the existing Seq
                 ticketSequence = ticketSeqData.sequence + 1;
-                if (ticketSequence > PriorityRange.MaxSlipNo)
-                {
+                if (ticketSequence > PriorityRange.MaxSlipNo) {
                     ticketSequence = PriorityRange.MinSlipNo;
                 }
                 ticketSeqData.sequence = ticketSequence;
@@ -180,8 +398,7 @@ var issueSingleTicket = function (transaction) {
                         }
                         if (maxTransaction) {
                             ticketSequence = maxTransaction.ticketSequence + 1;
-                            if (ticketSequence > PriorityRange.MaxSlipNo)
-                            {
+                            if (ticketSequence > PriorityRange.MaxSlipNo) {
                                 ticketSequence = PriorityRange.MinSlipNo;
                             }
                         }
@@ -231,8 +448,8 @@ var issueSingleTicket = function (transaction) {
     }
 };
 
-
-
+module.exports.finishCurrentCustomer = finishCurrentCustomer;
+module.exports.getNextCustomer = getNextCustomer;
 module.exports.initialize = initialize;
 module.exports.issueSingleTicket = issueSingleTicket;
 

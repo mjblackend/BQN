@@ -3,6 +3,7 @@
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
 var transactionManager = require("../logic/transactionManager");
+var userActivityManager = require("../logic/userActivityManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
 var transaction = require("../data/transaction");
@@ -15,7 +16,9 @@ var initialize = async function (ticketInfo) {
         if (result == common.success) {
             result = await configurationService.initialize();
             if (result == common.success) {
-                return await dataService.initialize();
+                result = await dataService.initialize();
+                console.log("Initialized");
+                return result;
             }
         }
         return common.error;
@@ -63,7 +66,29 @@ var issueTicketMulti = function (ticketInfo) {
 
 //next customer from counter
 var counterNext = function (counterInfo) {
-    return true;
+    try {
+        let result = common.error;
+
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let CurrentCustomerTransaction;
+        let NextCustomerTransaction;
+
+        result = userActivityManager.next(OrgID, BranchID, CounterID, LanguageIndex);
+        if (result == common.success) {
+            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, LanguageIndex, CurrentCustomerTransaction);
+            if (result == common.success) {
+                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID, LanguageIndex, NextCustomerTransaction);
+            }
+        }
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
 };
 
 //Open counter without calling customer

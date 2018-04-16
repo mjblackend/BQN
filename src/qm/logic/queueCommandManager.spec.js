@@ -72,4 +72,21 @@ describe('Queuing Command Manager Test', function () {
         let result = await queueCommandManager.issueTicket(ticketInfo);
         (result === common.error).should.true();
     });
+
+
+    it('Next Customer Get for counter ID = 120', async function () {
+
+        var ticketInfo = {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.counterNext(ticketInfo);
+        (result === common.success).should.true();
+    });
+
+
+
+    
 });
