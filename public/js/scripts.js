@@ -1,11 +1,26 @@
 var count=0;
 var callsnumber=0;
+var socket;
 function PostdataMultiple(){
     var index=0;
     for (index=0;index<1000; index++)
     {
         Postdata();
     }
+}
+function LoadPage(){
+    socket = io.connect('http://localhost:3000');
+    socket.on('connect', function(data) {
+       // socket.emit('join', 'Hello World from client');
+    });
+    socket.on('broadcast', function(data) {
+        var elem = document.getElementById('ticketnumberAll');
+        elem.innerHTML =data;
+    });
+}
+
+function SendMessage(){
+socket.emit('message', 'hello to Message');
 }
 function Postdata(){
     

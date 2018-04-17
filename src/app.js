@@ -7,12 +7,15 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var app = express();
+//socket.io
+
+
 
 var queueCommandManager = require("./qm/logic/queueCommandManager");
 queueCommandManager.initialize();
 
-var app = express();
-//var __dirname = path.resolve(path.dirname(''));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -42,5 +45,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+
 
 module.exports = app;

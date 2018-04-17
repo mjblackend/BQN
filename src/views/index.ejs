@@ -3,14 +3,20 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/socket.io/socket.io.js"></script>        
     <script src="/js/scripts.js"></script>
   </head>
-  <body>
+  <body onload="myFunction()">
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
-    <button type="button" onclick="PostdataMultiple()">Submit</button>
-    <p>Last ticket number: </p> 
+    <button type="button" onclick="LoadPage()">ConnectSocket</button>
+    <button type="button" onclick="SendMessage()">SendMessage</button>
+    <button type="button" onclick="Postdata()">IssueSingleTicket</button>
+    <button type="button" onclick="PostdataMultiple()">Issue1000Tickets</button>
     <p id="calls"></p>
+    <p>Iussed ticket number: </p> 
     <h3 id='ticketnumber'>...</h3>
+    <p>Last Iussed ticket number from all: </p> 
+    <h3 id='ticketnumberAll'>...</h3>
   </body>
 </html>
