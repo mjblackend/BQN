@@ -12,12 +12,6 @@ var counterData = require("../data/counterData");
 const Separators = ["", " ", "-", "/", "."];
 
 
-//Initialize
-var initialize = async function () {
-    let result = await repositoriesManager.initialize();
-    return result;
-};
-
 
 //Update Transaction
 var UpdateTransaction = function (transaction) {
@@ -460,6 +454,5 @@ var issueSingleTicket = function (transaction) {
 
 module.exports.finishCurrentCustomer = finishCurrentCustomer;
 module.exports.getNextCustomer = getNextCustomer;
-module.exports.initialize = initialize;
 module.exports.issueSingleTicket = issueSingleTicket;
 

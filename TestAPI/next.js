@@ -44,7 +44,17 @@ request.post(options, function(error, response, body){
 	{
 		console.log(error);
 	}
-	console.log(body);
+	if (body)
+	{
+			var payload= JSON.parse(body);
+			var nextString= 'Ticket Number=' + payload.displayTicketNumber + " " + ' Counter State =' + payload.CurrentStateType;
+			console.log(nextString);
+	}
+		else{
+		console.log("error request error" + DoneRequests);
+		
+	}
+
 	DoneRequests = DoneRequests + 1;
 	if (DoneRequests == maxRequests)
 	{

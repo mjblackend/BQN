@@ -1,6 +1,6 @@
 const request = require('request');
 const http = require('http');
-var maxRequests = 1000;
+var maxRequests = 1;
 var DoneRequests = 0 ;
 var Now=  new Date();
 

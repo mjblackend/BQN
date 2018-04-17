@@ -23,6 +23,40 @@ var cacheData = async function () {
                 let branch = new branchData();
                 branch.id = BranchesConfig[i].ID;
 
+
+                //Get user activities
+                let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branch.id, "0"]);
+                if (userActivities) {
+                    branch.userActivitiesData = userActivities;
+                    if (branch.userActivitiesData) {
+                        //Set the user activities on the counter data
+                        for (let i = 0; i < branch.userActivitiesData.length; i++) {
+
+                            let UserActivity = branch.userActivitiesData[i];
+                            let tcounterData = new counterData();
+                            tcounterData.id = UserActivity.counter_ID;
+                            tcounterData.currentState_ID = UserActivity.id;
+                            if (tcounterData.id > 0) {
+                                let found = false;
+                                for (let i = 0; i < branch.countersData.length; i++) {
+                                    if (branch.countersData[i].id == UserActivity.counter_ID) {
+                                        found = true;
+                                        branch.countersData[i].currentState_ID = UserActivity.id;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    let tcounterData = new counterData();
+                                    tcounterData.id = UserActivity.counter_ID;
+                                    tcounterData.currentState_ID = UserActivity.id;
+                                    branch.countersData.push(tcounterData);
+                                }
+                            }
+                        }
+                    }
+                }
+
+
                 //Get only the transactions for the day
                 let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
                 let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branch.id, States]);

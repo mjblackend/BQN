@@ -65,8 +65,8 @@ var transactionRep = function (db) {
 
 
         this.getAll = async function () {
+            let that = this.db;
             try {
-                let that = this.db;
                 let sql = "SELECT * FROM transactions";
                 let transactions = await that.all(sql);
                 return transactions;
@@ -80,10 +80,11 @@ var transactionRep = function (db) {
 
 
         this.getFilterBy = async function (filterKeys, filterValues) {
+            let that = this.db;
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
                     let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
-                    let that = this.db;
+
                     let sql = "SELECT * FROM transactions where " + filter;
                     let transactions = await that.all(sql);
                     return transactions;
@@ -100,9 +101,10 @@ var transactionRep = function (db) {
 
         this.delete = async function (transaction) {
             try {
+                let that = this.db;
                 if (transaction) {
                     //Do the Query
-                    let that = this.db;
+
                     let sql = " delete from transactions where id = " + transaction.id;
                     let isSuccess = await that.run(sql);
                     if (isSuccess) {
@@ -126,8 +128,8 @@ var transactionRep = function (db) {
 
         this.Update = async function (transaction) {
             try {
+                let that = this.db;
                 if (transaction) {
-                    let that = this.db;
                     //Prepare the values array
                     let values = GetValuesFromObject(transaction);
 
@@ -155,8 +157,8 @@ var transactionRep = function (db) {
 
         this.Add = async function (transaction) {
             try {
+                let that = this.db;
                 if (transaction) {
-                    let that = this.db;
                     //Prepare the values array
                     let values = GetValuesFromObject(transaction);
 

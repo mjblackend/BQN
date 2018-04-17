@@ -5,7 +5,7 @@ var logger = require("../../common/logger");
 var transactionRep = require("./transactionRep");
 var userActivitiesRep = require("./userActivitiesRep");
 var idGenerator = require("./idGenerator");
-
+var initialized = false;
 "use strict";
 
 //Initialize DB connection
@@ -14,11 +14,15 @@ var idGenerator = require("./idGenerator");
 var initialize = async function () {
     try {
 
+        if (initialized) {
+            return common.success;
+        }
+
         let result = false;
 
         // open the database
         //Run the upgrade script
-        result = await sqlite3.open("./db/queuing.db");
+        result = await sqlite3.open(common.dbConnection);
 
         //Run the initialize script
         let sql = fs.readFileSync("init_database.sql").toString();
@@ -40,8 +44,7 @@ var initialize = async function () {
         this.userActivitiesRep = new userActivitiesRep(sqlite3);
 
 
-        // close the database connection
-        //db.close();
+        initialized = true;
         return common.success;
     }
     catch (error) {

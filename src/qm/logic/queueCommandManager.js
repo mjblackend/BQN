@@ -10,19 +10,16 @@ var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 
 
+
 //Initialize everything
 var initialize = async function (ticketInfo) {
     try {
-        let result = await transactionManager.initialize();
+        let result = await configurationService.initialize();
         if (result == common.success) {
-            result = await configurationService.initialize();
-            if (result == common.success) {
-                result = await dataService.initialize();
-                console.log("Initialized");
-                return result;
-            }
+            result = await dataService.initialize();
+            console.log("Initialized");
+            return result;
         }
-        return common.error;
     }
     catch (error) {
         logger.logError(error);
@@ -75,19 +72,25 @@ var counterNext = function (counterInfo) {
         let CounterID = counterInfo["counterid"];
         let LanguageIndex = counterInfo["languageindex"];
         let args = [];
-        result = userActivityManager.next(OrgID, BranchID, CounterID);
+        let CurrentStateType = [];
+        result = userActivityManager.CheckCounterValidationForNext(OrgID, BranchID, CounterID);
         if (result == common.success) {
             result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID,  args);
             if (result == common.success) {
                 args = [];
                 result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID,  args);
                 if (result == common.success) {
-                    if (args) {
-                        counterInfo.displayTicketNumber = args[args.length - 1].displayTicketNumber;
-                    }
-                    else
-                    {
-                        counterInfo.displayTicketNumber = "...";
+                    result = userActivityManager.ChangeCurrentCounterState(OrgID, BranchID, CounterID,CurrentStateType)
+                    if (result == common.success) {
+                       if (args) {
+                            counterInfo.displayTicketNumber = args[args.length - 1].displayTicketNumber;
+                            counterInfo.CurrentStateType =  CurrentStateType[0];
+                        }
+                        else
+                        {
+                            counterInfo.displayTicketNumber = "...";
+                            counterInfo.CurrentStateType = CurrentStateType;
+                        }
                     }
                 }
             }

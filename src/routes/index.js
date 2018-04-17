@@ -10,9 +10,10 @@ router.post('/processCommand', function (req, res, next) {
   try {
     let apiMessage = req.body;
     queueCommandManager.processCommand(apiMessage);
-    console.log('Ticket Number=' + apiMessage.payload.displayTicketNumber);
+    let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType
+    console.log(tbody)
     res.body=apiMessage;
-    res.end('Ticket Number=' + apiMessage.payload.displayTicketNumber);
+    res.end(JSON.stringify(apiMessage.payload));
   }
   catch (error) {
     logger.log(error);

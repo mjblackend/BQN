@@ -1,6 +1,6 @@
 const request = require('request');
 const http = require('http');
-var maxRequests = 1000;
+var maxRequests = 1;
 var DoneRequests = 0 ;
 var Now=  new Date();
 
@@ -14,13 +14,13 @@ class apiMessage {
     }
 }
 
+
 //Moch Data
 var tapiMessage = new apiMessage;
-tapiMessage.title = "issueTicket";
+tapiMessage.title = "next";
 tapiMessage.payload = {
   orgid: "1",
-  segmentid: "325",
-  serviceid: "364",
+  counterid: "120",
   branchid: "106",
   languageindex: "0",
   origin: "0"
@@ -47,14 +47,14 @@ request.post(options, function(error, response, body){
 	if (body)
 	{
 			var payload= JSON.parse(body);
-			var nextString= 'Ticket Number=' + payload.displayTicketNumber;
+			var nextString= 'Ticket Number=' + payload.displayTicketNumber + " " + ' Counter State =' + payload.CurrentStateType;
 			console.log(nextString);
 	}
-	else{
+		else{
 		console.log("error request error" + DoneRequests);
 		
 	}
-	
+
 	DoneRequests = DoneRequests + 1;
 	if (DoneRequests == maxRequests)
 	{
