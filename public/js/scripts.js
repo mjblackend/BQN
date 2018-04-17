@@ -9,7 +9,7 @@ function PostdataMultiple(){
     }
 }
 function LoadPage(){
-    socket = io.connect('http://localhost:3000');
+    socket = io.connect('https://bnq.herokuapp.com');
     socket.on('connect', function(data) {
        // socket.emit('join', 'Hello World from client');
     });
