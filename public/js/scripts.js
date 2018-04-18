@@ -24,6 +24,14 @@ function IssueTicketMultiple(number){
     }
 }
 
+function nextMultiple(number){
+    var index=0;
+    for (index=0;index<number; index++)
+    {
+        Next();
+    }
+}
+
 function Next(){
     
     var Message ={
