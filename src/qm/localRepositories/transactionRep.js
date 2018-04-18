@@ -8,7 +8,8 @@ var idGenerator = require("./idGenerator");
 var transactioninst = new transaction();
 var attributes = Object.getOwnPropertyNames(transactioninst);
 var attributesStr = attributes.join(",");
-
+var updateTransactions = [];
+var addTransactions = [];
 
 //Prepare Values for insert or update
 var GetValuesFromObject = function (transaction) {
@@ -37,13 +38,13 @@ var GetFilterColumnsFromObject = function (filterKeys, filterValues) {
         for (let i = 0; i < filterKeys.length; i++) {
             if (Array.isArray(filterValues[i])) {
                 let values = filterValues[i].join(",");
-                filter = filter + filterKeys[i] + " in ("  +  values + ") ";
+                filter = filter + filterKeys[i] + " in (" + values + ") ";
                 if (i != (filterKeys.length - 1)) {
                     filter = filter + " and ";
                 }
             }
             else {
-                filter = filter + filterKeys[i] + " = " + filterValues[i] ;
+                filter = filter + filterKeys[i] + " = " + filterValues[i];
                 if (i != (filterKeys.length - 1)) {
                     filter = filter + " and ";
                 }
@@ -185,6 +186,48 @@ var transactionRep = function (db) {
         };
 
 
+
+        this.UpdateSynch = function (transaction) {
+            try {
+                updateTransactions.push(transaction);
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+        this.AddSynch = function (transaction) {
+            try {
+                addTransactions.push(transaction);
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+        this.commit = async function () {
+            try {
+                let count = addTransactions.length;
+                while (count > 0) {
+                    let transaction = addTransactions.shift();
+                    await this.Add(transaction)
+                    count = count - 1;
+                }
+                count = updateTransactions.length;
+                while (count > 0) {
+                    let transaction = updateTransactions.shift();
+                    await this.Update(transaction)
+                    count = count - 1;
+                }
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
 
 
     }

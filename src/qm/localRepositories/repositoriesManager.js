@@ -52,9 +52,19 @@ var initialize = async function () {
         return common.error;
     }
 };
+var commit = async function () {
+    try {
+        await this.transactionRep.commit();
+        await this.userActivitiesRep.commit();
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
 
 
-
+module.exports.commit = commit;
 module.exports.transactionRep = transactionRep;
 module.exports.userActivitiesRep = userActivitiesRep;
 module.exports.initialize = initialize;

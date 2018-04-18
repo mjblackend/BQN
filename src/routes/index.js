@@ -6,10 +6,10 @@ var notificationHub=require('../notificationHub');
 
 /* GET home page. */
 /*eslint-disable no-unused-vars*/
-router.post('/processCommand', function (req, res, next) {
+router.post('/processCommand', async function (req, res, next) {
   try {
     let apiMessage = req.body;
-    queueCommandManager.processCommand(apiMessage);
+    await queueCommandManager.processCommand(apiMessage);
     let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType + " " + ' ErrorMessage=' +  apiMessage.payload.errorMessage;
     console.log(tbody);
     notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.displayTicketNumber);

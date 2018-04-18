@@ -26,7 +26,7 @@ var UpdateActivity = function (userActivity) {
             }
 
             //Update To data base
-            repositoriesManager.userActivitiesRep.Update(userActivity);
+            repositoriesManager.userActivitiesRep.UpdateSynch(userActivity);
             return common.success;
         }
         else {
@@ -59,7 +59,7 @@ var AddActivity = function (userActivity) {
             BracnhData.userActivitiesData.push(userActivity);
 
             //Update To data base
-            repositoriesManager.userActivitiesRep.Add(userActivity);
+            repositoriesManager.userActivitiesRep.AddSynch(userActivity);
             return common.success;
         }
         else {

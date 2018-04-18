@@ -30,7 +30,7 @@ var UpdateTransaction = function (transaction) {
             }
 
             //Update To data base
-            repositoriesManager.transactionRep.Update(transaction);
+            repositoriesManager.transactionRep.UpdateSynch(transaction);
             return common.success;
         }
         else {
@@ -85,7 +85,7 @@ var AddTransaction = function (transaction) {
             }
 
             //Update To data base
-            repositoriesManager.transactionRep.Add(transaction);
+            repositoriesManager.transactionRep.AddSynch(transaction);
             return common.success;
         }
         else {

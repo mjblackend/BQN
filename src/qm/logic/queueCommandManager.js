@@ -8,7 +8,7 @@ var logger = require("../../common/logger");
 var common = require("../../common/common");
 var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
-
+var repositoriesManager = require("../localRepositories/repositoriesManager");
 
 
 //Initialize everything
@@ -30,7 +30,7 @@ var initialize = async function (ticketInfo) {
 
 //only functions and reference of branch data and configuration service.
 //Issue Ticket 
-var issueTicket = function (ticketInfo) {
+var issueTicket = async function (ticketInfo) {
     try {
         let result;
         let BranchID = ticketInfo["branchid"];
@@ -48,6 +48,7 @@ var issueTicket = function (ticketInfo) {
 
         result = transactionManager.issueSingleTicket(transactioninst);
         ticketInfo.displayTicketNumber = transactioninst.displayTicketNumber;
+        await repositoriesManager.commit();
         //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
         ticketInfo.result = result;
         return result;
@@ -64,7 +65,7 @@ var issueTicketMulti = function (ticketInfo) {
 };
 
 //break customer from counter
-var counterBreak = function (counterInfo) {
+var counterBreak = async function (counterInfo) {
     try {
         let result = common.error;
 
@@ -100,6 +101,8 @@ var counterBreak = function (counterInfo) {
         if (counterInfo.result == common.not_valid) {
             counterInfo.errorMessage = "is in invalid state to take a break";
         }
+
+        await repositoriesManager.commit();
         return result;
     }
     catch (error) {
@@ -110,7 +113,7 @@ var counterBreak = function (counterInfo) {
 
 
 //Take break on counter
-var counterNext = function (counterInfo) {
+var counterNext = async function (counterInfo) {
     try {
         let result = common.error;
 
@@ -154,6 +157,7 @@ var counterNext = function (counterInfo) {
         if (counterInfo.result == common.not_valid) {
             counterInfo.errorMessage = "is in invalid state to take do next";
         }
+        await repositoriesManager.commit();
         return result;
     }
     catch (error) {
@@ -163,7 +167,7 @@ var counterNext = function (counterInfo) {
 };
 
 //Open counter without calling customer
-var counterOpen = function (counterInfo) {
+var counterOpen = async function (counterInfo) {
     try {
         let result = common.error;
 
@@ -194,6 +198,8 @@ var counterOpen = function (counterInfo) {
         if (counterInfo.result == common.not_valid) {
             counterInfo.errorMessage = "is in invalid state to take a break";
         }
+
+        await repositoriesManager.commit();
         return result;
     }
     catch (error) {
@@ -290,22 +296,22 @@ var counterDeassignFromBMS = function (appointmentInfo) {
 };
 
 //Deassign Counter from BMS
-var processCommand = function (apiMessage) {
+var processCommand = async function (apiMessage) {
     try {
         let result = common.error;
         if (apiMessage) {
             switch (apiMessage.title) {
                 case enums.commands.IssueTicket:
-                    result = this.issueTicket(apiMessage.payload);
+                    result = await this.issueTicket(apiMessage.payload);
                     break;
                 case enums.commands.Next:
-                    result = this.counterNext(apiMessage.payload);
+                    result = await this.counterNext(apiMessage.payload);
                     break;
                 case enums.commands.Break:
-                    result = this.counterBreak(apiMessage.payload);
+                    result = await this.counterBreak(apiMessage.payload);
                     break;
                 case enums.commands.Open:
-                    result = this.counterOpen(apiMessage.payload);
+                    result = await this.counterOpen(apiMessage.payload);
                     break;
                 default:
                     result = common.error;

@@ -11,6 +11,9 @@ var t_UserActivity = new userActivity();
 var attributes = Object.getOwnPropertyNames(t_UserActivity);
 var attributesStr = attributes.join(",");
 
+var updateActivity = [];
+var addActivity = [];
+
 //Prepare Values for insert or update
 var GetValuesFromObject = function (activity) {
     try {
@@ -181,6 +184,49 @@ var userActivitiesRep = function (db) {
                 return common.error;
             }
         };
+        
+        this.UpdateSynch = function (userActivity) {
+            try {
+                updateActivity.push(userActivity);
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+        this.AddSynch = function (userActivity) {
+            try {
+                addActivity.push(userActivity);
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+        this.commit = async function () {
+            try {
+                let count = addActivity.length;
+                while (count > 0) {
+                    let activity = addActivity.shift();
+                    await this.Add(activity)
+                    count = count - 1;
+                }
+                count = updateActivity.length;
+                while (count > 0) {
+                    let activity = updateActivity.shift();
+                    await this.Update(activity)
+                    count = count - 1;
+                }
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+
 
     }
     catch (error) {
