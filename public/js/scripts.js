@@ -58,11 +58,14 @@ function Next(){
             var elem = document.getElementById('servedticketnumber');
             elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
 
-            var elem = document.getElementById('ticketnumberCalled');
+            elem = document.getElementById('ticketnumberCalled');
             elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
 
-            var elem = document.getElementById('counterState');
+            elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
+
+            elem = document.getElementById('errorMessage');
+            elem.innerHTML =JSON.parse(this.responseText).errorMessage;
             
          };
       xhr.send(JSON.stringify(Message));
@@ -97,12 +100,16 @@ function COpen(){
             var elem = document.getElementById('servedticketnumber');
             elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
 
-            var elem = document.getElementById('ticketnumberCalled');
+            elem = document.getElementById('ticketnumberCalled');
             elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
 
-            var elem = document.getElementById('counterState');
+            elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
+
+            elem = document.getElementById('errorMessage');
+            elem.innerHTML =JSON.parse(this.responseText).errorMessage;
             
+
          };
       xhr.send(JSON.stringify(Message));
          
@@ -135,12 +142,15 @@ function CBreak(){
             var elem = document.getElementById('servedticketnumber');
             elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
 
-            var elem = document.getElementById('ticketnumberCalled');
+            elem = document.getElementById('ticketnumberCalled');
             elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
 
-            var elem = document.getElementById('counterState');
+            elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
-            
+
+            elem = document.getElementById('errorMessage');
+            elem.innerHTML =JSON.parse(this.responseText).errorMessage;
+           
          };
       xhr.send(JSON.stringify(Message));
          
@@ -175,6 +185,9 @@ function IssueTicket(){
         console.log(this.responseText);
         var elem = document.getElementById('ticketnumber');
         elem.innerHTML =JSON.parse(this.responseText).displayTicketNumber;
+
+        elem = document.getElementById('errorMessage');
+        elem.innerHTML =JSON.parse(this.responseText).errorMessage;
 
         if (count<1000)
         {
