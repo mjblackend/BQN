@@ -55,8 +55,11 @@ function Next(){
             count+=1;
             console.log(this.responseText);
             
+            var elem = document.getElementById('servedticketnumber');
+            elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
+
             var elem = document.getElementById('ticketnumberCalled');
-            elem.innerHTML =JSON.parse(this.responseText).displayTicketNumber;
+            elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
 
             var elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
@@ -91,6 +94,12 @@ function COpen(){
             count+=1;
             console.log(this.responseText);
             
+            var elem = document.getElementById('servedticketnumber');
+            elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
+
+            var elem = document.getElementById('ticketnumberCalled');
+            elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
+
             var elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
             
@@ -123,6 +132,12 @@ function CBreak(){
             count+=1;
             console.log(this.responseText);
             
+            var elem = document.getElementById('servedticketnumber');
+            elem.innerHTML =JSON.parse(this.responseText).ServedDisplayTicketNumber;
+
+            var elem = document.getElementById('ticketnumberCalled');
+            elem.innerHTML =JSON.parse(this.responseText).CurrentDisplayTicketNumber;
+
             var elem = document.getElementById('counterState');
             elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
             
@@ -160,6 +175,7 @@ function IssueTicket(){
         console.log(this.responseText);
         var elem = document.getElementById('ticketnumber');
         elem.innerHTML =JSON.parse(this.responseText).displayTicketNumber;
+
         if (count<1000)
         {
            // Postdata();

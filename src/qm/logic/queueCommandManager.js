@@ -84,11 +84,13 @@ var counterBreak = function (counterInfo) {
                 result = userActivityManager.ChangeCurrentCounterStateForBreak(OrgID, BranchID, CounterID, CurrentStateType);
                 if (result == common.success) {
                     if (FinishedTransaction) {
-                        counterInfo.displayTicketNumber = "...";
+                        counterInfo.ServedDisplayTicketNumber = FinishedTransaction[FinishedTransaction.length - 1].displayTicketNumber;
+                        counterInfo.CurrentDisplayTicketNumber = "...";
                         counterInfo.CurrentStateType = CurrentStateType[0];
                     }
                     else {
-                        counterInfo.displayTicketNumber = "...";
+                        counterInfo.ServedDisplayTicketNumber = "...";
+                        counterInfo.CurrentDisplayTicketNumber = "...";
                         counterInfo.CurrentStateType = CurrentStateType[0];
                     }
                 }
@@ -118,12 +120,17 @@ var counterNext = function (counterInfo) {
         let LanguageIndex = counterInfo["languageindex"];
         let Transactions = [];
         let CurrentStateType = [];
+        counterInfo.ServedDisplayTicketNumber = "...";
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(OrgID, BranchID, CounterID);
         if (result == common.success) {
             //Finish serving the current customer
             result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, Transactions);
             if (result == common.success) {
+                if (Transactions)
+                {
+                    counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                }
                 Transactions = [];
                 //Get next customer
                 result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID, Transactions);
@@ -132,11 +139,11 @@ var counterNext = function (counterInfo) {
                     result = userActivityManager.ChangeCurrentCounterStateForNext(OrgID, BranchID, CounterID, CurrentStateType);
                     if (result == common.success) {
                         if (Transactions) {
-                            counterInfo.displayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                            counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
                             counterInfo.CurrentStateType = CurrentStateType[0];
                         }
                         else {
-                            counterInfo.displayTicketNumber = "...";
+                            counterInfo.CurrentDisplayTicketNumber = "...";
                             counterInfo.CurrentStateType = CurrentStateType;
                         }
                     }
@@ -173,11 +180,12 @@ var counterOpen = function (counterInfo) {
             result = userActivityManager.ChangeCurrentCounterStateForOpen(OrgID, BranchID, CounterID, CurrentStateType);
             if (result == common.success) {
                 if (FinishedTransaction) {
-                    counterInfo.displayTicketNumber = "...";
+                    counterInfo.CurrentDisplayTicketNumber = "...";
+                    counterInfo.ServedDisplayTicketNumber = "...";
                     counterInfo.CurrentStateType = CurrentStateType[0];
                 }
                 else {
-                    counterInfo.displayTicketNumber = "...";
+                    counterInfo.CurrentDisplayTicketNumber = "...";
                     counterInfo.CurrentStateType = CurrentStateType[0];
                 }
             }
