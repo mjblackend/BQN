@@ -57,6 +57,9 @@ function Next(){
             
             var elem = document.getElementById('ticketnumberCalled');
             elem.innerHTML =JSON.parse(this.responseText).displayTicketNumber;
+
+            var elem = document.getElementById('counterState');
+            elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
             
          };
       xhr.send(JSON.stringify(Message));
@@ -65,6 +68,70 @@ function Next(){
 
 }
 
+function COpen(){
+    
+    var Message ={
+        time: new Date(),
+        title: 'open',
+        payload : {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0",
+            origin: "0"
+        }
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/processCommand', true);
+        xhr.setRequestHeader('Content-type', 'application/json')
+         
+        xhr.onload = function () {
+            // do something to response
+            count+=1;
+            console.log(this.responseText);
+            
+            var elem = document.getElementById('counterState');
+            elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
+            
+         };
+      xhr.send(JSON.stringify(Message));
+         
+
+
+}
+function CBreak(){
+    
+    var Message ={
+        time: new Date(),
+        title: 'break',
+        payload : {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0",
+            origin: "0"
+        }
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/processCommand', true);
+        xhr.setRequestHeader('Content-type', 'application/json')
+         
+        xhr.onload = function () {
+            // do something to response
+            count+=1;
+            console.log(this.responseText);
+            
+            var elem = document.getElementById('counterState');
+            elem.innerHTML =JSON.parse(this.responseText).CurrentStateType;
+            
+         };
+      xhr.send(JSON.stringify(Message));
+         
+
+
+}
 
 function IssueTicket(){
     
