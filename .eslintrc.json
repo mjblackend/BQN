@@ -14,7 +14,7 @@
         "ecmaVersion": 2017
     },
     "rules": {
-        "complexity": [2, 15],
+        "complexity": [2, 20],
         "no-console": 1,
         "indent": [
             "off",
