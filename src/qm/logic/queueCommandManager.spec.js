@@ -86,7 +86,53 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+    it('Counter Take Break for counter ID = 120 successfully', async function () {
+
+        var ticketInfo = {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.counterBreak(ticketInfo);
+        (result === common.success).should.true();
+    });
+
+    it('Counter Take Break for counter ID = 120 will failed because the counter is already in break', async function () {
+
+        var ticketInfo = {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.counterBreak(ticketInfo);
+        (result === common.not_valid).should.true();
+    });
+
+    it('Counter open from break for counter ID = 120 successfully', async function () {
+
+        var ticketInfo = {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.counterOpen(ticketInfo);
+        (result === common.success).should.true();
+    });
 
 
-    
+    it('Counter Take Break for counter ID = 120 successfully', async function () {
+
+        var ticketInfo = {
+            orgid: "1",
+            counterid: "120",
+            branchid: "106",
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.counterBreak(ticketInfo);
+        (result === common.success).should.true();
+    });
+
 });

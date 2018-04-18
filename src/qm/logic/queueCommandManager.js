@@ -49,6 +49,7 @@ var issueTicket = function (ticketInfo) {
         result = transactionManager.issueSingleTicket(transactioninst);
         ticketInfo.displayTicketNumber = transactioninst.displayTicketNumber;
         //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
+        ticketInfo.result = result;
         return result;
     }
     catch (error) {
@@ -62,7 +63,51 @@ var issueTicketMulti = function (ticketInfo) {
     return true;
 };
 
-//next customer from counter
+//break customer from counter
+var counterBreak = function (counterInfo) {
+    try {
+        let result = common.error;
+
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let FinishedTransaction = [];
+        let CurrentStateType = [];
+        //Check Current State if allow break
+        result = userActivityManager.CounterValidationForBreak(OrgID, BranchID, CounterID);
+        if (result == common.success) {
+            //Finish serving the current customer
+            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, FinishedTransaction);
+            if (result == common.success) {
+                //set the state to break
+                result = userActivityManager.ChangeCurrentCounterStateForBreak(OrgID, BranchID, CounterID, CurrentStateType);
+                if (result == common.success) {
+                    if (FinishedTransaction) {
+                        counterInfo.displayTicketNumber = "...";
+                        counterInfo.CurrentStateType = CurrentStateType[0];
+                    }
+                    else {
+                        counterInfo.displayTicketNumber = "...";
+                        counterInfo.CurrentStateType = CurrentStateType[0];
+                    }
+                }
+            }
+        }
+        counterInfo.result = result;
+        if (counterInfo.result == common.not_valid) {
+            counterInfo.errorMessage = "is in invalid state to take a break";
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+//Take break on counter
 var counterNext = function (counterInfo) {
     try {
         let result = common.error;
@@ -71,23 +116,26 @@ var counterNext = function (counterInfo) {
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
         let LanguageIndex = counterInfo["languageindex"];
-        let args = [];
+        let Transactions = [];
         let CurrentStateType = [];
-        result = userActivityManager.CheckCounterValidationForNext(OrgID, BranchID, CounterID);
+        //Check Current State if allow next
+        result = userActivityManager.CounterValidationForNext(OrgID, BranchID, CounterID);
         if (result == common.success) {
-            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID,  args);
+            //Finish serving the current customer
+            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, Transactions);
             if (result == common.success) {
-                args = [];
-                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID,  args);
+                Transactions = [];
+                //Get next customer
+                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID, Transactions);
                 if (result == common.success) {
-                    result = userActivityManager.ChangeCurrentCounterState(OrgID, BranchID, CounterID,CurrentStateType)
+                    //set the state to ready or serving
+                    result = userActivityManager.ChangeCurrentCounterStateForNext(OrgID, BranchID, CounterID, CurrentStateType);
                     if (result == common.success) {
-                       if (args) {
-                            counterInfo.displayTicketNumber = args[args.length - 1].displayTicketNumber;
-                            counterInfo.CurrentStateType =  CurrentStateType[0];
+                        if (Transactions) {
+                            counterInfo.displayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                            counterInfo.CurrentStateType = CurrentStateType[0];
                         }
-                        else
-                        {
+                        else {
                             counterInfo.displayTicketNumber = "...";
                             counterInfo.CurrentStateType = CurrentStateType;
                         }
@@ -95,7 +143,11 @@ var counterNext = function (counterInfo) {
                 }
             }
         }
-        return common.success;
+        counterInfo.result = result;
+        if (counterInfo.result == common.not_valid) {
+            counterInfo.errorMessage = "is in invalid state to take do next";
+        }
+        return result;
     }
     catch (error) {
         logger.logError(error);
@@ -105,13 +157,43 @@ var counterNext = function (counterInfo) {
 
 //Open counter without calling customer
 var counterOpen = function (counterInfo) {
-    return true;
+    try {
+        let result = common.error;
+
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let FinishedTransaction = [];
+        let CurrentStateType = [];
+        //Check Current State if allow break
+        result = userActivityManager.CounterValidationForOpen(OrgID, BranchID, CounterID);
+        if (result == common.success) {
+            //set the state to Open
+            result = userActivityManager.ChangeCurrentCounterStateForOpen(OrgID, BranchID, CounterID, CurrentStateType);
+            if (result == common.success) {
+                if (FinishedTransaction) {
+                    counterInfo.displayTicketNumber = "...";
+                    counterInfo.CurrentStateType = CurrentStateType[0];
+                }
+                else {
+                    counterInfo.displayTicketNumber = "...";
+                    counterInfo.CurrentStateType = CurrentStateType[0];
+                }
+            }
+        }
+        counterInfo.result = result;
+        if (counterInfo.result == common.not_valid) {
+            counterInfo.errorMessage = "is in invalid state to take a break";
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
 };
 
-//Take break on counter
-var counterBreak = function (counterInfo) {
-    return true;
-};
 
 //Transfer ticket to counter
 var counterTransferToCounter = function (TransferInfo) {
@@ -210,6 +292,12 @@ var processCommand = function (apiMessage) {
                     break;
                 case enums.commands.Next:
                     result = this.counterNext(apiMessage.payload);
+                    break;
+                case enums.commands.Break:
+                    result = this.counterBreak(apiMessage.payload);
+                    break;
+                case enums.commands.Open:
+                    result = this.counterOpen(apiMessage.payload);
                     break;
                 default:
                     result = common.error;

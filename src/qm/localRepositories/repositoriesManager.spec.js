@@ -64,7 +64,7 @@ describe('Test User Activity Repo', function () {
     it('Create New Activity successfully', async function () {
         let userActivityinst = new userActivity();
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.addOrUpdate(userActivityinst);
+        let result = await repositoriesManager.userActivitiesRep.Add(userActivityinst);
         (result == common.success).should.true();
     });
 
@@ -72,7 +72,7 @@ describe('Test User Activity Repo', function () {
         let userActivityinst = new userActivity();
         userActivityinst.id = 5;
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.addOrUpdate(userActivityinst);
+        let result = await repositoriesManager.userActivitiesRep.Update(userActivityinst);
         (result == common.success).should.true();
     });
     it('Get Activity by ID, ID = 5 successfully', async function () {
@@ -83,7 +83,7 @@ describe('Test User Activity Repo', function () {
         let userActivityinst = new userActivity();
         userActivityinst.id = 6;
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.addOrUpdate(userActivityinst);
+        let result = await repositoriesManager.userActivitiesRep.Update(userActivityinst);
         if (result == common.success) {
             result = await repositoriesManager.userActivitiesRep.delete(userActivityinst);
             (result == common.success).should.true();

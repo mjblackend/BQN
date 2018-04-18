@@ -150,7 +150,7 @@ var timeProirityValue = function (transaction) {
     return ((new Date() - transaction.priorityTime) * transaction.priority * 1000);
 };
 
-var finishCurrentCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
+var finishCurrentCustomer = function (OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
 
         let CurrentCustomerTransaction = new transaction();
@@ -202,7 +202,7 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
             //Update the old
             if (CurrentCustomerTransaction) {
                 UpdateTransaction(CurrentCustomerTransaction);
-                resultArgs.push(CurrentCustomerTransaction);
+                FinishedTransaction.push(CurrentCustomerTransaction);
             }
         }
 

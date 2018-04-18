@@ -32,7 +32,9 @@ const SegmentAllocationType = {
 
 const commands = {
     IssueTicket: "issueTicket",
-    Next: "next"
+    Next: "next",
+    Break: "break",
+    Open: "open"
 };
 
 
