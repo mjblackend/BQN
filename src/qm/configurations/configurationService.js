@@ -83,6 +83,9 @@ var populateEntities = async function () {
             }
         }
 
+
+        //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
+
         return common.success;
     }
     catch (error) {
