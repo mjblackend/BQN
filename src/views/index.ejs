@@ -6,17 +6,20 @@
     <script src="/socket.io/socket.io.js"></script>        
     <script src="/js/scripts.js"></script>
   </head>
-  <body onload="myFunction()">
+  <body onload="LoadPage()">
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
-    <button type="button" onclick="LoadPage()">ConnectSocket</button>
-    <button type="button" onclick="SendMessage()">SendMessage</button>
-    <button type="button" onclick="Postdata()">IssueSingleTicket</button>
-    <button type="button" onclick="PostdataMultiple()">Issue1000Tickets</button>
-    <p id="calls"></p>
-    <p>Iussed ticket number: </p> 
-    <h3 id='ticketnumber'>...</h3>
-    <p>Last Iussed ticket number from all: </p> 
-    <h3 id='ticketnumberAll'>...</h3>
+    <button type="button" onclick="IssueTicket()">IssueSingleTicket</button>
+    <button type="button" onclick="IssueTicketMultiple(1000)">Issue1000Tickets</button>
+    <button type="button" onclick="Next()" style="display: inline;">Next</button>
+    <p id="calls">...</p>
+    <h3 style="display: inline;">Iussed ticket number: </h3> 
+    <p id='ticketnumber' style="display: inline;">...</p>
+    <div></div>
+    <h3 style="display: inline;">Called number: </h3> 
+    <p id='ticketnumberCalled' style="display: inline;">...</p>
+    <div></div>
+    <h3 style="display: inline;">Last Iussed/Called ticket number from all: </h3> 
+    <p id='ticketnumberAll' style="display: inline;">...</p>
   </body>
 </html>
