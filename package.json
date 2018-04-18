@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "lint": "esw *.js src",
     "lint:watch": "npm run lint -- --watch",
-    "test": "mocha -R spec --recursive ./src"
+    "test": "mocha -R spec --recursive src/qm/logic/queueCommandManager.spec.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
