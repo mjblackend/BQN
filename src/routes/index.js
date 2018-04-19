@@ -12,7 +12,15 @@ router.post('/processCommand', async function (req, res, next) {
     await queueCommandManager.processCommand(apiMessage);
     let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType + " " + ' ErrorMessage=' +  apiMessage.payload.errorMessage;
     console.log(tbody);
-    notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.displayTicketNumber);
+    if(apiMessage.payload.displayTicketNumber)
+    {
+      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.displayTicketNumber);
+    }
+    else
+    {
+      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.CurrentDisplayTicketNumber);
+    }
+    
     res.body=apiMessage;
     res.end(JSON.stringify(apiMessage.payload));
   }
