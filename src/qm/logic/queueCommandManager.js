@@ -84,7 +84,7 @@ var counterBreak = async function (counterInfo) {
                 //set the state to break
                 result = userActivityManager.ChangeCurrentCounterStateForBreak(OrgID, BranchID, CounterID, CurrentStateType);
                 if (result == common.success) {
-                    if (FinishedTransaction) {
+                    if (FinishedTransaction && FinishedTransaction.length > 0 ) {
                         counterInfo.ServedDisplayTicketNumber = FinishedTransaction[FinishedTransaction.length - 1].displayTicketNumber;
                         counterInfo.CurrentDisplayTicketNumber = "...";
                         counterInfo.CurrentStateType = CurrentStateType[0];
@@ -130,7 +130,7 @@ var counterNext = async function (counterInfo) {
             //Finish serving the current customer
             result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, Transactions);
             if (result == common.success) {
-                if (Transactions)
+                if (Transactions && Transactions.length > 0)
                 {
                     counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
                 }
@@ -141,7 +141,7 @@ var counterNext = async function (counterInfo) {
                     //set the state to ready or serving
                     result = userActivityManager.ChangeCurrentCounterStateForNext(OrgID, BranchID, CounterID, CurrentStateType);
                     if (result == common.success) {
-                        if (Transactions) {
+                        if (Transactions && Transactions.length > 0) {
                             counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
                             counterInfo.CurrentStateType = CurrentStateType[0];
                         }
@@ -183,7 +183,7 @@ var counterOpen = async function (counterInfo) {
             //set the state to Open
             result = userActivityManager.ChangeCurrentCounterStateForOpen(OrgID, BranchID, CounterID, CurrentStateType);
             if (result == common.success) {
-                if (FinishedTransaction) {
+                if (FinishedTransaction && FinishedTransaction.length > 0) {
                     counterInfo.CurrentDisplayTicketNumber = "...";
                     counterInfo.ServedDisplayTicketNumber = "...";
                     counterInfo.CurrentStateType = CurrentStateType[0];

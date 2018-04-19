@@ -138,7 +138,7 @@ var transactionRep = function (db) {
                     let sql = " insert or replace into transactions (" + attributesStr + ") values (" + values + ")";
                     let isSuccess = await that.run(sql);
                     if (isSuccess) {
-                        await idGenerator.UpdateSeqOnDB(that);
+                        //await idGenerator.UpdateSeqOnDB(that);
                         return common.success;
                     }
                     else {
