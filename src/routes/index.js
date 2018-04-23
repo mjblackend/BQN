@@ -37,11 +37,7 @@ router.post('/processCommand', async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
   try {
-    var apiMessagePayLoad = {
-      EntityName: "branch"
-    };
-    let result = await queueCommandManager.Read(apiMessagePayLoad)
-    res.render('index', { title: 'Test APIs page', message: 'Hello there!',branches: apiMessagePayLoad.branches});
+    res.render('index', { title: 'Test APIs page', message: 'Hello there!'});
   }
   catch (error) {
     logger.log(error);

@@ -13,6 +13,7 @@ function LoadPage() {
         var elem = document.getElementById('ticketnumberAll');
         elem.innerHTML = data;
     });
+    FillBranches();
 }
 
 function SendMessage() {
@@ -90,6 +91,33 @@ function Connect() {
     FillSegments(branchID);
 }
 
+function FillBranches(branchid) {
+
+    var Message = {
+        time: new Date(),
+        title: 'read',
+        payload: {
+            EntityName: "branch"
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+        // do something to response
+        var branches = JSON.parse(this.responseText).branches;
+        var options = "";
+        for (let i = 0; i < branches.length; i++) {
+            options = options + '<option value="' + branches[i].ID + '">' + branches[i].Name_L1 + '</option>'
+        }
+
+        elem = document.getElementById('branches');
+        elem.innerHTML = options;
+    };
+    xhr.send(JSON.stringify(Message));
+};
 
 function FillServices(branchid) {
 
