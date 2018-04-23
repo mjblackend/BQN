@@ -150,7 +150,7 @@ var timeProirityValue = function (transaction) {
     return ((new Date() - transaction.priorityTime) * transaction.priority * 1000);
 };
 
-var finishCurrentCustomer = function (OrgID, BranchID, CounterID, FinishedTransaction) {
+var finishCurrentCustomer = function (errors,OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
 
         let CurrentCustomerTransaction = new transaction();
@@ -211,6 +211,7 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, FinishedTransa
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
@@ -218,7 +219,7 @@ var finishCurrentCustomer = function (OrgID, BranchID, CounterID, FinishedTransa
 
 
 //Get Next Customer
-var getNextCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
+var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
     try {
 
         let NextCustomerTransaction = new transaction();
@@ -330,6 +331,7 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
@@ -337,7 +339,7 @@ var getNextCustomer = function (OrgID, BranchID, CounterID, resultArgs) {
 
 
 //Issue ticket
-var issueSingleTicket = function (transaction) {
+var issueSingleTicket = function (errors,transaction) {
     try {
         let result = common.error;
         transaction.creationTime = Date.now();
@@ -352,7 +354,7 @@ var issueSingleTicket = function (transaction) {
         );
 
         if (!serviceSegmentPriorityRange) {
-            logger.logError("error: the Service is not allocated on Segment");
+            errors.push("error: the Service is not allocated on Segment");
             return common.error;
         }
 
@@ -448,6 +450,7 @@ var issueSingleTicket = function (transaction) {
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };

@@ -173,7 +173,7 @@ function getCurrentData(OrgID, BranchID, CounterID, output) {
 
 
 //Check Counter Validation For Open
-var CounterValidationForOpen = function (OrgID, BranchID, CounterID) {
+var CounterValidationForOpen = function (errors,OrgID, BranchID, CounterID) {
     try {
         let output = [];
         let BracnhData;
@@ -190,6 +190,7 @@ var CounterValidationForOpen = function (OrgID, BranchID, CounterID) {
                 return common.success;
             }
             else {
+                errors.push("Not in the correct state to open");
                 return common.not_valid;
             }
         }
@@ -201,12 +202,13 @@ var CounterValidationForOpen = function (OrgID, BranchID, CounterID) {
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForOpen = function (OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForOpen = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
 
         let oldActivity;
@@ -230,6 +232,7 @@ var ChangeCurrentCounterStateForOpen = function (OrgID, BranchID, CounterID, Cur
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
@@ -237,7 +240,7 @@ var ChangeCurrentCounterStateForOpen = function (OrgID, BranchID, CounterID, Cur
 
 
 //Check Counter Validation ForNext
-var CounterValidationForBreak = function (OrgID, BranchID, CounterID) {
+var CounterValidationForBreak = function (errors,OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
@@ -256,6 +259,7 @@ var CounterValidationForBreak = function (OrgID, BranchID, CounterID) {
                 return common.success;
             }
             else {
+                errors.push("Not in the correct state to Break") ;
                 return common.not_valid;
             }
         }
@@ -267,6 +271,7 @@ var CounterValidationForBreak = function (OrgID, BranchID, CounterID) {
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
@@ -278,7 +283,7 @@ var CounterValidationForBreak = function (OrgID, BranchID, CounterID) {
 
 
 //Check Counter Validation ForNext
-var CounterValidationForNext = function (OrgID, BranchID, CounterID) {
+var CounterValidationForNext = function (errors,OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
@@ -307,6 +312,7 @@ var CounterValidationForNext = function (OrgID, BranchID, CounterID) {
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };
@@ -314,7 +320,7 @@ var CounterValidationForNext = function (OrgID, BranchID, CounterID) {
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForBreak = function (OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
 
         let output = [];
@@ -337,6 +343,7 @@ var ChangeCurrentCounterStateForBreak = function (OrgID, BranchID, CounterID, Cu
         return common.success;
     }
     catch (error) {
+        errors.push(error.toString());
         logger.logError(error);
         return common.error;
     }
@@ -345,7 +352,7 @@ var ChangeCurrentCounterStateForBreak = function (OrgID, BranchID, CounterID, Cu
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForNext = function (OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
         let output = [];
         let oldActivity;
@@ -392,6 +399,7 @@ var ChangeCurrentCounterStateForNext = function (OrgID, BranchID, CounterID, Cur
     }
     catch (error) {
         logger.logError(error);
+        errors.push(error.toString());
         return common.error;
     }
 };

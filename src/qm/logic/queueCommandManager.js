@@ -33,6 +33,7 @@ var initialize = async function (ticketInfo) {
 var issueTicket = async function (ticketInfo) {
     try {
         let result;
+        let errors = [];
         let BranchID = ticketInfo["branchid"];
         let SegmentID = ticketInfo["segmentid"];
         let ServiceID = ticketInfo["serviceid"];
@@ -46,14 +47,17 @@ var issueTicket = async function (ticketInfo) {
         transactioninst.service_ID = ServiceID;
         transactioninst.segment_ID = SegmentID;
 
-        result = transactionManager.issueSingleTicket(transactioninst);
+        result = transactionManager.issueSingleTicket(errors, transactioninst);
         ticketInfo.displayTicketNumber = transactioninst.displayTicketNumber;
         await repositoriesManager.commit();
         //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
         ticketInfo.result = result;
 
         if (ticketInfo.result != common.success) {
-            ticketInfo.errorMessage = "problem in taking ticket due to segment service allocation";
+            ticketInfo.errorMessage = errors.join(",");
+        }
+        else {
+            ticketInfo.errorMessage = "";
         }
 
         return result;
@@ -73,7 +77,7 @@ var issueTicketMulti = function (ticketInfo) {
 var counterBreak = async function (counterInfo) {
     try {
         let result = common.error;
-
+        let errors = [];
         let OrgID = counterInfo["orgid"];
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
@@ -81,15 +85,15 @@ var counterBreak = async function (counterInfo) {
         let FinishedTransaction = [];
         let CurrentStateType = [];
         //Check Current State if allow break
-        result = userActivityManager.CounterValidationForBreak(OrgID, BranchID, CounterID);
+        result = userActivityManager.CounterValidationForBreak(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
             //Finish serving the current customer
-            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, FinishedTransaction);
+            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, FinishedTransaction);
             if (result == common.success) {
                 //set the state to break
-                result = userActivityManager.ChangeCurrentCounterStateForBreak(OrgID, BranchID, CounterID, CurrentStateType);
+                result = userActivityManager.ChangeCurrentCounterStateForBreak(errors, OrgID, BranchID, CounterID, CurrentStateType);
                 if (result == common.success) {
-                    if (FinishedTransaction && FinishedTransaction.length > 0 ) {
+                    if (FinishedTransaction && FinishedTransaction.length > 0) {
                         counterInfo.ServedDisplayTicketNumber = FinishedTransaction[FinishedTransaction.length - 1].displayTicketNumber;
                         counterInfo.CurrentDisplayTicketNumber = "...";
                         counterInfo.CurrentStateType = CurrentStateType[0];
@@ -103,8 +107,11 @@ var counterBreak = async function (counterInfo) {
             }
         }
         counterInfo.result = result;
-        if (counterInfo.result == common.not_valid) {
-            counterInfo.errorMessage = "is in invalid state to take a break";
+        if (counterInfo.result != common.success) {
+            counterInfo.errorMessage = errors.join(",");
+        }
+        else {
+            counterInfo.errorMessage = "";
         }
 
         await repositoriesManager.commit();
@@ -121,7 +128,7 @@ var counterBreak = async function (counterInfo) {
 var counterNext = async function (counterInfo) {
     try {
         let result = common.error;
-
+        let errors = [];
         let OrgID = counterInfo["orgid"];
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
@@ -130,21 +137,20 @@ var counterNext = async function (counterInfo) {
         let CurrentStateType = [];
         counterInfo.ServedDisplayTicketNumber = "...";
         //Check Current State if allow next
-        result = userActivityManager.CounterValidationForNext(OrgID, BranchID, CounterID);
+        result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
             //Finish serving the current customer
-            result = transactionManager.finishCurrentCustomer(OrgID, BranchID, CounterID, Transactions);
+            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions);
             if (result == common.success) {
-                if (Transactions && Transactions.length > 0)
-                {
+                if (Transactions && Transactions.length > 0) {
                     counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
                 }
                 Transactions = [];
                 //Get next customer
-                result = transactionManager.getNextCustomer(OrgID, BranchID, CounterID, Transactions);
+                result = transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions);
                 if (result == common.success) {
                     //set the state to ready or serving
-                    result = userActivityManager.ChangeCurrentCounterStateForNext(OrgID, BranchID, CounterID, CurrentStateType);
+                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CurrentStateType);
                     if (result == common.success) {
                         if (Transactions && Transactions.length > 0) {
                             counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
@@ -159,9 +165,13 @@ var counterNext = async function (counterInfo) {
             }
         }
         counterInfo.result = result;
-        if (counterInfo.result == common.not_valid) {
-            counterInfo.errorMessage = "is in invalid state to take do next";
+        if (counterInfo.result != common.success) {
+            counterInfo.errorMessage = errors.join(",");
         }
+        else {
+            counterInfo.errorMessage = "";
+        }
+
         await repositoriesManager.commit();
         return result;
     }
@@ -175,7 +185,7 @@ var counterNext = async function (counterInfo) {
 var counterOpen = async function (counterInfo) {
     try {
         let result = common.error;
-
+        let errors = [];
         let OrgID = counterInfo["orgid"];
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
@@ -183,10 +193,10 @@ var counterOpen = async function (counterInfo) {
         let FinishedTransaction = [];
         let CurrentStateType = [];
         //Check Current State if allow break
-        result = userActivityManager.CounterValidationForOpen(OrgID, BranchID, CounterID);
+        result = userActivityManager.CounterValidationForOpen(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
             //set the state to Open
-            result = userActivityManager.ChangeCurrentCounterStateForOpen(OrgID, BranchID, CounterID, CurrentStateType);
+            result = userActivityManager.ChangeCurrentCounterStateForOpen(errors, OrgID, BranchID, CounterID, CurrentStateType);
             if (result == common.success) {
                 if (FinishedTransaction && FinishedTransaction.length > 0) {
                     counterInfo.CurrentDisplayTicketNumber = "...";
@@ -200,8 +210,11 @@ var counterOpen = async function (counterInfo) {
             }
         }
         counterInfo.result = result;
-        if (counterInfo.result == common.not_valid) {
-            counterInfo.errorMessage = "is in invalid state to take a break";
+        if (counterInfo.result != common.success) {
+            counterInfo.errorMessage = errors.join(",");
+        }
+        else {
+            counterInfo.errorMessage = "";
         }
 
         await repositoriesManager.commit();
