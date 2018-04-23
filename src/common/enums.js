@@ -34,7 +34,8 @@ const commands = {
     IssueTicket: "issueTicket",
     Next: "next",
     Break: "break",
-    Open: "open"
+    Open: "open",
+    Read: "read"
 };
 
 

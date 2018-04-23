@@ -105,7 +105,7 @@ var cacheServerEnities = async function () {
         let counter = require("./Counter_Config");
         let counterInst = new counter();
         let attributes = Object.getOwnPropertyNames(counterInst);
-        let Results = await configRepository.GetAll(attributes, "T_Counter");
+        let Results = await configRepository.GetByFilter(attributes, "T_Counter","Active","1");
         if (Results && Results.length > 0) {
             configsCache.counters = Results;
         }
@@ -114,7 +114,7 @@ var cacheServerEnities = async function () {
         let hall = require("./Hall_Config");
         let hallInst = new hall();
         attributes = Object.getOwnPropertyNames(hallInst);
-        Results = await configRepository.GetAll(attributes, "T_Hall");
+        Results = await configRepository.GetAll(attributes, "T_Hall","Active","1");
         if (Results && Results.length > 0) {
             configsCache.halls = Results;
         }
@@ -140,7 +140,7 @@ var cacheServerEnities = async function () {
         let Segment = require("./Segment_Config");
         let tSegment = new Segment();
         attributes = Object.getOwnPropertyNames(tSegment);
-        Results = await configRepository.GetAll(attributes, "T_Segment");
+        Results = await configRepository.GetAll(attributes, "T_Segment","Active","1");
         if (Results && Results.length > 0) {
             configsCache.segments = Results;
         }
@@ -161,7 +161,7 @@ var cacheServerEnities = async function () {
         let Service = require("./Service_Config");
         let tService = new Service();
         attributes = Object.getOwnPropertyNames(tService);
-        Results = await configRepository.GetAll(attributes, "T_Service");
+        Results = await configRepository.GetAll(attributes, "T_Service","Active","1");
         if (Results && Results.length > 0) {
             configsCache.services = Results;
         }
@@ -182,7 +182,7 @@ var cacheServerEnities = async function () {
         let ServiceConfig = require("./ServiceConfig_Config");
         let tServiceConfig = new ServiceConfig();
         attributes = Object.getOwnPropertyNames(tServiceConfig);
-        Results = await configRepository.GetAll(attributes, "T_ServiceConfig");
+        Results = await configRepository.GetAll(attributes, "T_ServiceConfig","Active","1");
         if (Results && Results.length > 0) {
             configsCache.serviceConfigs = Results;
         }
@@ -241,7 +241,7 @@ var cacheServerEnities = async function () {
         let branch = require("./QueueBranch_config");
         let branchInst = new branch();
         attributes = Object.getOwnPropertyNames(branchInst);
-        Results = await configRepository.GetAll(attributes, "T_QueueBranch");
+        Results = await configRepository.GetAll(attributes, "T_QueueBranch","Active","1");
         if (Results && Results.length > 0) {
             configsCache.branches = Results;
         }
@@ -256,6 +256,53 @@ var cacheServerEnities = async function () {
         return common.error;
     }
 };
+
+var Read = function (apiMessagePayLoad) {
+    try {
+        let result = common.error;
+        if (apiMessagePayLoad) {
+            switch (apiMessagePayLoad.EntityName.toLowerCase()) {
+                case "branch":
+                    apiMessagePayLoad.branches = configsCache.branches;
+                    result = common.success;
+                    break;
+                case "counter":
+                    apiMessagePayLoad.counters = configsCache.counters.filter(function (value) {
+                        return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1 )
+                    });
+                    result = common.success;
+                    break;
+
+                case "segment":
+                    apiMessagePayLoad.segments = configsCache.segments;
+                    apiMessagePayLoad.serviceSegmentPriorityRanges = configsCache.serviceSegmentPriorityRanges
+                    result = common.success;
+                    break;
+
+                case "service":
+                    let servicesAllocations = configsCache.branch_serviceAllocations.filter(function (value) {
+                        return value.QueueBranch_ID == apiMessagePayLoad.BranchID
+                    });
+                    apiMessagePayLoad.services = configsCache.services.filter(function (value) {
+                        for (let i = 0; i < servicesAllocations.length; i++) {
+                            if (servicesAllocations[i].Service_ID == value.ID) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+                    result = common.success;
+                    break;
+            }
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
 
 var initialize = async function () {
     try {
@@ -276,6 +323,6 @@ var initialize = async function () {
     }
 };
 
-
+module.exports.Read = Read;
 module.exports.initialize = initialize;
 module.exports.configsCache = configsCache;

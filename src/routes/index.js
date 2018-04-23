@@ -31,9 +31,17 @@ router.post('/processCommand', async function (req, res, next) {
 
 });
 
-router.get('/', function (req, res, next) {
+
+
+
+
+router.get('/', async function (req, res, next) {
   try {
-    res.render('index', { title: 'Test APIs page', message: 'Hello there!' });
+    var apiMessagePayLoad = {
+      EntityName: "branch"
+    };
+    let result = await queueCommandManager.Read(apiMessagePayLoad)
+    res.render('index', { title: 'Test APIs page', message: 'Hello there!',branches: apiMessagePayLoad.branches});
   }
   catch (error) {
     logger.log(error);

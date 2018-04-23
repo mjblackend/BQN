@@ -135,4 +135,46 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+
+    it('Get All Branches', async function () {
+
+        var apiMessagePayLoad = {
+            EntityName: "branch"
+        };
+        let result = await queueCommandManager.Read(apiMessagePayLoad);
+        (result === common.success).should.true();
+    });
+
+    it('Get All Counters on Branch ID = 106', async function () {
+
+        var apiMessagePayLoad = {
+            EntityName: "counter",
+            BranchID: "106"
+        };
+        let result = await queueCommandManager.Read(apiMessagePayLoad);
+        (result === common.success).should.true();
+    });
+    
+    it('Get All Services on Branch ID = 106', async function () {
+
+        var apiMessagePayLoad = {
+            EntityName: "service",
+            BranchID: "106"
+        };
+        let result = await queueCommandManager.Read(apiMessagePayLoad);
+        (result === common.success).should.true();
+    });
+
+    it('Get All Segments', async function () {
+
+        var apiMessagePayLoad = {
+            EntityName: "segment",
+            BranchID: "106"
+        };
+        let result = await queueCommandManager.Read(apiMessagePayLoad);
+        (result === common.success).should.true();
+    });
+
+
+
 });

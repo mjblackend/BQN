@@ -51,6 +51,11 @@ var issueTicket = async function (ticketInfo) {
         await repositoriesManager.commit();
         //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
         ticketInfo.result = result;
+
+        if (ticketInfo.result != common.success) {
+            ticketInfo.errorMessage = "problem in taking ticket due to segment service allocation";
+        }
+
         return result;
     }
     catch (error) {
@@ -295,6 +300,11 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
+var Read = function (apiMessagePayload) {
+    return configurationService.Read(apiMessagePayload);
+};
+
+
 //Deassign Counter from BMS
 var processCommand = async function (apiMessage) {
     try {
@@ -312,6 +322,9 @@ var processCommand = async function (apiMessage) {
                     break;
                 case enums.commands.Open:
                     result = await this.counterOpen(apiMessage.payload);
+                    break;
+                case enums.commands.Read:
+                    result = await this.Read(apiMessage.payload);
                     break;
                 default:
                     result = common.error;
@@ -359,4 +372,4 @@ module.exports.counterFinsihServing = counterFinsihServing;
 module.exports.checkInAppointment = checkInAppointment;
 module.exports.counterDeassignFromBMS = counterDeassignFromBMS;
 module.exports.processCommand = processCommand;
-
+module.exports.Read = Read;
