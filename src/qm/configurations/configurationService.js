@@ -263,27 +263,27 @@ var Read = function (apiMessagePayLoad) {
         if (apiMessagePayLoad) {
             switch (apiMessagePayLoad.EntityName.toLowerCase()) {
                 case "branch":
-                    apiMessagePayLoad.branches = configsCache.branches;
+                    apiMessagePayLoad.branches = this.configsCache.branches;
                     result = common.success;
                     break;
                 case "counter":
-                    apiMessagePayLoad.counters = configsCache.counters.filter(function (value) {
+                    apiMessagePayLoad.counters = this.configsCache.counters.filter(function (value) {
                         return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1 )
                     });
                     result = common.success;
                     break;
 
                 case "segment":
-                    apiMessagePayLoad.segments = configsCache.segments;
-                    apiMessagePayLoad.serviceSegmentPriorityRanges = configsCache.serviceSegmentPriorityRanges
+                    apiMessagePayLoad.segments = this.configsCache.segments;
+                    apiMessagePayLoad.serviceSegmentPriorityRanges = this.configsCache.serviceSegmentPriorityRanges
                     result = common.success;
                     break;
 
                 case "service":
-                    let servicesAllocations = configsCache.branch_serviceAllocations.filter(function (value) {
+                    let servicesAllocations = this.configsCache.branch_serviceAllocations.filter(function (value) {
                         return value.QueueBranch_ID == apiMessagePayLoad.BranchID
                     });
-                    apiMessagePayLoad.services = configsCache.services.filter(function (value) {
+                    apiMessagePayLoad.services = this.configsCache.services.filter(function (value) {
                         for (let i = 0; i < servicesAllocations.length; i++) {
                             if (servicesAllocations[i].Service_ID == value.ID) {
                                 return true;
