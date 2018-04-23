@@ -17,11 +17,13 @@
     <select id="branches">
     </select>
     <button id="btnconnect" type="button" onclick="Connect()" style="display: inline;">Connect</button>
+  </form>
 
-    <label>Counters</label>
-    <select id="counters">
-    </select>
-
+  <h1>
+    <%= title %>
+  </h1>
+  <hr>
+  <form>
     <label>Segments</label>
     <select id="segments">
     </select>
@@ -29,13 +31,7 @@
     <label>services</label>
     <select id="services">
     </select>
-
   </form>
-
-  <h1>
-    <%= title %>
-  </h1>
-  <hr>
   <h2>Ticketing APIs</h2>
   <button type="button" onclick="IssueTicket()">IssueSingleTicket</button>
   <button type="button" onclick="IssueTicketMultiple(1000)">Issue1000Tickets</button>
@@ -45,6 +41,11 @@
   <hr>
   <hr>
   <div></div>
+  <form>
+    <label>Counters</label>
+    <select id="counters">
+    </select>
+  </form>
   <h2>Counter APIs</h2>
   <button type="button" onclick="COpen()" style="display: inline;">Open</button>
   <button type="button" onclick="Next()" style="display: inline;">Next</button>
