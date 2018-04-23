@@ -212,13 +212,13 @@ var transactionRep = function (db) {
                 let count = addTransactions.length;
                 while (count > 0) {
                     let transaction = addTransactions.shift();
-                    await this.Add(transaction)
+                    await this.Add(transaction);
                     count = count - 1;
                 }
                 count = updateTransactions.length;
                 while (count > 0) {
                     let transaction = updateTransactions.shift();
-                    await this.Update(transaction)
+                    await this.Update(transaction);
                     count = count - 1;
                 }
                 return common.success;

@@ -210,13 +210,13 @@ var userActivitiesRep = function (db) {
                 let count = addActivity.length;
                 while (count > 0) {
                     let activity = addActivity.shift();
-                    await this.Add(activity)
+                    await this.Add(activity);
                     count = count - 1;
                 }
                 count = updateActivity.length;
                 while (count > 0) {
                     let activity = updateActivity.shift();
-                    await this.Update(activity)
+                    await this.Update(activity);
                     count = count - 1;
                 }
                 return common.success;

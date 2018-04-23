@@ -96,10 +96,10 @@ var CreateNewActivity = function (OrgID, BranchID, CounterID, type) {
     }
 };
 
-var UpdateActivity = function (Activity) {
+var UpdateActionTime = function (Activity) {
     try {
         Activity.lastActionTime = Date.now();
-        //UpdateActivity(Activity);
+        repositoriesManager.userActivitiesRep.AddSynch(Activity);
         return Activity;
     }
     catch (error) {
@@ -211,7 +211,6 @@ var CounterValidationForOpen = function (errors,OrgID, BranchID, CounterID) {
 var ChangeCurrentCounterStateForOpen = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
 
-        let oldActivity;
         let output = [];
         let BracnhData;
         let CounterData;
@@ -222,7 +221,7 @@ var ChangeCurrentCounterStateForOpen = function (errors,OrgID, BranchID, Counter
         CurrentActivity = output[2];
 
         if (CurrentActivity) {
-            oldActivity = CloseActivity(CurrentActivity);
+            CloseActivity(CurrentActivity);
         }
 
         CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
@@ -324,7 +323,6 @@ var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, Counte
     try {
 
         let output = [];
-        let oldActivity;
         let BracnhData;
         let CounterData;
         let CurrentActivity;
@@ -334,7 +332,7 @@ var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, Counte
         CurrentActivity = output[2];
 
         if (CurrentActivity) {
-            oldActivity = CloseActivity(CurrentActivity);
+            CloseActivity(CurrentActivity);
         }
 
         CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Break);
@@ -354,8 +352,7 @@ var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, Counte
 //Change Current Counter State
 var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
-        let output = [];
-        let oldActivity;
+         let output = [];
         let BracnhData;
         let CounterData;
         let CurrentActivity;
@@ -367,20 +364,20 @@ var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, Counter
         if (CurrentActivity) {
             if (CounterData.currentTransaction_ID > 0) {
                 if (CurrentActivity.type != enums.EmployeeActiontypes.Serving) {
-                    oldActivity = CloseActivity(CurrentActivity);
+                    CloseActivity(CurrentActivity);
                     CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Serving);
                 }
                 else {
-                    CurrentActivity = UpdateActivity(CurrentActivity);
+                    CurrentActivity = UpdateActionTime(CurrentActivity);
                 }
             }
             else {
                 if (CurrentActivity.type != enums.EmployeeActiontypes.Ready) {
-                    oldActivity = CloseActivity(CurrentActivity);
+                    CloseActivity(CurrentActivity);
                     CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
                 }
                 else {
-                    CurrentActivity = UpdateActivity(CurrentActivity);
+                    CurrentActivity = UpdateActionTime(CurrentActivity);
                 }
             }
         }
