@@ -11,28 +11,29 @@
 </head>
 
 <body onload="LoadPage()">
-
+  <hr>
+  <h1>
+    <%= title %>
+  </h1>
   <form>
     <label>Branches</label>
     <select id="branches">
     </select>
     <button id="btnconnect" type="button" onclick="Connect()" style="display: inline;">Connect</button>
   </form>
-
-  <h1>
-    <%= title %>
-  </h1>
   <hr>
+  <br>
+  <h2>Ticketing APIs</h2>
   <form>
-    <label>Segments</label>
+    <label>Select Segments</label>
     <select id="segments">
     </select>
 
-    <label>services</label>
+    <label>Select Services</label>
     <select id="services">
     </select>
   </form>
-  <h2>Ticketing APIs</h2>
+  <hr>
   <button type="button" onclick="IssueTicket()">IssueSingleTicket</button>
   <button type="button" onclick="IssueTicketMultiple(1000)">Issue1000Tickets</button>
   <hr>
@@ -40,13 +41,16 @@
   <p id='ticketnumber' style="display: inline;">...</p>
   <hr>
   <hr>
+  <br>
+  <br>
   <div></div>
+  <h2>Counter APIs</h2>
   <form>
-    <label>Counters</label>
+    <label>Select Counter</label>
     <select id="counters">
     </select>
   </form>
-  <h2>Counter APIs</h2>
+  <hr>
   <button type="button" onclick="COpen()" style="display: inline;">Open</button>
   <button type="button" onclick="Next()" style="display: inline;">Next</button>
   <button type="button" onclick="nextMultiple(1000)" style="display: inline;">Next1000</button>
@@ -66,6 +70,8 @@
   <p id='ticketnumberAll' style="display: inline;">...</p>
   <hr>
   <hr>
+  <br>
+  <br>
   <div></div>
   <h3 style="display: inline;">Error: </h3>
   <p id='errorMessage' style="display: inline;">...</p>
