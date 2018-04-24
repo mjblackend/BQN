@@ -319,6 +319,9 @@ var counterDeassignFromBMS = function (appointmentInfo) {
 var Read = function (apiMessagePayload) {
     return configurationService.Read(apiMessagePayload);
 };
+var ReadBranchStatistics = async function (apiMessagePayload) {
+    return await statisticsManager.ReadBranchStatistics(apiMessagePayload);
+};
 
 
 //Deassign Counter from BMS
@@ -342,6 +345,9 @@ var processCommand = async function (apiMessage) {
                 case enums.commands.Read:
                     result = await this.Read(apiMessage.payload);
                     break;
+                case enums.commands.ReadBranchStatistics:
+                    result = await this.ReadBranchStatistics(apiMessage.payload);
+                    break;                   
                 default:
                     result = common.error;
             }
@@ -389,3 +395,4 @@ module.exports.checkInAppointment = checkInAppointment;
 module.exports.counterDeassignFromBMS = counterDeassignFromBMS;
 module.exports.processCommand = processCommand;
 module.exports.Read = Read;
+module.exports.ReadBranchStatistics =ReadBranchStatistics;

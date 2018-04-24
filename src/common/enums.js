@@ -65,7 +65,8 @@ const commands = {
     Next: "next",
     Break: "break",
     Open: "open",
-    Read: "read"
+    Read: "read",
+    ReadBranchStatistics: "readBranchStatistics"
 };
 
 

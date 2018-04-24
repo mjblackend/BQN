@@ -1,4 +1,3 @@
-var fs = require("fs");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
@@ -82,7 +81,7 @@ var CreateNewstatistics = function (transactions) {
 
         //total pending customers
         if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold ) {
-            t_Statistics.TotalPendingCustomersNo = t_Statistics.NonServedCustomersNo + 1;
+            t_Statistics.TotalPendingCustomersNo = t_Statistics.TotalPendingCustomersNo + 1;
         }
 
         //avrage serving customers
@@ -143,7 +142,7 @@ var UpdateStatistics = function (Statistics, transactions) {
 
         //total pending customers
         if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold ) {
-            Statistics.TotalPendingCustomersNo = Statistics.NonServedCustomersNo + 1;
+            Statistics.TotalPendingCustomersNo = Statistics.TotalPendingCustomersNo + 1;
         }
 
         //avrage serving customers
@@ -176,6 +175,7 @@ var UpdateStatistics = function (Statistics, transactions) {
 //Load for all branches statistics
 var initialize = async function () {
     try {
+        branches_statisticsData = [];
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
         let tomorrow = new Date(Today + 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
@@ -226,8 +226,6 @@ var initialize = async function () {
                 }
             }
         }
-
-        fs.writeFileSync("statistics.json", JSON.stringify(branches_statisticsData));
         return common.success;
     }
     catch (error) {
@@ -239,28 +237,30 @@ var initialize = async function () {
 
 
 //Get branch statistics
-var getBranchStatistics = function (BranchID) {
+var ReadBranchStatistics = async function (apiMessagePayLoad ) {
     try {
+        await initialize();
+        let BranchID=apiMessagePayLoad.BranchID;
         let Branchstatistics = branches_statisticsData.find(
             function (value) {
                 return value.branch_ID == BranchID;
             }
         );
         if (Branchstatistics) {
-            return Branchstatistics.statistics;
+            apiMessagePayLoad.statistics = Branchstatistics.statistics;
         }
         else {
-            return [];
+            apiMessagePayLoad.statistics = [];
         }
+        return common.success;
     }
     catch (error) {
         logger.logError(error);
-        return undefined;
+        return common.error;
     }
 
 };
 
 
-
+module.exports.ReadBranchStatistics = ReadBranchStatistics;
 module.exports.initialize = initialize;
-module.exports.getBranchStatistics = getBranchStatistics;

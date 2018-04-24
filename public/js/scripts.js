@@ -33,6 +33,65 @@ function nextMultiple(number) {
     }
 }
 
+function readBranchStatistics() {
+    var e = document.getElementById("branches");
+    var branchid = e.options[e.selectedIndex].value;
+
+    var Message = {
+        time: new Date(),
+        title: 'readBranchStatistics',
+        payload: {
+            EntityName: "service",
+            BranchID: branchid
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+        // do something to response
+        var statistics = JSON.parse(this.responseText).statistics;
+        var options = `<tr>
+        <th>Service ID</th>
+        <th>Segment ID</th>
+        <th>Hall ID</th>
+        <th>Counter ID</th>
+
+        <th>Waiting Customers</th>
+        <th>Served Customers</th> 
+        <th>No Show Customers</th>
+        <th>Avg Service Time</th>
+        <th>Avg Waiting Time</th>
+        <th>Total Pending Customers</th>
+      </tr>`;
+
+        for (let i = 0; i < statistics.length; i++) {
+            options = options + '<tr>';
+            options = options + '<th>'+ statistics[i].service_ID + '</th>';
+            options = options + '<th>'+ statistics[i].segment_ID + '</th>';
+            options = options + '<th>'+ statistics[i].hall_ID + '</th>';
+            options = options + '<th>'+ statistics[i].counter_ID + '</th>';
+
+            options = options + '<th>'+ statistics[i].WaitingCustomers + '</th>';
+            options = options + '<th>'+ statistics[i].ServedCustomersNo + '</th>';
+            options = options + '<th>'+ statistics[i].NoShowCustomersNo + '</th>';
+            options = options + '<th>'+ statistics[i].AvgServiceTime + '</th>';
+            options = options + '<th>'+ statistics[i].AvgWaitingTime + '</th>';
+            options = options + '<th>'+ statistics[i].TotalPendingCustomersNo + '</th>';
+            options = options + '</tr>';
+        }
+
+        elem = document.getElementById('statistics');
+        elem.innerHTML = options;
+    };
+    xhr.send(JSON.stringify(Message));
+
+}
+
+
+
 function Next() {
 
     var e = document.getElementById("counters");
