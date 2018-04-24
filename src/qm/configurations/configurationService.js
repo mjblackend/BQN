@@ -307,6 +307,7 @@ var Read = function (apiMessagePayLoad) {
 };
 
 
+
 var initialize = async function () {
     try {
         if (common.moch) {

@@ -13,6 +13,7 @@ class transaction {
         this.symbol = STRING_NULL;
         this.service_ID = INT_NULL;
         this.segment_ID = INT_NULL;
+        this.hall_ID = INT_NULL;
         this.priority = INT_NULL;
         this.orderOfServing = INT_NULL;
         this.note = STRING_NULL;
@@ -31,7 +32,7 @@ class transaction {
         this.integration_ID = INT_NULL;
         this.smsTicket = INT_NULL;  //to be delayed
         this.displayTicketNumber = STRING_NULL;
-        this.hall_ID = INT_NULL;
+
 
 
         //Times

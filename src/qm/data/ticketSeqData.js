@@ -1,8 +1,7 @@
 class ticketSeqData {
     constructor() {
     this.hall_ID;
-    this.service_ID;
-    this.segment_ID;          
+    this.symbol;           
     this.sequence; 
     this.time;   
     }

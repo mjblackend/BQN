@@ -9,7 +9,7 @@ var common = require("../../common/common");
 var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
-
+var statisticsManager = require("../statistics/statisticsManager");
 
 //Initialize everything
 var initialize = async function (ticketInfo) {
@@ -17,8 +17,11 @@ var initialize = async function (ticketInfo) {
         let result = await configurationService.initialize();
         if (result == common.success) {
             result = await dataService.initialize();
-            console.log("Initialized");
-            return result;
+            if (result == common.success) {
+                result = await statisticsManager.initialize();
+                console.log("Initialized");
+                return result;
+            }
         }
     }
     catch (error) {

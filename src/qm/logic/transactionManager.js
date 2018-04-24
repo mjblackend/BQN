@@ -150,7 +150,31 @@ var timeProirityValue = function (transaction) {
     return ((new Date() - transaction.priorityTime) * transaction.priority * 1000);
 };
 
-var finishCurrentCustomer = function (errors,OrgID, BranchID, CounterID, FinishedTransaction) {
+var getServiceConfig = function (ServiceID) {
+    try {
+        //Get min service time
+        let service = configurationService.configsCache.services.find(function (value) {
+            if (value.ID == ServiceID) {
+                return true;
+            }
+        });
+
+        //Get min service time
+        let serviceConfig = configurationService.configsCache.serviceConfigs.find(function (value) {
+            if (value.ID == service.ServiceConfig_ID) {
+                return true;
+            }
+        });
+
+        return serviceConfig;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+};
+
+var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
 
         let CurrentCustomerTransaction = new transaction();
@@ -185,16 +209,25 @@ var finishCurrentCustomer = function (errors,OrgID, BranchID, CounterID, Finishe
                     CurrentCustomerTransaction.state = enums.StateType.closed;
                     CurrentCustomerTransaction.endServingTime = Now;
                     CurrentCustomerTransaction.closeTime = Now;
-                    CurrentCustomerTransaction.serviceSeconds =  CurrentCustomerTransaction.serviceSeconds + ( CurrentCustomerTransaction.arrivalTime -  CurrentCustomerTransaction.startServingTime);
-                    
+                    CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + ((Now - CurrentCustomerTransaction.startServingTime) / 1000);
+
+                    //Get min service time to determine the serving type
+                    let serviceConfig = getServiceConfig(CurrentCustomerTransaction.service_ID);
+                    if (CurrentCustomerTransaction.serviceSeconds < serviceConfig.MinServiceTime) {
+                        CurrentCustomerTransaction.servingType = enums.CustomerServingType.NoShow;
+                    }
+                    else {
+                        CurrentCustomerTransaction.servingType = enums.CustomerServingType.Served;
+                    }
+
                     //Remove the transaction from memory
-                    let CurrentCustomerTransactionID= CurrentCustomerTransaction.id;
+                    let CurrentCustomerTransactionID = CurrentCustomerTransaction.id;
                     BracnhData.transactionsData = BracnhData.transactionsData.filter(function (transaction_Data) {
-                        return transaction_Data.id !=  CurrentCustomerTransactionID;
+                        return transaction_Data.id != CurrentCustomerTransactionID;
                     }
                     );
-                    BracnhData.visitData= BracnhData.visitData.filter(function (visitData) {
-                        return visitData.visit_ID !=  CurrentCustomerTransactionID;
+                    BracnhData.visitData = BracnhData.visitData.filter(function (visitData) {
+                        return visitData.visit_ID != CurrentCustomerTransactionID;
                     }
                     );
                 }
@@ -219,7 +252,7 @@ var finishCurrentCustomer = function (errors,OrgID, BranchID, CounterID, Finishe
 
 
 //Get Next Customer
-var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
+var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) {
     try {
 
         let NextCustomerTransaction = new transaction();
@@ -290,7 +323,7 @@ var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
             if (transactions && transactions.length > 0) {
                 NextCustomerTransaction = transactions[0];
                 for (let i = 0; i < transactions.length; i++) {
-                    if (timeProirityValue( NextCustomerTransaction) < timeProirityValue(transactions[i])) {
+                    if (timeProirityValue(NextCustomerTransaction) < timeProirityValue(transactions[i])) {
                         NextCustomerTransaction = transactions[i];
                     }
                 }
@@ -302,20 +335,20 @@ var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
                 NextCustomerTransaction.counter_ID = CounterID;
                 NextCustomerTransaction.serveStep = 1;
                 NextCustomerTransaction.lastOfVisit = 1;
-                NextCustomerTransaction.waitingSeconds =  NextCustomerTransaction.waitingSeconds + ( NextCustomerTransaction.startServingTime -  NextCustomerTransaction.arrivalTime);
+                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + (NextCustomerTransaction.startServingTime - NextCustomerTransaction.arrivalTime);
 
                 let found = false;
                 for (let i = 0; i < BracnhData.countersData.length; i++) {
                     if (BracnhData.countersData[i].id == CounterID) {
                         found = true;
-                        BracnhData.countersData[i].currentTransaction_ID =  NextCustomerTransaction.id;
+                        BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
                         break;
                     }
                 }
                 if (!found) {
                     let tcounterData = new counterData();
-                    tcounterData.id =  NextCustomerTransaction.counter_ID;
-                    tcounterData.currentTransaction_ID =  NextCustomerTransaction.id;
+                    tcounterData.id = NextCustomerTransaction.counter_ID;
+                    tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
                     BracnhData.countersData.push(tcounterData);
                 }
             }
@@ -323,8 +356,8 @@ var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
 
 
         //update the new
-        if ( NextCustomerTransaction) {
-            UpdateTransaction( NextCustomerTransaction);
+        if (NextCustomerTransaction) {
+            UpdateTransaction(NextCustomerTransaction);
             resultArgs.push(NextCustomerTransaction);
         }
         return common.success;
@@ -339,7 +372,7 @@ var getNextCustomer = function (errors,OrgID, BranchID, CounterID, resultArgs) {
 
 
 //Issue ticket
-var issueSingleTicket = function (errors,transaction) {
+var issueSingleTicket = function (errors, transaction) {
     try {
         let result = common.error;
         transaction.creationTime = Date.now();
@@ -364,6 +397,9 @@ var issueSingleTicket = function (errors,transaction) {
         }
         );
 
+        transaction.symbol = PriorityRange.Symbol;
+        transaction.priority = PriorityRange.Priority;
+
         //Get Max Seq
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
@@ -376,7 +412,7 @@ var issueSingleTicket = function (errors,transaction) {
         if (BracnhData != null) {
             //Get the sequence if exists in the memory
             let ticketSeqData = BracnhData.ticketSeqData.find(function (value) {
-                return value.segment_ID == transaction.segment_ID && value.service_ID == transaction.service_ID;
+                return value.symbol ==  transaction.symbol && value.hall_ID == transaction.hall_ID;
             }
             );
 
@@ -398,7 +434,7 @@ var issueSingleTicket = function (errors,transaction) {
                         let maxTransaction = transactions[0];
                         for (let i = 0; i < transactions.length; i++) {
                             //Check for maximum transaction number today
-                            if (transactions[i].ticketSequence > maxTransaction.ticketSequence) {
+                            if (transactions[i].creationTime > maxTransaction.creationTime) {
                                 maxTransaction = transactions[i];
                             }
                         }
@@ -423,8 +459,7 @@ var issueSingleTicket = function (errors,transaction) {
                 if (ticketSeqData == null) {
                     ticketSeqData = new TicketSeqData();
                     ticketSeqData.hall_ID = transaction.hall_ID;
-                    ticketSeqData.service_ID = transaction.service_ID;
-                    ticketSeqData.segment_ID = transaction.segment_ID;
+                    ticketSeqData.symbol =  transaction.symbol
                     ticketSeqData.sequence = ticketSequence;
                     ticketSeqData.time = Today;
                     BracnhData.ticketSeqData.push(ticketSeqData);
@@ -437,8 +472,7 @@ var issueSingleTicket = function (errors,transaction) {
 
 
 
-        transaction.symbol = PriorityRange.Symbol;
-        transaction.priority = PriorityRange.Priority;
+
         transaction.ticketSequence = ticketSequence;
         transaction.displayTicketNumber = prepareDisplayTicketNumber(transaction, PriorityRange.MaxSlipNo, Separators[PriorityRange.Separator_LV]);
         transaction.hall_ID = getHallNumber(transaction);
