@@ -198,6 +198,10 @@ var AddOrUpdateTransaction = function (transaction) {
 
 var RefreshBranchStatistics = function (BranchID) {
     try {
+        let Now = new Date();
+        let Today = Now.setHours(0, 0, 0, 0);
+        let tomorrow = new Date(Today + 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
+
         //Add it to statistics collection
         let t_branchStatistics = branches_statisticsData.find(function (value) {
             return value.branch_ID == BranchID;
@@ -217,6 +221,14 @@ var RefreshBranchStatistics = function (BranchID) {
 
         //Update statistics
         let transactionsData = t_branchStatistics.transactions;
+        if (transactionsData && transactionsData.length > 0) {
+            //filter for today only 
+            transactionsData = transactionsData.filter(function (value) {
+                return value.creationTime > Today && value.creationTime < tomorrow;
+            }
+            );
+        }
+
         if (transactionsData && transactionsData.length > 0) {
             for (let i = 0; i < transactionsData.length; i++) {
                 let transaction = transactionsData[i];
