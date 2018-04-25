@@ -10,19 +10,38 @@ var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("../statistics/statisticsManager");
-
+var initialized =false;
 //Initialize everything
 var initialize = async function (ticketInfo) {
     try {
+        if (initialized)
+        {
+            return common.success;
+        }
         let result = await configurationService.initialize();
         if (result == common.success) {
             result = await dataService.initialize();
             if (result == common.success) {
                 result = await statisticsManager.initialize();
+                initialized=true;
                 console.log("Initialized");
                 return result;
             }
         }
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+var FinishingCommand = async function (BranchID) {
+    try {
+        //Refresh Statistics
+        statisticsManager.RefreshBranchStatistics(BranchID);
+
+        //Commit DB Actions
+        await repositoriesManager.commit();
     }
     catch (error) {
         logger.logError(error);
@@ -52,8 +71,6 @@ var issueTicket = async function (ticketInfo) {
 
         result = transactionManager.issueSingleTicket(errors, transactioninst);
         ticketInfo.displayTicketNumber = transactioninst.displayTicketNumber;
-        await repositoriesManager.commit();
-        //console.log("transactioninst ID=" + transactioninst.id + " , Ticket Number = " + transactioninst.displayTicketNumber);
         ticketInfo.result = result;
 
         if (ticketInfo.result != common.success) {
@@ -62,7 +79,7 @@ var issueTicket = async function (ticketInfo) {
         else {
             ticketInfo.errorMessage = "";
         }
-
+        await FinishingCommand(BranchID);
         return result;
     }
     catch (error) {
@@ -117,7 +134,7 @@ var counterBreak = async function (counterInfo) {
             counterInfo.errorMessage = "";
         }
 
-        await repositoriesManager.commit();
+        await FinishingCommand(BranchID);
         return result;
     }
     catch (error) {
@@ -175,7 +192,7 @@ var counterNext = async function (counterInfo) {
             counterInfo.errorMessage = "";
         }
 
-        await repositoriesManager.commit();
+        await FinishingCommand(BranchID);
         return result;
     }
     catch (error) {
@@ -220,7 +237,7 @@ var counterOpen = async function (counterInfo) {
             counterInfo.errorMessage = "";
         }
 
-        await repositoriesManager.commit();
+        await FinishingCommand(BranchID);
         return result;
     }
     catch (error) {

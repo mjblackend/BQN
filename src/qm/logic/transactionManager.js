@@ -9,6 +9,7 @@ var visitData = require("../data/visitData");
 var TicketSeqData = require("../data/ticketSeqData");
 var idGenerator = require("../localRepositories/idGenerator");
 var counterData = require("../data/counterData");
+var statisticsManager = require("../statistics/statisticsManager");
 const Separators = ["", " ", "-", "/", "."];
 
 
@@ -28,6 +29,9 @@ var UpdateTransaction = function (transaction) {
                     break;
                 }
             }
+
+            //Update the Statistics
+            statisticsManager.AddOrUpdateTransaction(transaction);
 
             //Update To data base
             repositoriesManager.transactionRep.UpdateSynch(transaction);
@@ -83,6 +87,8 @@ var AddTransaction = function (transaction) {
             } else {
                 VisitData.transactions_IDs.push(transaction.id);
             }
+            //Update the Statistics
+            statisticsManager.AddOrUpdateTransaction(transaction);
 
             //Update To data base
             repositoriesManager.transactionRep.AddSynch(transaction);
@@ -412,7 +418,7 @@ var issueSingleTicket = function (errors, transaction) {
         if (BracnhData != null) {
             //Get the sequence if exists in the memory
             let ticketSeqData = BracnhData.ticketSeqData.find(function (value) {
-                return value.symbol ==  transaction.symbol && value.hall_ID == transaction.hall_ID;
+                return value.symbol == transaction.symbol && value.hall_ID == transaction.hall_ID;
             }
             );
 
@@ -459,7 +465,7 @@ var issueSingleTicket = function (errors, transaction) {
                 if (ticketSeqData == null) {
                     ticketSeqData = new TicketSeqData();
                     ticketSeqData.hall_ID = transaction.hall_ID;
-                    ticketSeqData.symbol =  transaction.symbol
+                    ticketSeqData.symbol = transaction.symbol
                     ticketSeqData.sequence = ticketSequence;
                     ticketSeqData.time = Today;
                     BracnhData.ticketSeqData.push(ticketSeqData);

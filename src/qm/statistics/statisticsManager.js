@@ -8,6 +8,7 @@ var statisticsData = require("../data/statisticsData");
 var configurationService = require("../configurations/configurationService");
 var branches_statisticsData = [];
 
+
 var getServiceConfig = function (ServiceID) {
     try {
         //Get min service time
@@ -44,7 +45,7 @@ var CreateNewstatistics = function (transactions) {
         t_Statistics.StatisticsDate = Date.now();
 
         //Attributes
-        t_Statistics.ID=generateID(transactions);
+        t_Statistics.ID = generateID(transactions);
         t_Statistics.branch_ID = transactions.branch_ID;
         t_Statistics.segment_ID = transactions.segment_ID;
         t_Statistics.hall_ID = transactions.hall_ID;
@@ -70,37 +71,35 @@ var CreateNewstatistics = function (transactions) {
         }
 
         //number of no show
-        if (transactions.servingType == enums.CustomerServingType.NoShow ) {
+        if (transactions.servingType == enums.CustomerServingType.NoShow) {
             t_Statistics.NoShowCustomersNo = t_Statistics.NoShowCustomersNo + 1;
         }
 
         //number of non served customers
-        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow ) {
+        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
             t_Statistics.NonServedCustomersNo = t_Statistics.NonServedCustomersNo + 1;
         }
 
         //total pending customers
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold ) {
+        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
             t_Statistics.TotalPendingCustomersNo = t_Statistics.TotalPendingCustomersNo + 1;
         }
 
         //avrage serving customers
         if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-           if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime)
-           {
+            if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime) {
                 t_Statistics.TotalServiceTime = t_Statistics.TotalServiceTime + transactions.serviceSeconds;
                 t_Statistics.ASTWeight = t_Statistics.ASTWeight + 1;
-                t_Statistics.AvgServiceTime = t_Statistics.TotalServiceTime  / t_Statistics.ASTWeight;
-           }   
+                t_Statistics.AvgServiceTime = t_Statistics.TotalServiceTime / t_Statistics.ASTWeight;
+            }
         }
 
         //waited customer
         if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime)
-           {
+            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
                 t_Statistics.TotalWaitingTime = t_Statistics.TotalWaitingTime + transactions.waitingSeconds;
-                 t_Statistics.AvgWaitingTime = t_Statistics.TotalWaitingTime  /  t_Statistics.WaitedCustomersNo;
-           }   
+                t_Statistics.AvgWaitingTime = t_Statistics.TotalWaitingTime / t_Statistics.WaitedCustomersNo;
+            }
         }
         return t_Statistics;
     }
@@ -114,7 +113,7 @@ var UpdateStatistics = function (Statistics, transactions) {
     try {
         let ServiceConfig = getServiceConfig(transactions.service_ID);
         Statistics.StatisticsDate = Date.now();
-        Statistics.ID=generateID(transactions);
+        Statistics.ID = generateID(transactions);
         //Waiting Customer
         if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
             Statistics.WaitingCustomers = Statistics.WaitingCustomers + 1;
@@ -131,37 +130,35 @@ var UpdateStatistics = function (Statistics, transactions) {
         }
 
         //number of no show
-        if (transactions.servingType == enums.CustomerServingType.NoShow ) {
+        if (transactions.servingType == enums.CustomerServingType.NoShow) {
             Statistics.NoShowCustomersNo = Statistics.NoShowCustomersNo + 1;
         }
 
         //number of non served customers
-        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow ) {
+        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
             Statistics.NonServedCustomersNo = Statistics.NonServedCustomersNo + 1;
         }
 
         //total pending customers
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold ) {
+        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
             Statistics.TotalPendingCustomersNo = Statistics.TotalPendingCustomersNo + 1;
         }
 
         //avrage serving customers
         if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-           if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime)
-           {
-            Statistics.TotalServiceTime = Statistics.TotalServiceTime + transactions.serviceSeconds;
-            Statistics.ASTWeight = Statistics.ASTWeight + 1;
-            Statistics.AvgServiceTime = Statistics.TotalServiceTime  / Statistics.ASTWeight;
-           }   
+            if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime) {
+                Statistics.TotalServiceTime = Statistics.TotalServiceTime + transactions.serviceSeconds;
+                Statistics.ASTWeight = Statistics.ASTWeight + 1;
+                Statistics.AvgServiceTime = Statistics.TotalServiceTime / Statistics.ASTWeight;
+            }
         }
 
         //waited customer
         if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime)
-           {
-            Statistics.TotalWaitingTime = Statistics.TotalWaitingTime + transactions.waitingSeconds;
-                Statistics.AvgWaitingTime = Statistics.TotalWaitingTime  /  Statistics.WaitedCustomersNo;
-           }   
+            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
+                Statistics.TotalWaitingTime = Statistics.TotalWaitingTime + transactions.waitingSeconds;
+                Statistics.AvgWaitingTime = Statistics.TotalWaitingTime / Statistics.WaitedCustomersNo;
+            }
         }
         return Statistics;
 
@@ -171,6 +168,77 @@ var UpdateStatistics = function (Statistics, transactions) {
         return undefined;
     }
 };
+var AddOrUpdateTransaction = function (transaction) {
+    try {
+        let BranchID = transaction.branch_ID
+        //search from branch
+        let t_branches_statisticsData = branches_statisticsData.find(function (value) {
+            return value.branch_ID == BranchID;
+        });
+        //Check if the branch exists
+        if (t_branches_statisticsData) {
+            //Remove old transactions if exists
+            t_branches_statisticsData.transactions = t_branches_statisticsData.transactions.filter(function (value) { return value.id != transaction.id; });
+            //Add it to new
+            t_branches_statisticsData.transactions.push(transaction);
+        }
+        else {
+            //add branch transactions
+            t_branches_statisticsData = new branchStatisticsData();
+            t_branches_statisticsData.branch_ID = BranchID;
+            t_branches_statisticsData.transactions.push(transaction);
+            branches_statisticsData.push(t_branches_statisticsData);
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+var RefreshBranchStatistics = function (BranchID) {
+    try {
+        //Add it to statistics collection
+        let t_branchStatistics = branches_statisticsData.find(function (value) {
+            return value.branch_ID == BranchID;
+        });
+
+        //if statistics not exists add it
+        if (!t_branchStatistics) {
+            //If the branch not exists
+            t_branchStatistics = new branchStatisticsData();
+            //Create branch statistics
+            t_branchStatistics.branch_ID = BranchID;
+            branches_statisticsData.push(t_branchStatistics);
+        }
+
+        //Clear statistics
+        t_branchStatistics.statistics = [];
+
+        //Update statistics
+        let transactionsData = t_branchStatistics.transactions;
+        if (transactionsData && transactionsData.length > 0) {
+            for (let i = 0; i < transactionsData.length; i++) {
+                let transaction = transactionsData[i];
+                let Statistics_ID = generateID(transaction);
+                //if the branch exists
+                t_Statistics = t_branchStatistics.statistics.find(function (value) {
+                    return value.ID == Statistics_ID;
+                });
+                if (t_Statistics) {
+                    UpdateStatistics(t_Statistics, transaction);
+                }
+                else {
+                    t_Statistics = CreateNewstatistics(transaction);
+                    t_branchStatistics.statistics.push(t_Statistics);
+                }
+            }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+}
 
 //Load for all branches statistics
 var initialize = async function () {
@@ -180,7 +248,6 @@ var initialize = async function () {
         let Today = Now.setHours(0, 0, 0, 0);
         let tomorrow = new Date(Today + 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
         let t_Statistics;
-        logger.logError("load statistics");
 
         //Get all transactions
         let transactionsData = await repositoriesManager.transactionRep.getAll();
@@ -193,9 +260,14 @@ var initialize = async function () {
 
             if (transactionsData) {
                 for (let i = 0; i < transactionsData.length; i++) {
-                    let transaction=transactionsData[i];
+                    let transaction = transactionsData[i];
                     let BranchID = transaction.branch_ID
                     let Statistics_ID = generateID(transaction);
+
+                    //Add it to branch transaction
+                    AddOrUpdateTransaction(transaction)
+
+                    //Add it to statistics collection
                     let branch_statistics = branches_statisticsData.find(function (value) {
                         return value.branch_ID == BranchID;
                     });
@@ -205,7 +277,7 @@ var initialize = async function () {
                             return value.ID == Statistics_ID;
                         });
                         if (t_Statistics) {
-                            UpdateStatistics(t_Statistics,transaction);
+                            UpdateStatistics(t_Statistics, transaction);
                         }
                         else {
                             t_Statistics = CreateNewstatistics(transaction);
@@ -237,10 +309,10 @@ var initialize = async function () {
 
 
 //Get branch statistics
-var ReadBranchStatistics = async function (apiMessagePayLoad ) {
+var ReadBranchStatistics = async function (apiMessagePayLoad) {
     try {
-        await initialize();
-        let BranchID=apiMessagePayLoad.BranchID;
+        let BranchID = apiMessagePayLoad.BranchID;
+        //RefreshBranchStatistics(BranchID);
         let Branchstatistics = branches_statisticsData.find(
             function (value) {
                 return value.branch_ID == BranchID;
@@ -261,6 +333,7 @@ var ReadBranchStatistics = async function (apiMessagePayLoad ) {
 
 };
 
-
+module.exports.RefreshBranchStatistics = RefreshBranchStatistics;
+module.exports.AddOrUpdateTransaction = AddOrUpdateTransaction;
 module.exports.ReadBranchStatistics = ReadBranchStatistics;
 module.exports.initialize = initialize;

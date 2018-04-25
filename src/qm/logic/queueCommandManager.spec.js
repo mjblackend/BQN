@@ -6,11 +6,12 @@ var mocha = require("mocha");
 var describe = mocha.describe;
 var it = mocha.it;
 
-
+console.log("queueCommandManager.spec");
 should.toString();
 
 describe('Queuing Command Manager Test', function () {
     it('Initialize Queuing Command Manager successfully', async function () {
+        this.timeout(15000);
         let result = await queueCommandManager.initialize();
         (result === common.success).should.true();
     });
@@ -174,7 +175,5 @@ describe('Queuing Command Manager Test', function () {
         let result = await queueCommandManager.Read(apiMessagePayLoad);
         (result === common.success).should.true();
     });
-
-
 
 });
