@@ -303,22 +303,24 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
             //Get Servable Tickets
             let transactions = BracnhData.transactionsData.filter(function (transaction_Data) {
                 var servable = false;
-                if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
-                    let tSegment = allocated_segments.find(function (segment) {
-                        return segment.Segment_ID == transaction_Data.segment_ID;
+                if (transaction_Data.state == enums.StateType.Pending || transaction_Data.state == enums.StateType.PendingRecall) {
+                    if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
+                        let tSegment = allocated_segments.find(function (segment) {
+                            return segment.Segment_ID == transaction_Data.segment_ID;
+                        }
+                        );
+                        if (!tSegment) {
+                            return servable;
+                        }
                     }
-                    );
-                    if (!tSegment) {
-                        return servable;
-                    }
-                }
-                if (allocated_services && allocated_services.length > 0) {
-                    let tService = allocated_services.find(function (service) {
-                        return service.Service_ID == transaction_Data.service_ID;
-                    }
-                    );
-                    if (tService) {
-                        servable = true;
+                    if (allocated_services && allocated_services.length > 0) {
+                        let tService = allocated_services.find(function (service) {
+                            return service.Service_ID == transaction_Data.service_ID;
+                        }
+                        );
+                        if (tService) {
+                            servable = true;
+                        }
                     }
                 }
                 return servable;
