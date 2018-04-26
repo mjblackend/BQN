@@ -64,7 +64,6 @@ function readBranchStatistics() {
         <th>No Show Customers</th>
         <th>Avg Service Time</th>
         <th>Avg Waiting Time</th>
-        <th>Total Pending Customers</th>
       </tr>`;
 
         for (let i = 0; i < statistics.length; i++) {
@@ -79,7 +78,6 @@ function readBranchStatistics() {
             options = options + '<th>'+ statistics[i].NoShowCustomersNo + '</th>';
             options = options + '<th>'+ statistics[i].AvgServiceTime + '</th>';
             options = options + '<th>'+ statistics[i].AvgWaitingTime + '</th>';
-            options = options + '<th>'+ statistics[i].TotalPendingCustomersNo + '</th>';
             options = options + '</tr>';
         }
 

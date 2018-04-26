@@ -465,7 +465,7 @@ var issueSingleTicket = function (errors, transaction) {
                 if (ticketSeqData == null) {
                     ticketSeqData = new TicketSeqData();
                     ticketSeqData.hall_ID = transaction.hall_ID;
-                    ticketSeqData.symbol = transaction.symbol
+                    ticketSeqData.symbol = transaction.symbol;
                     ticketSeqData.sequence = ticketSequence;
                     ticketSeqData.time = Today;
                     BracnhData.ticketSeqData.push(ticketSeqData);

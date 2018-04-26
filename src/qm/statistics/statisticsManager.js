@@ -2,7 +2,6 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
 var enums = require("../../common/enums");
-var dataService = require("../data/dataService");
 var branchStatisticsData = require("../data/branchStatisticsData");
 var statisticsData = require("../data/statisticsData");
 var configurationService = require("../configurations/configurationService");
@@ -34,7 +33,7 @@ var getServiceConfig = function (ServiceID) {
 };
 
 var generateID = function (transactions) {
-    return transactions.branch_ID + "_" + transactions.service_ID + "_" + transactions.segment_ID + "_" + transactions.hall_ID + "_" + transactions.counter_ID + "_" + transactions.user_ID
+    return transactions.branch_ID + "_" + transactions.service_ID + "_" + transactions.segment_ID + "_" + transactions.hall_ID + "_" + transactions.counter_ID + "_" + transactions.user_ID;
 };
 
 var CreateNewstatistics = function (transactions) {
@@ -78,11 +77,6 @@ var CreateNewstatistics = function (transactions) {
         //number of non served customers
         if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
             t_Statistics.NonServedCustomersNo = t_Statistics.NonServedCustomersNo + 1;
-        }
-
-        //total pending customers
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
-            t_Statistics.TotalPendingCustomersNo = t_Statistics.TotalPendingCustomersNo + 1;
         }
 
         //avrage serving customers
@@ -139,10 +133,6 @@ var UpdateStatistics = function (Statistics, transactions) {
             Statistics.NonServedCustomersNo = Statistics.NonServedCustomersNo + 1;
         }
 
-        //total pending customers
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
-            Statistics.TotalPendingCustomersNo = Statistics.TotalPendingCustomersNo + 1;
-        }
 
         //avrage serving customers
         if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
@@ -170,7 +160,7 @@ var UpdateStatistics = function (Statistics, transactions) {
 };
 var AddOrUpdateTransaction = function (transaction) {
     try {
-        let BranchID = transaction.branch_ID
+        let BranchID = transaction.branch_ID;
         //search from branch
         let t_branches_statisticsData = branches_statisticsData.find(function (value) {
             return value.branch_ID == BranchID;
@@ -194,7 +184,7 @@ var AddOrUpdateTransaction = function (transaction) {
         logger.logError(error);
         return undefined;
     }
-}
+};
 
 var RefreshBranchStatistics = function (BranchID) {
     try {
@@ -234,7 +224,7 @@ var RefreshBranchStatistics = function (BranchID) {
                 let transaction = transactionsData[i];
                 let Statistics_ID = generateID(transaction);
                 //if the branch exists
-                t_Statistics = t_branchStatistics.statistics.find(function (value) {
+                let t_Statistics = t_branchStatistics.statistics.find(function (value) {
                     return value.ID == Statistics_ID;
                 });
                 if (t_Statistics) {
@@ -250,7 +240,7 @@ var RefreshBranchStatistics = function (BranchID) {
     catch (error) {
         logger.logError(error);
     }
-}
+};
 
 //Load for all branches statistics
 var initialize = async function () {
@@ -273,11 +263,11 @@ var initialize = async function () {
             if (transactionsData) {
                 for (let i = 0; i < transactionsData.length; i++) {
                     let transaction = transactionsData[i];
-                    let BranchID = transaction.branch_ID
+                    let BranchID = transaction.branch_ID;
                     let Statistics_ID = generateID(transaction);
 
                     //Add it to branch transaction
-                    AddOrUpdateTransaction(transaction)
+                    AddOrUpdateTransaction(transaction);
 
                     //Add it to statistics collection
                     let branch_statistics = branches_statisticsData.find(function (value) {

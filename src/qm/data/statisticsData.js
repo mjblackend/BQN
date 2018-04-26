@@ -21,7 +21,6 @@ class statisticsData {
         this.ServedCustomersNo = INT_ZERO;
         this.WaitedCustomersNo = INT_ZERO;
         this.NoShowCustomersNo = INT_ZERO;
-        this.TotalPendingCustomersNo = INT_ZERO;
         this.NonServedCustomersNo = INT_ZERO;
 
         //this.SentToServer;
