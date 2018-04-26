@@ -59,11 +59,6 @@ var CreateNewstatistics = function (transactions) {
             t_Statistics.WaitingCustomers = t_Statistics.WaitingCustomers + 1;
         }
 
-        //waited customer
-        if (transactions.serviceSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            t_Statistics.WaitedCustomersNo = t_Statistics.WaitedCustomersNo + 1;
-        }
-
         //served customers
         if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.SetAsServed || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
             t_Statistics.ServedCustomersNo = t_Statistics.ServedCustomersNo + 1;
@@ -90,6 +85,7 @@ var CreateNewstatistics = function (transactions) {
 
         //waited customer
         if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
+            t_Statistics.WaitedCustomersNo = t_Statistics.WaitedCustomersNo + 1;
             if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
                 t_Statistics.TotalWaitingTime = t_Statistics.TotalWaitingTime + transactions.waitingSeconds;
                 t_Statistics.AvgWaitingTime = t_Statistics.TotalWaitingTime / t_Statistics.WaitedCustomersNo;
@@ -111,11 +107,6 @@ var UpdateStatistics = function (Statistics, transactions) {
         //Waiting Customer
         if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
             Statistics.WaitingCustomers = Statistics.WaitingCustomers + 1;
-        }
-
-        //waited customer
-        if (transactions.serviceSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            Statistics.WaitedCustomersNo = Statistics.WaitedCustomersNo + 1;
         }
 
         //served customers
@@ -145,6 +136,7 @@ var UpdateStatistics = function (Statistics, transactions) {
 
         //waited customer
         if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
+            Statistics.WaitedCustomersNo = Statistics.WaitedCustomersNo + 1;
             if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
                 Statistics.TotalWaitingTime = Statistics.TotalWaitingTime + transactions.waitingSeconds;
                 Statistics.AvgWaitingTime = Statistics.TotalWaitingTime / Statistics.WaitedCustomersNo;

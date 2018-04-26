@@ -40,7 +40,7 @@ const CustomerServingType={
     Cancelled: 5,
     ServedWithAdded: 6,
     CancelledDueTransfer: 7
-}
+};
 
 const OriginType ={
     //IF any change occours the simulation must be changed
@@ -58,7 +58,7 @@ const OriginType ={
     ChangeService: 11,
     AutoTransfer: 12,
     RemoteTicketing: 13
-}
+};
 
 const commands = {
     IssueTicket: "issueTicket",
