@@ -173,6 +173,33 @@ function getCurrentData(OrgID, BranchID, CounterID, output) {
 
 
 //Check Counter Validation For Open
+var isCounterValidForAutoNext = function (errors,OrgID, BranchID, CounterID) {
+    try {
+        let output = [];
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        getCurrentData(OrgID, BranchID, CounterID, output);
+        BracnhData = output[0];
+        CounterData = output[1];
+        CurrentActivity = output[2];
+
+        // Change the Current activity
+        if (CurrentActivity) {
+            if (CurrentActivity.type == enums.EmployeeActiontypes.Ready ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+        return false;
+    }
+};
+
+//Check Counter Validation For Open
 var CounterValidationForOpen = function (errors,OrgID, BranchID, CounterID) {
     try {
         let output = [];
@@ -403,7 +430,7 @@ var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, Counter
 
 
 
-
+module.exports.isCounterValidForAutoNext =isCounterValidForAutoNext;
 module.exports.CounterValidationForNext = CounterValidationForNext;
 module.exports.ChangeCurrentCounterStateForNext = ChangeCurrentCounterStateForNext;
 module.exports.CounterValidationForBreak = CounterValidationForBreak;

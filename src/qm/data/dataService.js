@@ -26,6 +26,10 @@ var cacheData = async function () {
 
                 //Get user activities
                 let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branch.id, "0"]);
+                userActivities = userActivities.filter(function (value) {
+                    return value.startTime > Today;
+                });
+
                 if (userActivities) {
                     branch.userActivitiesData = userActivities;
                     if (branch.userActivitiesData) {

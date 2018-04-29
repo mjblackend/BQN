@@ -10,30 +10,7 @@ var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("../statistics/statisticsManager");
-var initialized =false;
-//Initialize everything
-var initialize = async function (ticketInfo) {
-    try {
-        if (initialized)
-        {
-            return common.success;
-        }
-        let result = await configurationService.initialize();
-        if (result == common.success) {
-            result = await dataService.initialize();
-            if (result == common.success) {
-                result = await statisticsManager.initialize();
-                initialized=true;
-                console.log("Initialized");
-                return result;
-            }
-        }
-    }
-    catch (error) {
-        logger.logError(error);
-        return common.error;
-    }
-};
+var initialized = false;
 
 var FinishingCommand = async function (BranchID) {
     try {
@@ -340,7 +317,6 @@ var ReadBranchStatistics = async function (apiMessagePayload) {
     return await statisticsManager.ReadBranchStatistics(apiMessagePayload);
 };
 
-
 //Deassign Counter from BMS
 var processCommand = async function (apiMessage) {
     try {
@@ -364,7 +340,7 @@ var processCommand = async function (apiMessage) {
                     break;
                 case enums.commands.ReadBranchStatistics:
                     result = await this.ReadBranchStatistics(apiMessage.payload);
-                    break;                   
+                    break;
                 default:
                     result = common.error;
             }
@@ -381,12 +357,69 @@ var processCommand = async function (apiMessage) {
 };
 
 
+var automaticCommands = async function () {
+    try {
+        console.log("Autonext starts");
+        //Automatic next
+        let errors = [];
+        if (dataService.branchesData) {
+            for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
+                let branchData = dataService.branchesData[iBranch];
+                if (branchData.countersData) {
+                    for (let iCounter = 0; iCounter < branchData.countersData.length; iCounter++) {
+                        let counterData = branchData.countersData[iCounter];
+                        let isValidForAutoNext = userActivityManager.isCounterValidForAutoNext(errors, "1", branchData.id, counterData.id);
+                        if (isValidForAutoNext) {
+                            var counterInfo = {
+                                orgid: "1",
+                                counterid: counterData.id.toString(),
+                                branchid:  branchData.id.toString(),
+                                languageindex: "0"
+                            };
+                            counterNext(counterInfo);
+                        }
+                    }
+                }
+            }
+        }
+        console.log("Autonext ends");
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+//Initialize everything
+var initialize = async function (ticketInfo) {
+    try {
+        if (initialized) {
+            return common.success;
+        }
+        let result = await configurationService.initialize();
+        if (result == common.success) {
+            result = await dataService.initialize();
+            if (result == common.success) {
+                result = await statisticsManager.initialize();
+                setInterval(automaticCommands, 10000);
+                initialized = true;
+                console.log("Initialized");
+                return result;
+            }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
 
 
 
 
-
-
+module.exports.automaticCommands = automaticCommands;
 module.exports.initialize = initialize;
 module.exports.issueTicket = issueTicket;
 module.exports.issueTicketMulti = issueTicketMulti;
@@ -412,4 +445,4 @@ module.exports.checkInAppointment = checkInAppointment;
 module.exports.counterDeassignFromBMS = counterDeassignFromBMS;
 module.exports.processCommand = processCommand;
 module.exports.Read = Read;
-module.exports.ReadBranchStatistics =ReadBranchStatistics;
+module.exports.ReadBranchStatistics = ReadBranchStatistics;
