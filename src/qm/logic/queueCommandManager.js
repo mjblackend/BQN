@@ -360,23 +360,25 @@ var processCommand = async function (apiMessage) {
 var automaticCommands = async function () {
     try {
         console.log("Autonext starts");
-        //Automatic next
-        let errors = [];
-        if (dataService.branchesData) {
-            for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
-                let branchData = dataService.branchesData[iBranch];
-                if (branchData.countersData) {
-                    for (let iCounter = 0; iCounter < branchData.countersData.length; iCounter++) {
-                        let counterData = branchData.countersData[iCounter];
-                        let isValidForAutoNext = userActivityManager.isCounterValidForAutoNext(errors, "1", branchData.id, counterData.id);
-                        if (isValidForAutoNext) {
-                            var counterInfo = {
-                                orgid: "1",
-                                counterid: counterData.id.toString(),
-                                branchid:  branchData.id.toString(),
-                                languageindex: "0"
-                            };
-                            counterNext(counterInfo);
+        if (initialized) {
+            //Automatic next
+            let errors = [];
+            if (dataService.branchesData) {
+                for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
+                    let branchData = dataService.branchesData[iBranch];
+                    if (branchData.countersData) {
+                        for (let iCounter = 0; iCounter < branchData.countersData.length; iCounter++) {
+                            let counterData = branchData.countersData[iCounter];
+                            let isValidForAutoNext = userActivityManager.isCounterValidForAutoNext(errors, "1", branchData.id, counterData.id);
+                            if (isValidForAutoNext) {
+                                var counterInfo = {
+                                    orgid: "1",
+                                    counterid: counterData.id.toString(),
+                                    branchid: branchData.id.toString(),
+                                    languageindex: "0"
+                                };
+                                counterNext(counterInfo);
+                            }
                         }
                     }
                 }
@@ -403,7 +405,6 @@ var initialize = async function (ticketInfo) {
             result = await dataService.initialize();
             if (result == common.success) {
                 result = await statisticsManager.initialize();
-                setInterval(automaticCommands, 10000);
                 initialized = true;
                 console.log("Initialized");
                 return result;
@@ -415,10 +416,19 @@ var initialize = async function (ticketInfo) {
         return common.error;
     }
 };
+var startBackgroundActions = async function (ticketInfo) {
+    try {
+        setInterval(automaticCommands, 10000);
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
 
 
-
-
+module.exports.startBackgroundActions = startBackgroundActions;
 module.exports.automaticCommands = automaticCommands;
 module.exports.initialize = initialize;
 module.exports.issueTicket = issueTicket;

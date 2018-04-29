@@ -14,7 +14,7 @@ var app = express();
 
 var queueCommandManager = require("./qm/logic/queueCommandManager");
 queueCommandManager.initialize();
-
+queueCommandManager.startBackgroundActions();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
