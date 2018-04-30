@@ -21,9 +21,13 @@ var UpdateActivity = function (userActivity) {
             for (let i = 0; i < BracnhData.userActivitiesData.length; i++) {
                 if (BracnhData.userActivitiesData[i].id == userActivity.id) {
                     BracnhData.userActivitiesData[i] = userActivity;
+                    if (BracnhData.userActivitiesData[i].closed == 1) {
+                        BracnhData.userActivitiesData.splice(i, 1);
+                    }
                     break;
                 }
             }
+
 
             //Update To data base
             repositoriesManager.userActivitiesRep.UpdateSynch(userActivity);
@@ -173,20 +177,11 @@ function getCurrentData(OrgID, BranchID, CounterID, output) {
 
 
 //Check Counter Validation For Open
-var isCounterValidForAutoNext = function (errors,OrgID, BranchID, CounterID) {
+var isCounterValidForAutoNext = function (CurrentActivity) {
     try {
-        let output = [];
-        let BracnhData;
-        let CounterData;
-        let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
-        CounterData = output[1];
-        CurrentActivity = output[2];
-
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type == enums.EmployeeActiontypes.Ready ) {
+            if (CurrentActivity.type == enums.EmployeeActiontypes.Ready) {
                 return true;
             }
         }
@@ -200,7 +195,7 @@ var isCounterValidForAutoNext = function (errors,OrgID, BranchID, CounterID) {
 };
 
 //Check Counter Validation For Open
-var CounterValidationForOpen = function (errors,OrgID, BranchID, CounterID) {
+var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
     try {
         let output = [];
         let BracnhData;
@@ -235,7 +230,7 @@ var CounterValidationForOpen = function (errors,OrgID, BranchID, CounterID) {
 };
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForOpen = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
 
         let output = [];
@@ -266,7 +261,7 @@ var ChangeCurrentCounterStateForOpen = function (errors,OrgID, BranchID, Counter
 
 
 //Check Counter Validation ForNext
-var CounterValidationForBreak = function (errors,OrgID, BranchID, CounterID) {
+var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
@@ -285,7 +280,7 @@ var CounterValidationForBreak = function (errors,OrgID, BranchID, CounterID) {
                 return common.success;
             }
             else {
-                errors.push("Not in the correct state to Break") ;
+                errors.push("Not in the correct state to Break");
                 return common.not_valid;
             }
         }
@@ -309,7 +304,7 @@ var CounterValidationForBreak = function (errors,OrgID, BranchID, CounterID) {
 
 
 //Check Counter Validation ForNext
-var CounterValidationForNext = function (errors,OrgID, BranchID, CounterID) {
+var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
@@ -346,7 +341,7 @@ var CounterValidationForNext = function (errors,OrgID, BranchID, CounterID) {
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
 
         let output = [];
@@ -377,9 +372,9 @@ var ChangeCurrentCounterStateForBreak = function (errors,OrgID, BranchID, Counte
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
     try {
-         let output = [];
+        let output = [];
         let BracnhData;
         let CounterData;
         let CurrentActivity;
@@ -430,7 +425,7 @@ var ChangeCurrentCounterStateForNext = function (errors,OrgID, BranchID, Counter
 
 
 
-module.exports.isCounterValidForAutoNext =isCounterValidForAutoNext;
+module.exports.isCounterValidForAutoNext = isCounterValidForAutoNext;
 module.exports.CounterValidationForNext = CounterValidationForNext;
 module.exports.ChangeCurrentCounterStateForNext = ChangeCurrentCounterStateForNext;
 module.exports.CounterValidationForBreak = CounterValidationForBreak;

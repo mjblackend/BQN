@@ -359,6 +359,8 @@ var processCommand = async function (apiMessage) {
 
 var automaticCommands = async function () {
     try {
+
+        let date1 = Date.now();
         console.log("Autonext starts");
         if (initialized) {
             //Automatic next
@@ -366,25 +368,33 @@ var automaticCommands = async function () {
             if (dataService.branchesData) {
                 for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
                     let branchData = dataService.branchesData[iBranch];
-                    if (branchData.countersData) {
-                        for (let iCounter = 0; iCounter < branchData.countersData.length; iCounter++) {
-                            let counterData = branchData.countersData[iCounter];
-                            let isValidForAutoNext = userActivityManager.isCounterValidForAutoNext(errors, "1", branchData.id, counterData.id);
-                            if (isValidForAutoNext) {
+                    if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
+                        let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
+                            return userActivityManager.isCounterValidForAutoNext(value);
+                        }
+                        );
+                        if (readyCountersActivities) {
+                            for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
+                                let activity = readyCountersActivities[iActivity];
                                 var counterInfo = {
                                     orgid: "1",
-                                    counterid: counterData.id.toString(),
+                                    counterid: activity.counter_ID.toString(),
                                     branchid: branchData.id.toString(),
                                     languageindex: "0"
                                 };
                                 counterNext(counterInfo);
                             }
                         }
+
                     }
                 }
             }
         }
-        console.log("Autonext ends");
+
+        let duration= (Date.now() - date1)/1000
+
+        console.log("Autonext ends " + duration + " seconds");
+
         return common.success;
     }
     catch (error) {
