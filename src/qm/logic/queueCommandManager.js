@@ -310,6 +310,46 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
+
+var getCounterStatus = function (counterInfo)
+{
+    try{
+        let result = common.success;
+        let errors = [];
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+    
+        let output = [];
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        let CurrentTransaction;
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
+        BracnhData = output[0];
+        CounterData = output[1];
+        CurrentActivity = output[2];
+        CurrentTransaction=output[3];
+        if (CurrentTransaction)
+        {
+            counterInfo.CurrentDisplayTicketNumber = CurrentTransaction.displayTicketNumber;
+        }
+        else
+        {
+            counterInfo.CurrentDisplayTicketNumber = "...";
+        }
+        if (CurrentActivity)
+        {
+            counterInfo.CurrentStateType = CurrentActivity.type;
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
 var Read = function (apiMessagePayload) {
     return configurationService.Read(apiMessagePayload);
 };
@@ -341,6 +381,9 @@ var processCommand = async function (apiMessage) {
                 case enums.commands.ReadBranchStatistics:
                     result = await this.ReadBranchStatistics(apiMessage.payload);
                     break;
+                case enums.commands.GetCounterStatus:
+                    result = await this.getCounterStatus(apiMessage.payload);
+                    break;                   
                 default:
                     result = common.error;
             }
@@ -437,7 +480,7 @@ var startBackgroundActions = async function (ticketInfo) {
     }
 };
 
-
+module.exports.getCounterStatus = getCounterStatus
 module.exports.startBackgroundActions = startBackgroundActions;
 module.exports.automaticCommands = automaticCommands;
 module.exports.initialize = initialize;

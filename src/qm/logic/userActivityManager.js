@@ -127,55 +127,6 @@ var CloseActivity = function (Activity) {
     }
 };
 
-//Get the Branch Data and counter data then the current Activity
-function getCurrentData(OrgID, BranchID, CounterID, output) {
-    try {
-
-        let BracnhData;
-        let CounterData;
-        let CurrentActivity;
-
-        //Get Branch Data
-        BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
-
-        //Get current State
-        if (BracnhData && BracnhData.countersData) {
-            for (let i = 0; i < BracnhData.countersData.length; i++) {
-                if (BracnhData.countersData[i].id == CounterID) {
-                    CounterData = BracnhData.countersData[i];
-                    break;
-                }
-            }
-            if (!CounterData) {
-                let tcounterData = new counterData();
-                tcounterData.id = CounterID;
-                BracnhData.countersData.push(tcounterData);
-                CounterData = BracnhData.countersData[BracnhData.countersData.length - 1];
-            }
-        }
-
-        //Get Counter Status
-        if (CounterData) {
-            if (CounterData.currentState_ID) {
-                CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
-                    return CounterData.currentState_ID == value.id;
-                });
-            }
-        }
-        output.push(BracnhData);
-        output.push(CounterData);
-        output.push(CurrentActivity);
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
-
-
 //Check Counter Validation For Open
 var isCounterValidForAutoNext = function (CurrentActivity) {
     try {
@@ -201,7 +152,7 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
@@ -237,7 +188,7 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
@@ -268,7 +219,7 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
@@ -311,7 +262,7 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
@@ -348,7 +299,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
@@ -378,7 +329,7 @@ var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, Counte
         let BracnhData;
         let CounterData;
         let CurrentActivity;
-        getCurrentData(OrgID, BranchID, CounterID, output);
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];

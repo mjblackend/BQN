@@ -128,6 +128,63 @@ var cacheData = async function () {
     }
 };
 
+//Get the Branch Data and counter data then the current Activity
+function getCurrentData(OrgID, BranchID, CounterID, output) {
+    try {
+
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        let CurrentTransaction;
+
+        //Get Branch Data
+        BracnhData = branchesData.find(function (value) {
+            return value.id == BranchID;
+        }
+        );
+
+        //Get current State
+        if (BracnhData && BracnhData.countersData) {
+            for (let i = 0; i < BracnhData.countersData.length; i++) {
+                if (BracnhData.countersData[i].id == CounterID) {
+                    CounterData = BracnhData.countersData[i];
+                    break;
+                }
+            }
+            if (!CounterData) {
+                let tcounterData = new counterData();
+                tcounterData.id = CounterID;
+                BracnhData.countersData.push(tcounterData);
+                CounterData = BracnhData.countersData[BracnhData.countersData.length - 1];
+            }
+        }
+
+        //Get Counter Status
+        if (CounterData) {
+            if (CounterData.currentState_ID) {
+                CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
+                    return CounterData.currentState_ID == value.id;
+                });
+            }
+            if (CounterData.currentTransaction_ID) {
+                CurrentTransaction = BracnhData.transactionsData.find(function (value) {
+                    return CounterData.currentTransaction_ID == value.id;
+                });
+            }
+        }
+
+
+
+        output.push(BracnhData);
+        output.push(CounterData);
+        output.push(CurrentActivity);
+        output.push(CurrentTransaction);
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
 
 var initialize = async function () {
     try {
@@ -143,6 +200,6 @@ var initialize = async function () {
     }
 };
 
-
+module.exports.getCurrentData = getCurrentData;
 module.exports.initialize = initialize;
 module.exports.branchesData = branchesData;

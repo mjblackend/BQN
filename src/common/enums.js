@@ -66,7 +66,8 @@ const commands = {
     Break: "break",
     Open: "open",
     Read: "read",
-    ReadBranchStatistics: "readBranchStatistics"
+    ReadBranchStatistics: "readBranchStatistics",
+    GetCounterStatus: "getCounterStatus"
 };
 
 
