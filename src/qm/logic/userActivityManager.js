@@ -6,7 +6,7 @@ var dataService = require("../data/dataService");
 var userActivity = require("../data/userActivity");
 var idGenerator = require("../localRepositories/idGenerator");
 var counterData = require("../data/counterData");
-
+var configurationService = require("../configurations/configurationService");
 
 
 //Update Activity
@@ -140,7 +140,6 @@ var isCounterValidForAutoNext = function (CurrentActivity) {
     }
     catch (error) {
         logger.logError(error);
-        errors.push(error.toString());
         return false;
     }
 };
@@ -266,6 +265,17 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
+
+        let counter = configurationService.configsCache.counters.find(function (value) {
+            return value.ID == CounterData.id;
+        }
+        );
+
+        //Check for correct type
+        if (counter && counter.Type_LV != enums.counterTypes.CustomerServing) {
+
+            return common.not_valid;
+        }
 
         // Change the Current activity
         if (CurrentActivity) {

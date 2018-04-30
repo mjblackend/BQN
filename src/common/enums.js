@@ -31,7 +31,7 @@ const SegmentAllocationType = {
 };
 
 
-const CustomerServingType={
+const CustomerServingType = {
     NoCalled: 0,
     NoShow: 1,
     Served: 2,
@@ -42,17 +42,17 @@ const CustomerServingType={
     CancelledDueTransfer: 7
 };
 
-const OriginType ={
+const OriginType = {
     //IF any change occours the simulation must be changed
     None: 0,
     TransferToService: 1,
-    TransferToWindow : 2,
-    AddVirtualService : 3,
-    MultiService : 4,
-    KioskBooking : 5,
-    Supervisor : 6,
-    ByUser : 7,
-    ExternalBooking : 8,
+    TransferToWindow: 2,
+    AddVirtualService: 3,
+    MultiService: 4,
+    KioskBooking: 5,
+    Supervisor: 6,
+    ByUser: 7,
+    ExternalBooking: 8,
     RemoteBooking: 9,
     TransferBack: 10,
     ChangeService: 11,
@@ -70,8 +70,14 @@ const commands = {
     GetCounterStatus: "getCounterStatus"
 };
 
+const counterTypes = {
+    CustomerServing: 0,
+    TicketDispenser: 1,
+    TicketDispenserWithUser: 2,
+    NoCallServing: 3
+};
 
-
+module.exports.counterTypes = counterTypes;
 module.exports.OriginType = OriginType;
 module.exports.SegmentAllocationType = SegmentAllocationType;
 module.exports.EmployeeActiontypes = EmployeeActiontypes;

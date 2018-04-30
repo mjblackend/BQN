@@ -348,7 +348,7 @@ var getCounterStatus = function (counterInfo)
         logger.logError(error);
         return common.error;
     }
-}
+};
 
 var Read = function (apiMessagePayload) {
     return configurationService.Read(apiMessagePayload);
@@ -434,7 +434,7 @@ var automaticCommands = async function () {
             }
         }
 
-        let duration= (Date.now() - date1)/1000
+        let duration= (Date.now() - date1)/1000;
 
         console.log("Autonext ends " + duration + " seconds");
 
@@ -480,7 +480,7 @@ var startBackgroundActions = async function (ticketInfo) {
     }
 };
 
-module.exports.getCounterStatus = getCounterStatus
+module.exports.getCounterStatus = getCounterStatus;
 module.exports.startBackgroundActions = startBackgroundActions;
 module.exports.automaticCommands = automaticCommands;
 module.exports.initialize = initialize;
