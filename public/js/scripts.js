@@ -14,6 +14,7 @@ function LoadPage() {
         elem.innerHTML = data;
     });
     FillBranches();
+    setInterval(CGetCurrentState,5000);
 }
 
 function SendMessage() {
@@ -89,6 +90,47 @@ function readBranchStatistics() {
 }
 
 
+
+function CGetCurrentState(){
+    var e = document.getElementById("counters");
+    let counterID = e.options[e.selectedIndex].value;
+
+    var Message = {
+        time: new Date(),
+        title: 'getCounterStatus',
+        payload: {
+            orgid: "1",
+            counterid: counterID,
+            branchid: branchID,
+            languageindex: "0",
+            origin: "0"
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+        // do something to response
+        count += 1;
+        console.log(this.responseText);
+
+        var elem = document.getElementById('servedticketnumber');
+        elem.innerHTML = "...";
+
+        elem = document.getElementById('ticketnumberCalled');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
+
+        elem = document.getElementById('counterState');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
+
+        elem = document.getElementById('errorMessage');
+        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+
+    };
+    xhr.send(JSON.stringify(Message));
+}
 
 function Next() {
 
