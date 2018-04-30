@@ -196,7 +196,20 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
             CloseActivity(CurrentActivity);
         }
 
-        CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
+        let counter = configurationService.configsCache.counters.find(function (value) {
+            return value.ID == CounterID;
+        }
+        );
+        //Check for correct type
+        if (counter && counter.Type_LV == enums.counterTypes.CustomerServing) {
+
+            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
+        }
+        else
+        {
+            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.NoCallServing);
+        }
+
         CounterData.currentState_ID = CurrentActivity.id;
         CurrentStateTypes.push(CurrentActivity.type);
         return common.success;
@@ -225,7 +238,7 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.NoCallServing
+            if (CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff 
                 && CurrentActivity.type != enums.EmployeeActiontypes.TicketDispensing && CurrentActivity.type != enums.EmployeeActiontypes.Custom && CurrentActivity.type != enums.EmployeeActiontypes.Break) {
                 return common.success;
             }

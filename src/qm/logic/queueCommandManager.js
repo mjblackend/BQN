@@ -310,16 +310,15 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
-
-var getCounterStatus = function (counterInfo)
-{
-    try{
+//Get counter status (current ticket and state)
+var getCounterStatus = function (counterInfo) {
+    try {
         let result = common.success;
         let errors = [];
         let OrgID = counterInfo["orgid"];
         let BranchID = counterInfo["branchid"];
         let CounterID = counterInfo["counterid"];
-    
+
         let output = [];
         let BracnhData;
         let CounterData;
@@ -329,17 +328,14 @@ var getCounterStatus = function (counterInfo)
         BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
-        CurrentTransaction=output[3];
-        if (CurrentTransaction)
-        {
+        CurrentTransaction = output[3];
+        if (CurrentTransaction) {
             counterInfo.CurrentDisplayTicketNumber = CurrentTransaction.displayTicketNumber;
         }
-        else
-        {
+        else {
             counterInfo.CurrentDisplayTicketNumber = "...";
         }
-        if (CurrentActivity)
-        {
+        if (CurrentActivity) {
             counterInfo.CurrentStateType = CurrentActivity.type;
         }
         return result;
@@ -383,7 +379,7 @@ var processCommand = async function (apiMessage) {
                     break;
                 case enums.commands.GetCounterStatus:
                     result = await this.getCounterStatus(apiMessage.payload);
-                    break;                   
+                    break;
                 default:
                     result = common.error;
             }
@@ -399,10 +395,9 @@ var processCommand = async function (apiMessage) {
     }
 };
 
-
-var automaticCommands = async function () {
+//Automatic Commands
+var automaticNext = async function () {
     try {
-
         let date1 = Date.now();
         console.log("Autonext starts");
         if (initialized) {
@@ -411,31 +406,34 @@ var automaticCommands = async function () {
             if (dataService.branchesData) {
                 for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
                     let branchData = dataService.branchesData[iBranch];
-                    if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
-                        let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
-                            return userActivityManager.isCounterValidForAutoNext(value);
-                        }
-                        );
-                        if (readyCountersActivities) {
-                            for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
-                                let activity = readyCountersActivities[iActivity];
-                                var counterInfo = {
-                                    orgid: "1",
-                                    counterid: activity.counter_ID.toString(),
-                                    branchid: branchData.id.toString(),
-                                    languageindex: "0"
-                                };
-                                counterNext(counterInfo);
+                    let EnableAutoNext = configurationService.getCommonSettings(branchData.id, "EnableAutoNext");
+                    if (EnableAutoNext == "1") {
+                        if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
+                            let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
+                                return userActivityManager.isCounterValidForAutoNext(value);
                             }
-                        }
+                            );
+                            if (readyCountersActivities) {
+                                for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
+                                    let activity = readyCountersActivities[iActivity];
+                                    var counterInfo = {
+                                        orgid: "1",
+                                        counterid: activity.counter_ID.toString(),
+                                        branchid: branchData.id.toString(),
+                                        languageindex: "0"
+                                    };
+                                    counterNext(counterInfo);
+                                }
+                            }
 
+                        }
                     }
+
                 }
             }
         }
 
-        let duration= (Date.now() - date1)/1000;
-
+        let duration = (Date.now() - date1) / 1000;
         console.log("Autonext ends " + duration + " seconds");
 
         return common.success;
@@ -471,7 +469,7 @@ var initialize = async function (ticketInfo) {
 };
 var startBackgroundActions = async function (ticketInfo) {
     try {
-        setInterval(automaticCommands, 10000);
+        setInterval(automaticNext, 10000);
         return common.success;
     }
     catch (error) {
@@ -482,7 +480,7 @@ var startBackgroundActions = async function (ticketInfo) {
 
 module.exports.getCounterStatus = getCounterStatus;
 module.exports.startBackgroundActions = startBackgroundActions;
-module.exports.automaticCommands = automaticCommands;
+module.exports.automaticNext = automaticNext;
 module.exports.initialize = initialize;
 module.exports.issueTicket = issueTicket;
 module.exports.issueTicketMulti = issueTicketMulti;

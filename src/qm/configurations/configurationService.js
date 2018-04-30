@@ -84,13 +84,38 @@ var populateEntities = async function () {
         }
 
 
-        //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
+        fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
 
         return common.success;
     }
     catch (error) {
         logger.logError(error);
         return common.error;
+    }
+};
+
+var getCommonSettings = function (BranchID, Key) {
+    try {
+        //Get Branch Data
+        let BracnhConfig = this.configsCache.branches.find(function (value) {
+            return value.ID == BranchID;
+        }
+        );
+
+        if (BracnhConfig)
+        {
+            let commonConfig = BracnhConfig.settings.find(function (value) {
+                return value.Key == Key;
+            });
+    
+            if (commonConfig)
+            {
+                return commonConfig.Value;
+            }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
     }
 };
 
@@ -327,6 +352,7 @@ var initialize = async function () {
     }
 };
 
+module.exports.getCommonSettings = getCommonSettings;
 module.exports.Read = Read;
 module.exports.initialize = initialize;
 module.exports.configsCache = configsCache;
