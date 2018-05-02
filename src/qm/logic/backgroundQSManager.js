@@ -16,8 +16,7 @@ var automaticNext = async function () {
 
         let errors = [];
         //Automatic next
-        if (queueCommandManager.initialized)
-        {
+        if (queueCommandManager.initialized) {
             if (dataService.branchesData && dataService.branchesData.length > 0) {
                 for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
                     let branchData = dataService.branchesData[iBranch];
@@ -39,10 +38,10 @@ var automaticNext = async function () {
                                     queueCommandManager.counterNext(counterInfo);
                                 }
                             }
-    
+
                         }
                     }
-    
+
                 }
             }
         }
@@ -61,7 +60,9 @@ var automaticNext = async function () {
 
 var startBackgroundActions = async function (ticketInfo) {
     try {
-        autoNextID = setInterval(automaticNext, 10000);
+        if (!autoNextID) {
+            autoNextID = setInterval(automaticNext, 10000);
+        }
         return common.success;
     }
     catch (error) {
@@ -72,6 +73,7 @@ var startBackgroundActions = async function (ticketInfo) {
 var stopBackgroundActions = async function (ticketInfo) {
     try {
         clearInterval(autoNextID);
+        autoNextID = undefined;
         return common.success;
     }
     catch (error) {

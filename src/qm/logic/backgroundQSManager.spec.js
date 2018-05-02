@@ -17,7 +17,7 @@ describe('Background QS Manager', function () {
         (result === common.success).should.true();
     });
     it('Start Background Actions Successfully', function () {
-        let result = backgroundQSManager.stopBackgroundActions().then(function(result) {
+        let result = backgroundQSManager.startBackgroundActions().then(function(result) {
             (result === common.success).should.true();
           });
     });
