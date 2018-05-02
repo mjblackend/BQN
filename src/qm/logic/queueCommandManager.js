@@ -1,12 +1,12 @@
 /*eslint no-unused-vars: "off"*/
 "use strict";
+var logger = require("../../common/logger");
+var common = require("../../common/common");
+var enums = require("../../common/enums");
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
 var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
-var logger = require("../../common/logger");
-var common = require("../../common/common");
-var enums = require("../../common/enums");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("../statistics/statisticsManager");
@@ -395,60 +395,12 @@ var processCommand = async function (apiMessage) {
     }
 };
 
-//Automatic Commands
-var automaticNext = async function () {
-    try {
-        let date1 = Date.now();
-        console.log("Autonext starts");
-        if (initialized) {
-            //Automatic next
-            let errors = [];
-            if (dataService.branchesData) {
-                for (let iBranch = 0; iBranch < dataService.branchesData.length; iBranch++) {
-                    let branchData = dataService.branchesData[iBranch];
-                    let EnableAutoNext = configurationService.getCommonSettings(branchData.id, "EnableAutoNext");
-                    if (EnableAutoNext == "1") {
-                        if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
-                            let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
-                                return userActivityManager.isCounterValidForAutoNext(value);
-                            }
-                            );
-                            if (readyCountersActivities) {
-                                for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
-                                    let activity = readyCountersActivities[iActivity];
-                                    var counterInfo = {
-                                        orgid: "1",
-                                        counterid: activity.counter_ID.toString(),
-                                        branchid: branchData.id.toString(),
-                                        languageindex: "0"
-                                    };
-                                    counterNext(counterInfo);
-                                }
-                            }
-
-                        }
-                    }
-
-                }
-            }
-        }
-
-        let duration = (Date.now() - date1) / 1000;
-        console.log("Autonext ends " + duration + " seconds");
-
-        return common.success;
-    }
-    catch (error) {
-        logger.logError(error);
-        return common.error;
-    }
-};
 
 
 //Initialize everything
 var initialize = async function (ticketInfo) {
     try {
-        if (initialized) {
+        if (this.initialized) {
             return common.success;
         }
         let result = await configurationService.initialize();
@@ -456,7 +408,7 @@ var initialize = async function (ticketInfo) {
             result = await dataService.initialize();
             if (result == common.success) {
                 result = await statisticsManager.initialize();
-                initialized = true;
+                this.initialized = true;
                 console.log("Initialized");
                 return result;
             }
@@ -467,21 +419,11 @@ var initialize = async function (ticketInfo) {
         return common.error;
     }
 };
-var startBackgroundActions = async function (ticketInfo) {
-    try {
-        setInterval(automaticNext, 10000);
-        return common.success;
-    }
-    catch (error) {
-        logger.logError(error);
-        return common.error;
-    }
-};
+
 
 module.exports.getCounterStatus = getCounterStatus;
-module.exports.startBackgroundActions = startBackgroundActions;
-module.exports.automaticNext = automaticNext;
 module.exports.initialize = initialize;
+module.exports.initialized = initialized;
 module.exports.issueTicket = issueTicket;
 module.exports.issueTicketMulti = issueTicketMulti;
 module.exports.counterNext = counterNext;

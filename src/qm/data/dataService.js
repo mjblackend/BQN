@@ -184,7 +184,7 @@ function getCurrentData(OrgID, BranchID, CounterID, output) {
         logger.logError(error);
         return undefined;
     }
-};
+}
 
 var initialize = async function () {
     try {
