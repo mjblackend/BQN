@@ -14,16 +14,24 @@ var ReadCommands = {
 };
 
 function filterArray(ArrayOfEntities, BranchID) {
+    let tArray = [];
     if (ArrayOfEntities && ArrayOfEntities.length > 0) {
-        return ArrayOfEntities.filter(function (value) {
-            return value.QueueBranch_ID == BranchID;
+        tArray = ArrayOfEntities.filter(function (value) {
+            return value.QueueBranch_ID.toString() == BranchID.toString();
         });
     }
-    else {
-        return [];
-    }
+    return tArray;
 }
 
+function find(ArrayOfEntities, EntityID) {
+    let Entity;
+    if (ArrayOfEntities && ArrayOfEntities.length > 0) {
+        Entity = ArrayOfEntities.find(function (value) {
+            return value.ID.toString() == EntityID.toString();
+        });
+    }
+    return Entity;
+}
 
 //Populate branch cofigs
 var populateEntities = async function () {
@@ -213,11 +221,11 @@ var Read = function (apiMessagePayLoad) {
 
 
 var getService = function (ServiceID) {
-    return this.configsCache.services.find(function (value) { return value.ID == ServiceID; });
+    return find(this.configsCache.services, ServiceID);
 };
 
 var getServiceConfig = function (ServiceConfigID) {
-    return this.configsCache.serviceConfigs.find(function (value) { return value.ID == ServiceConfigID; });
+    return find(this.configsCache.serviceConfigs, ServiceConfigID);
 };
 
 var getServiceConfigFromService = function (ServiceID) {
