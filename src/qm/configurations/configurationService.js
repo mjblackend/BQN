@@ -37,39 +37,37 @@ function find(ArrayOfEntities, EntityID) {
     return Entity;
 }
 
+function filterCommonConfigs(ArrayOfEntities, BranchID,BranchConfigID) {
+    if (isArrayValid(ArrayOfEntities)) {
+        return ArrayOfEntities.filter(function (value) {
+            return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
+        });
+    }
+    else {
+        return [];
+    }
+}
+
 //Populate branch cofigs
 var populateEntities = async function () {
     try {
 
-        if (configsCache.branches && configsCache.branches.length > 0) {
+        if (isArrayValid(configsCache.branches)) {
             for (let i = 0; i < configsCache.branches.length; i++) {
                 let BranchID = configsCache.branches[i].ID;
                 let BranchConfigID = configsCache.branches[i].BranchConfig_ID;
                 //Assign counters
                 configsCache.branches[i].counters = filterArray(configsCache.counters, BranchID);
-
                 //Branch Users Allocations
                 configsCache.branches[i].usersAllocations = filterArray(configsCache.branch_UsersAllocations, BranchID);
-
                 //Halls
                 configsCache.branches[i].halls = filterArray(configsCache.halls, BranchID);
-
                 //Segment Allocations
                 configsCache.branches[i].segmentsAllocations = filterArray(configsCache.segmentsAllocations, BranchID);
-
                 //Serives allocations
                 configsCache.branches[i].servicesAllocations = filterArray(configsCache.servicesAllocations, BranchID);
-
                 //commonConfigs
-                if (configsCache.commonConfigs && configsCache.commonConfigs.length > 0) {
-                    configsCache.branches[i].settings = configsCache.commonConfigs.filter(function (value) {
-                        return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
-                    });
-                }
-                else {
-                    configsCache.branches[i].settings = [];
-                }
-
+                configsCache.branches[i].settings = filterCommonConfigs(configsCache.commonConfigs,BranchID,BranchConfigID);
             }
         }
         //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
