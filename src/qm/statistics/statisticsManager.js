@@ -8,29 +8,6 @@ var configurationService = require("../configurations/configurationService");
 var branches_statisticsData = [];
 
 
-var getServiceConfig = function (ServiceID) {
-    try {
-        //Get min service time
-        let service = configurationService.configsCache.services.find(function (value) {
-            if (value.ID == ServiceID) {
-                return true;
-            }
-        });
-
-        //Get min service time
-        let serviceConfig = configurationService.configsCache.serviceConfigs.find(function (value) {
-            if (value.ID == service.ServiceConfig_ID) {
-                return true;
-            }
-        });
-
-        return serviceConfig;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-};
 
 var generateID = function (transactions) {
     return transactions.branch_ID + "_" + transactions.service_ID + "_" + transactions.segment_ID + "_" + transactions.hall_ID + "_" + transactions.counter_ID + "_" + transactions.user_ID;
@@ -38,7 +15,7 @@ var generateID = function (transactions) {
 
 var CreateNewstatistics = function (transactions) {
     try {
-        let ServiceConfig = getServiceConfig(transactions.service_ID);
+        let ServiceConfig = configurationService.getServiceConfigFromService(transactions.service_ID);
 
         let t_Statistics = new statisticsData();
         t_Statistics.StatisticsDate = Date.now();
@@ -101,7 +78,7 @@ var CreateNewstatistics = function (transactions) {
 };
 var UpdateStatistics = function (Statistics, transactions) {
     try {
-        let ServiceConfig = getServiceConfig(transactions.service_ID);
+        let ServiceConfig = configurationService.getServiceConfigFromService(transactions.service_ID);
         Statistics.StatisticsDate = Date.now();
         Statistics.ID = generateID(transactions);
         //Waiting Customer

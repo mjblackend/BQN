@@ -156,29 +156,6 @@ var timeProirityValue = function (transaction) {
     return ((new Date() - transaction.priorityTime) * transaction.priority * 1000);
 };
 
-var getServiceConfig = function (ServiceID) {
-    try {
-        //Get min service time
-        let service = configurationService.configsCache.services.find(function (value) {
-            if (value.ID == ServiceID) {
-                return true;
-            }
-        });
-
-        //Get min service time
-        let serviceConfig = configurationService.configsCache.serviceConfigs.find(function (value) {
-            if (value.ID == service.ServiceConfig_ID) {
-                return true;
-            }
-        });
-
-        return serviceConfig;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-};
 
 var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
@@ -218,7 +195,7 @@ var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, Finish
                     CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + ((Now - CurrentCustomerTransaction.startServingTime) / 1000);
 
                     //Get min service time to determine the serving type
-                    let serviceConfig = getServiceConfig(CurrentCustomerTransaction.service_ID);
+                    let serviceConfig = configurationService.getServiceConfigFromService(CurrentCustomerTransaction.service_ID);
                     if (CurrentCustomerTransaction.serviceSeconds < serviceConfig.MinServiceTime) {
                         CurrentCustomerTransaction.servingType = enums.CustomerServingType.NoShow;
                     }

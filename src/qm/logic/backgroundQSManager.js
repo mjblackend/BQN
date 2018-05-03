@@ -33,7 +33,7 @@ var automaticNext = async function () {
                                     var counterInfo = {
                                         orgid: activity.org_ID,
                                         counterid: activity.counter_ID.toString(),
-                                        branchid: branchData.id.toString(),
+                                        branchid: branchData.id.toString()
                                     };
                                     queueCommandManager.counterNext(counterInfo);
                                 }

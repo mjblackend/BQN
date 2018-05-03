@@ -102,20 +102,41 @@ var getCommonSettings = function (BranchID, Key) {
         }
         );
 
-        if (BracnhConfig)
-        {
+        if (BracnhConfig) {
             let commonConfig = BracnhConfig.settings.find(function (value) {
                 return value.Key == Key;
             });
-    
-            if (commonConfig)
-            {
+
+            if (commonConfig) {
                 return commonConfig.Value;
             }
         }
     }
     catch (error) {
         logger.logError(error);
+    }
+};
+var getService = function (ServiceID) {
+    return this.configsCache.services.find(function (value) {return value.ID == ServiceID });
+};
+
+var getServiceConfig = function (ServiceConfigID) {
+    return this.configsCache.serviceConfigs.find(function (value) {return value.ID == ServiceConfigID });
+};
+
+var getServiceConfigFromService = function (ServiceID) {
+    try {
+        //Get min service time
+        let service = this.getService(ServiceID);
+
+        //Get min service time
+        let serviceConfig = this.getServiceConfig(service.ServiceConfig_ID);
+
+        return serviceConfig;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
     }
 };
 
@@ -352,6 +373,9 @@ var initialize = async function () {
     }
 };
 
+module.exports.getService = getService;
+module.exports.getServiceConfig = getServiceConfig;
+module.exports.getServiceConfigFromService = getServiceConfigFromService;
 module.exports.getCommonSettings = getCommonSettings;
 module.exports.Read = Read;
 module.exports.initialize = initialize;
