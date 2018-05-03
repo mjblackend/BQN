@@ -12,10 +12,14 @@ var ReadCommands = {
     segment: "segment",
     service: "service"
 };
+function isArrayValid(ArrayOfEntities)
+{
+    return ArrayOfEntities && ArrayOfEntities.length > 0 ;
+}
 
 function filterArray(ArrayOfEntities, BranchID) {
     let tArray = [];
-    if (ArrayOfEntities && ArrayOfEntities.length > 0) {
+    if (isArrayValid(ArrayOfEntities)) {
         tArray = ArrayOfEntities.filter(function (value) {
             return value.QueueBranch_ID.toString() == BranchID.toString();
         });
@@ -25,7 +29,7 @@ function filterArray(ArrayOfEntities, BranchID) {
 
 function find(ArrayOfEntities, EntityID) {
     let Entity;
-    if (ArrayOfEntities && ArrayOfEntities.length > 0) {
+    if (isArrayValid(ArrayOfEntities)) {
         Entity = ArrayOfEntities.find(function (value) {
             return value.ID.toString() == EntityID.toString();
         });
