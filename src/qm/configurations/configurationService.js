@@ -118,164 +118,59 @@ var getCommonSettings = function (BranchID, Key) {
 };
 
 /*eslint complexity: ["error", 100]*/
-
-async function getCounters() {
-    //Counters
-    let counter = require("./Counter_Config");
-    let counterInst = new counter();
-    let attributes = Object.getOwnPropertyNames(counterInst);
-    return await configRepository.GetByFilter(attributes, "T_Counter", "Active", "1");
-}
-
-async function getHalls() {
-    //Halls
-    let hall = require("./Hall_Config");
-    let hallInst = new hall();
-    let attributes = Object.getOwnPropertyNames(hallInst);
-    return await configRepository.GetAll(attributes, "T_Hall", "Active", "1");
-}
-
-
-async function getPriorityRanges() {
-    //PriorityRanges
-    let PriorityRange = require("./PriorityRange_Config");
-    let tPriorityRange = new PriorityRange();
-    let attributes = Object.getOwnPropertyNames(tPriorityRange);
-    return await configRepository.GetAll(attributes, "T_PriorityRange");
-}
-
 async function getBranchServiceAllocation() {
     //Special case since the many to many have same columns names
     let attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as Service_ID"];
     return await configRepository.GetAll(attributes, "R_QueueBranch_Service");
 }
-
-
-async function getSegments() {
-    //segments
-    let Segment = require("./Segment_Config");
-    let tSegment = new Segment();
-    let attributes = Object.getOwnPropertyNames(tSegment);
-    return await configRepository.GetAll(attributes, "T_Segment", "Active", "1");
+async function getEntitiesFilter(EntityClass, EntityTable, Filter, FilterValue) {
+    let DBEntity = require("./" + EntityClass);
+    let tDBEntity = new DBEntity();
+    let attributes = Object.getOwnPropertyNames(tDBEntity);
+    return await configRepository.GetByFilter(attributes, EntityTable, Filter, FilterValue);
 }
-
-async function getSegmentAllocation() {
-    //segments Allocate
-    let SegmentAllocation = require("./SegmentAllocation_Config");
-    let tSegmentAllocation = new SegmentAllocation();
-    let attributes = Object.getOwnPropertyNames(tSegmentAllocation);
-    return await configRepository.GetAll(attributes, "T_SegmentAllocation");
+async function getAllEntities(EntityClass, EntityTable) {
+    let DBEntity = require("./" + EntityClass);
+    let tDBEntity = new DBEntity();
+    let attributes = Object.getOwnPropertyNames(tDBEntity);
+    return await configRepository.GetAll(attributes, EntityTable);
 }
-
-async function getServices() {
-    //Services
-    let Service = require("./Service_Config");
-    let tService = new Service();
-    let attributes = Object.getOwnPropertyNames(tService);
-    return await configRepository.GetAll(attributes, "T_Service", "Active", "1");
-}
-
-async function getServicesAllocation() {
-    //services Allocate
-    let ServiceAllocation = require("./ServiceAllocation_Config");
-    let tServiceAllocation = new ServiceAllocation();
-    let attributes = Object.getOwnPropertyNames(tServiceAllocation);
-    return await configRepository.GetAll(attributes, "T_ServiceAllocation");
-}
-
-async function getServicesConfigs() {
-    //services Config
-    let ServiceConfig = require("./ServiceConfig_Config");
-    let tServiceConfig = new ServiceConfig();
-    let attributes = Object.getOwnPropertyNames(tServiceConfig);
-    return await configRepository.GetAll(attributes, "T_ServiceConfig", "Active", "1");
-}
-
-async function getServiceSegmentPriorityRange() {
-    //Service Segment Priority Range
-    let ServiceSegmentPriorityRange = require("./ServiceSegmentPriorityRange_Config");
-    let tServiceSegmentPriorityRange = new ServiceSegmentPriorityRange();
-    let attributes = Object.getOwnPropertyNames(tServiceSegmentPriorityRange);
-    return await configRepository.GetAll(attributes, "T_ServiceSegmentPriorityRange");
-
-}
-
-async function getServiceWorkflow() {
-    //Service Workflow Config
-    let ServiceWorkflow = require("./ServiceWorkflow_Config");
-    let tServiceWorkflow = new ServiceWorkflow();
-    let attributes = Object.getOwnPropertyNames(tServiceWorkflow);
-    return await configRepository.GetAll(attributes, "T_ServiceWorkflow");
-}
-
-async function getUsers() {
-    //User Config
-    let User = require("./User_Config");
-    let tUser = new User();
-    let attributes = Object.getOwnPropertyNames(tUser);
-    return await configRepository.GetAll(attributes, "T_User");
-}
-
-async function getUserAllocations() {
-    //User Allocation Config
-    let UserAllocation = require("./UserAllocation_Config");
-    let tUserAllocation = new UserAllocation();
-    let attributes = Object.getOwnPropertyNames(tUserAllocation);
-    return await configRepository.GetAll(attributes, "X_USERS_BRANCHES");
-}
-
-async function getBranches() {
-    //Branches
-    let branch = require("./QueueBranch_config");
-    let branchInst = new branch();
-    let attributes = Object.getOwnPropertyNames(branchInst);
-    return await configRepository.GetAll(attributes, "T_QueueBranch", "Active", "1");
-}
-
-async function getCommonConfig() {
-    //Common Config
-    let CommonConfig = require("./CommonConfig_Config");
-    let tCommonConfig = new CommonConfig();
-    let attributes = Object.getOwnPropertyNames(tCommonConfig);
-    return await configRepository.GetAll(attributes, "T_CommonConfig");
-}
-
-
 //Cache Server Configs from DB
 var cacheServerEnities = async function () {
     try {
-
+        
         let result = common.success;
+        //Branches
+        configsCache.branches = await getEntitiesFilter("QueueBranch_config", "T_QueueBranch", "Active", "1");
         //Counters
-        configsCache.counters = await getCounters();
+        configsCache.counters = await getEntitiesFilter("Counter_Config", "T_Counter", "Active", "1");
         //Halls
-        configsCache.halls = await getHalls();
+        configsCache.halls = await getEntitiesFilter("Hall_Config", "T_Hall", "Active", "1");
         //PriorityRanges
-        configsCache.priorityRanges = await getPriorityRanges();
+        configsCache.priorityRanges = await getAllEntities("PriorityRange_Config", "T_PriorityRange" );
         //Special case since the many to many have same columns names
         configsCache.branch_serviceAllocations = await getBranchServiceAllocation();
         //segments
-        configsCache.segments = await getSegments();
+        configsCache.segments = await getEntitiesFilter("Segment_Config", "T_Segment", "Active", "1");
         //segments Allocate
-        configsCache.segmentsAllocations = await getSegmentAllocation();
+        configsCache.segmentsAllocations = await getAllEntities("SegmentAllocation_Config", "T_SegmentAllocation" );
         //services
-        configsCache.services = await getServices();
+        configsCache.services = await getEntitiesFilter("Service_Config", "T_Service", "Active", "1");
         //services Allocate
-        configsCache.servicesAllocations = await getServicesAllocation();
+        configsCache.servicesAllocations = await getAllEntities("ServiceAllocation_Config", "T_ServiceAllocation" );
         //services Config
-        configsCache.serviceConfigs = await getServicesConfigs();
+        configsCache.serviceConfigs = await await getEntitiesFilter("ServiceConfig_Config", "T_ServiceConfig", "Active", "1");
         //Service Segment Priority Range
-        configsCache.serviceSegmentPriorityRanges = await getServiceSegmentPriorityRange();
+        configsCache.serviceSegmentPriorityRanges = await getAllEntities("ServiceSegmentPriorityRange_Config", "T_ServiceSegmentPriorityRange" );
         //Service Workflow Config
-        configsCache.serviceWorkFlow = await getServiceWorkflow();
+        configsCache.serviceWorkFlow = await getAllEntities("ServiceWorkflow_Config", "T_ServiceWorkflow" );
         //User Config
-        configsCache.users = await getUsers();
+        configsCache.users = await getAllEntities("User_Config", "T_User" );
         //User Allocation Config
-        configsCache.branch_UsersAllocations = await getUserAllocations();
+        configsCache.branch_UsersAllocations = await getAllEntities("UserAllocation_Config", "X_USERS_BRANCHES" );
         //Common Config
-        configsCache.commonConfigs = await getCommonConfig();
-        //Branches
-        configsCache.branches = await getBranches();
+        configsCache.commonConfigs = await getAllEntities("CommonConfig_Config", "T_CommonConfig" );
+
         result = await populateEntities();
         return result;
     }
