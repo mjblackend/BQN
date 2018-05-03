@@ -116,185 +116,167 @@ var getCommonSettings = function (BranchID, Key) {
         logger.logError(error);
     }
 };
-var getService = function (ServiceID) {
-    return this.configsCache.services.find(function (value) {return value.ID == ServiceID });
-};
-
-var getServiceConfig = function (ServiceConfigID) {
-    return this.configsCache.serviceConfigs.find(function (value) {return value.ID == ServiceConfigID });
-};
-
-var getServiceConfigFromService = function (ServiceID) {
-    try {
-        //Get min service time
-        let service = this.getService(ServiceID);
-
-        //Get min service time
-        let serviceConfig = this.getServiceConfig(service.ServiceConfig_ID);
-
-        return serviceConfig;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-};
 
 /*eslint complexity: ["error", 100]*/
+
+async function getCounters() {
+    //Counters
+    let counter = require("./Counter_Config");
+    let counterInst = new counter();
+    let attributes = Object.getOwnPropertyNames(counterInst);
+    return await configRepository.GetByFilter(attributes, "T_Counter", "Active", "1");
+}
+
+async function getHalls() {
+    //Halls
+    let hall = require("./Hall_Config");
+    let hallInst = new hall();
+    let attributes = Object.getOwnPropertyNames(hallInst);
+    return await configRepository.GetAll(attributes, "T_Hall", "Active", "1");
+}
+
+
+async function getPriorityRanges() {
+    //PriorityRanges
+    let PriorityRange = require("./PriorityRange_Config");
+    let tPriorityRange = new PriorityRange();
+    let attributes = Object.getOwnPropertyNames(tPriorityRange);
+    return await configRepository.GetAll(attributes, "T_PriorityRange");
+}
+
+async function getBranchServiceAllocation() {
+    //Special case since the many to many have same columns names
+    let attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as Service_ID"];
+    return await configRepository.GetAll(attributes, "R_QueueBranch_Service");
+}
+
+
+async function getSegments() {
+    //segments
+    let Segment = require("./Segment_Config");
+    let tSegment = new Segment();
+    let attributes = Object.getOwnPropertyNames(tSegment);
+    return await configRepository.GetAll(attributes, "T_Segment", "Active", "1");
+}
+
+async function getSegmentAllocation() {
+    //segments Allocate
+    let SegmentAllocation = require("./SegmentAllocation_Config");
+    let tSegmentAllocation = new SegmentAllocation();
+    let attributes = Object.getOwnPropertyNames(tSegmentAllocation);
+    return await configRepository.GetAll(attributes, "T_SegmentAllocation");
+}
+
+async function getServices() {
+    //Services
+    let Service = require("./Service_Config");
+    let tService = new Service();
+    let attributes = Object.getOwnPropertyNames(tService);
+    return await configRepository.GetAll(attributes, "T_Service", "Active", "1");
+}
+
+async function getServicesAllocation() {
+    //services Allocate
+    let ServiceAllocation = require("./ServiceAllocation_Config");
+    let tServiceAllocation = new ServiceAllocation();
+    let attributes = Object.getOwnPropertyNames(tServiceAllocation);
+    return await configRepository.GetAll(attributes, "T_ServiceAllocation");
+}
+
+async function getServicesConfigs() {
+    //services Config
+    let ServiceConfig = require("./ServiceConfig_Config");
+    let tServiceConfig = new ServiceConfig();
+    let attributes = Object.getOwnPropertyNames(tServiceConfig);
+    return await configRepository.GetAll(attributes, "T_ServiceConfig", "Active", "1");
+}
+
+async function getServiceSegmentPriorityRange() {
+    //Service Segment Priority Range
+    let ServiceSegmentPriorityRange = require("./ServiceSegmentPriorityRange_Config");
+    let tServiceSegmentPriorityRange = new ServiceSegmentPriorityRange();
+    let attributes = Object.getOwnPropertyNames(tServiceSegmentPriorityRange);
+    return await configRepository.GetAll(attributes, "T_ServiceSegmentPriorityRange");
+
+}
+
+async function getServiceWorkflow() {
+    //Service Workflow Config
+    let ServiceWorkflow = require("./ServiceWorkflow_Config");
+    let tServiceWorkflow = new ServiceWorkflow();
+    let attributes = Object.getOwnPropertyNames(tServiceWorkflow);
+    return await configRepository.GetAll(attributes, "T_ServiceWorkflow");
+}
+
+async function getUsers() {
+    //User Config
+    let User = require("./User_Config");
+    let tUser = new User();
+    let attributes = Object.getOwnPropertyNames(tUser);
+    return await configRepository.GetAll(attributes, "T_User");
+}
+
+async function getUserAllocations() {
+    //User Allocation Config
+    let UserAllocation = require("./UserAllocation_Config");
+    let tUserAllocation = new UserAllocation();
+    let attributes = Object.getOwnPropertyNames(tUserAllocation);
+    return await configRepository.GetAll(attributes, "X_USERS_BRANCHES");
+}
+
+async function getBranches() {
+    //Branches
+    let branch = require("./QueueBranch_config");
+    let branchInst = new branch();
+    let attributes = Object.getOwnPropertyNames(branchInst);
+    return await configRepository.GetAll(attributes, "T_QueueBranch", "Active", "1");
+}
+
+async function getCommonConfig() {
+    //Common Config
+    let CommonConfig = require("./CommonConfig_Config");
+    let tCommonConfig = new CommonConfig();
+    let attributes = Object.getOwnPropertyNames(tCommonConfig);
+    return await configRepository.GetAll(attributes, "T_CommonConfig");
+}
+
+
 //Cache Server Configs from DB
 var cacheServerEnities = async function () {
     try {
 
         let result = common.success;
-
         //Counters
-        let counter = require("./Counter_Config");
-        let counterInst = new counter();
-        let attributes = Object.getOwnPropertyNames(counterInst);
-        let Results = await configRepository.GetByFilter(attributes, "T_Counter", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.counters = Results;
-        }
-
+        configsCache.counters = await getCounters();
         //Halls
-        let hall = require("./Hall_Config");
-        let hallInst = new hall();
-        attributes = Object.getOwnPropertyNames(hallInst);
-        Results = await configRepository.GetAll(attributes, "T_Hall", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.halls = Results;
-        }
-
+        configsCache.halls = await getHalls();
         //PriorityRanges
-        let PriorityRange = require("./PriorityRange_Config");
-        let tPriorityRange = new PriorityRange();
-        attributes = Object.getOwnPropertyNames(tPriorityRange);
-        Results = await configRepository.GetAll(attributes, "T_PriorityRange");
-        if (Results && Results.length > 0) {
-            configsCache.priorityRanges = Results;
-        }
-
-
+        configsCache.priorityRanges = await getPriorityRanges();
         //Special case since the many to many have same columns names
-        attributes = ["OrgID", "ObjectID1 as QueueBranch_ID", "ObjectID2 as Service_ID"];
-        Results = await configRepository.GetAll(attributes, "R_QueueBranch_Service");
-        if (Results && Results.length > 0) {
-            configsCache.branch_serviceAllocations = Results;
-        }
-
+        configsCache.branch_serviceAllocations = await getBranchServiceAllocation();
         //segments
-        let Segment = require("./Segment_Config");
-        let tSegment = new Segment();
-        attributes = Object.getOwnPropertyNames(tSegment);
-        Results = await configRepository.GetAll(attributes, "T_Segment", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.segments = Results;
-        }
-
-
+        configsCache.segments = await getSegments();
         //segments Allocate
-        let SegmentAllocation = require("./SegmentAllocation_Config");
-        let tSegmentAllocation = new SegmentAllocation();
-        attributes = Object.getOwnPropertyNames(tSegmentAllocation);
-        Results = await configRepository.GetAll(attributes, "T_SegmentAllocation");
-        if (Results && Results.length > 0) {
-            configsCache.segmentsAllocations = Results;
-        }
-
-
-
+        configsCache.segmentsAllocations = await getSegmentAllocation();
         //services
-        let Service = require("./Service_Config");
-        let tService = new Service();
-        attributes = Object.getOwnPropertyNames(tService);
-        Results = await configRepository.GetAll(attributes, "T_Service", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.services = Results;
-        }
-
-
+        configsCache.services = await getServices();
         //services Allocate
-        let ServiceAllocation = require("./ServiceAllocation_Config");
-        let tServiceAllocation = new ServiceAllocation();
-        attributes = Object.getOwnPropertyNames(tServiceAllocation);
-        Results = await configRepository.GetAll(attributes, "T_ServiceAllocation");
-        if (Results && Results.length > 0) {
-            configsCache.servicesAllocations = Results;
-        }
-
-
-
+        configsCache.servicesAllocations = await getServicesAllocation();
         //services Config
-        let ServiceConfig = require("./ServiceConfig_Config");
-        let tServiceConfig = new ServiceConfig();
-        attributes = Object.getOwnPropertyNames(tServiceConfig);
-        Results = await configRepository.GetAll(attributes, "T_ServiceConfig", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.serviceConfigs = Results;
-        }
-
-
+        configsCache.serviceConfigs = await getServicesConfigs();
         //Service Segment Priority Range
-        let ServiceSegmentPriorityRange = require("./ServiceSegmentPriorityRange_Config");
-        let tServiceSegmentPriorityRange = new ServiceSegmentPriorityRange();
-        attributes = Object.getOwnPropertyNames(tServiceSegmentPriorityRange);
-        Results = await configRepository.GetAll(attributes, "T_ServiceSegmentPriorityRange");
-        if (Results && Results.length > 0) {
-            configsCache.serviceSegmentPriorityRanges = Results;
-        }
-
+        configsCache.serviceSegmentPriorityRanges = await getServiceSegmentPriorityRange();
         //Service Workflow Config
-        let ServiceWorkflow = require("./ServiceWorkflow_Config");
-        let tServiceWorkflow = new ServiceWorkflow();
-        attributes = Object.getOwnPropertyNames(tServiceWorkflow);
-        Results = await configRepository.GetAll(attributes, "T_ServiceWorkflow");
-        if (Results && Results.length > 0) {
-            configsCache.serviceWorkFlow = Results;
-        }
-
-
+        configsCache.serviceWorkFlow = await getServiceWorkflow();
         //User Config
-        let User = require("./User_Config");
-        let tUser = new User();
-        attributes = Object.getOwnPropertyNames(tUser);
-        Results = await configRepository.GetAll(attributes, "T_User");
-        if (Results && Results.length > 0) {
-            configsCache.users = Results;
-        }
-
-
+        configsCache.users = await getUsers();
         //User Allocation Config
-        let UserAllocation = require("./UserAllocation_Config");
-        let tUserAllocation = new UserAllocation();
-        attributes = Object.getOwnPropertyNames(tUserAllocation);
-        Results = await configRepository.GetAll(attributes, "X_USERS_BRANCHES");
-        if (Results && Results.length > 0) {
-            configsCache.branch_UsersAllocations = Results;
-        }
-
-
+        configsCache.branch_UsersAllocations = await getUserAllocations();
         //Common Config
-        let CommonConfig = require("./CommonConfig_Config");
-        let tCommonConfig = new CommonConfig();
-        attributes = Object.getOwnPropertyNames(tCommonConfig);
-        Results = await configRepository.GetAll(attributes, "T_CommonConfig");
-        if (Results && Results.length > 0) {
-            configsCache.commonConfigs = Results;
-        }
-
-
+        configsCache.commonConfigs = await getCommonConfig();
         //Branches
-        let branch = require("./QueueBranch_config");
-        let branchInst = new branch();
-        attributes = Object.getOwnPropertyNames(branchInst);
-        Results = await configRepository.GetAll(attributes, "T_QueueBranch", "Active", "1");
-        if (Results && Results.length > 0) {
-            configsCache.branches = Results;
-        }
-
+        configsCache.branches = await getBranches();
         result = await populateEntities();
-
-
         return result;
     }
     catch (error) {
@@ -353,6 +335,30 @@ var Read = function (apiMessagePayLoad) {
 };
 
 
+
+var getService = function (ServiceID) {
+    return this.configsCache.services.find(function (value) { return value.ID == ServiceID });
+};
+
+var getServiceConfig = function (ServiceConfigID) {
+    return this.configsCache.serviceConfigs.find(function (value) { return value.ID == ServiceConfigID });
+};
+
+var getServiceConfigFromService = function (ServiceID) {
+    try {
+        //Get min service time
+        let service = this.getService(ServiceID);
+
+        //Get min service time
+        let serviceConfig = this.getServiceConfig(service.ServiceConfig_ID);
+
+        return serviceConfig;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+};
 
 var initialize = async function () {
     try {
