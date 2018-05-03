@@ -12,9 +12,8 @@ var ReadCommands = {
     segment: "segment",
     service: "service"
 };
-function isArrayValid(ArrayOfEntities)
-{
-    return ArrayOfEntities && ArrayOfEntities.length > 0 ;
+function isArrayValid(ArrayOfEntities) {
+    return ArrayOfEntities && ArrayOfEntities.length > 0;
 }
 
 function filterArray(ArrayOfEntities, BranchID) {
@@ -37,7 +36,7 @@ function find(ArrayOfEntities, EntityID) {
     return Entity;
 }
 
-function filterCommonConfigs(ArrayOfEntities, BranchID,BranchConfigID) {
+function filterCommonConfigs(ArrayOfEntities, BranchID, BranchConfigID) {
     if (isArrayValid(ArrayOfEntities)) {
         return ArrayOfEntities.filter(function (value) {
             return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
@@ -67,7 +66,7 @@ var populateEntities = async function () {
                 //Serives allocations
                 configsCache.branches[i].servicesAllocations = filterArray(configsCache.servicesAllocations, BranchID);
                 //commonConfigs
-                configsCache.branches[i].settings = filterCommonConfigs(configsCache.commonConfigs,BranchID,BranchConfigID);
+                configsCache.branches[i].settings = filterCommonConfigs(configsCache.commonConfigs, BranchID, BranchConfigID);
             }
         }
         //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
@@ -166,16 +165,17 @@ var cacheServerEnities = async function () {
 };
 
 function ReadCounters(apiMessagePayLoad, Cache) {
-    return Cache.counters.filter(function (value) {
+    apiMessagePayLoad.counters = Cache.counters.filter(function (value) {
         return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1);
     });
+    return common.success;
 }
 
-function ReadServices(BranchID, Cache) {
+function ReadServices(apiMessagePayLoad, Cache) {
     let servicesAllocations = Cache.branch_serviceAllocations.filter(function (value) {
-        return value.QueueBranch_ID == BranchID;
+        return value.QueueBranch_ID == apiMessagePayLoad.BranchID;
     });
-    return Cache.services.filter(function (value) {
+    apiMessagePayLoad.services = Cache.services.filter(function (value) {
         for (let i = 0; i < servicesAllocations.length; i++) {
             if (servicesAllocations[i].Service_ID == value.ID) {
                 return true;
@@ -183,36 +183,37 @@ function ReadServices(BranchID, Cache) {
         }
         return false;
     });
+    return common.success;
 }
+function ReadBranches(apiMessagePayLoad, Cache) {
+    apiMessagePayLoad.branches = Cache.branches;
+    return common.success;
+}
+function ReadSegments(apiMessagePayLoad, Cache) {
+    apiMessagePayLoad.segments = Cache.segments;
+    apiMessagePayLoad.serviceSegmentPriorityRanges = Cache.serviceSegmentPriorityRanges;
+    return common.success;
+}
+
 
 var Read = function (apiMessagePayLoad) {
     try {
-        let result = common.error;
         if (apiMessagePayLoad) {
             switch (apiMessagePayLoad.EntityName.toLowerCase()) {
                 case ReadCommands.branch:
-                    apiMessagePayLoad.branches = this.configsCache.branches;
-                    result = common.success;
-                    break;
+                    return ReadBranches(apiMessagePayLoad, this.configsCache);
                 case ReadCommands.counter:
-                    apiMessagePayLoad.counters = ReadCounters(apiMessagePayLoad, this.configsCache);
-                    result = common.success;
-                    break;
+                    return ReadCounters(apiMessagePayLoad, this.configsCache);
                 case ReadCommands.segment:
-                    apiMessagePayLoad.segments = this.configsCache.segments;
-                    apiMessagePayLoad.serviceSegmentPriorityRanges = this.configsCache.serviceSegmentPriorityRanges;
-                    result = common.success;
-                    break;
-
+                    return ReadSegments(apiMessagePayLoad, this.configsCache)
                 case ReadCommands.service:
-                    apiMessagePayLoad.services = ReadServices(apiMessagePayLoad.BranchID, this.configsCache);
-                    result = common.success;
-                    break;
+                    return ReadServices(apiMessagePayLoad, this.configsCache);
+
                 default:
-                    result = common.error;
+                    return common.error;
             }
         }
-        return result;
+        return common.error;
     }
     catch (error) {
         logger.logError(error);
