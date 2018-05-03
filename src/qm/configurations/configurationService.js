@@ -13,6 +13,13 @@ var ReadCommands = {
     service: "service"
 };
 
+function filterArray(ArrayOfEntities,BranchID)
+{
+    return  ArrayOfEntities.filter(function (value) {
+        return value.QueueBranch_ID == BranchID;
+    });
+}
+
 
 //Populate branch cofigs
 var populateEntities = async function () {
@@ -24,9 +31,7 @@ var populateEntities = async function () {
                 let BranchConfigID = configsCache.branches[i].BranchConfig_ID;
                 //Assign counters
                 if (configsCache.counters && configsCache.counters.length > 0) {
-                    configsCache.branches[i].counters = configsCache.counters.filter(function (value) {
-                        return value.QueueBranch_ID == BranchID;
-                    });
+                    configsCache.branches[i].counters = filterArray(configsCache.counters,BranchID);
                 }
                 else {
                     configsCache.branches[i].counters = [];
@@ -34,9 +39,7 @@ var populateEntities = async function () {
 
                 //Branch Users Allocations
                 if (configsCache.branch_UsersAllocations && configsCache.branch_UsersAllocations.length > 0) {
-                    configsCache.branches[i].usersAllocations = configsCache.branch_UsersAllocations.filter(function (value) {
-                        return value.QueueBranch_ID == BranchID;
-                    });
+                    configsCache.branches[i].usersAllocations = filterArray(configsCache.branch_UsersAllocations,BranchID);
                 }
                 else {
                     configsCache.branches[i].usersAllocations = [];
@@ -44,9 +47,7 @@ var populateEntities = async function () {
 
                 //Halls
                 if (configsCache.halls && configsCache.halls.length > 0) {
-                    configsCache.branches[i].halls = configsCache.halls.filter(function (value) {
-                        return value.QueueBranch_ID == BranchID;
-                    });
+                    configsCache.branches[i].halls = filterArray(configsCache.halls,BranchID);
                 }
                 else {
                     configsCache.branches[i].halls = [];
@@ -54,9 +55,7 @@ var populateEntities = async function () {
 
                 //Segment Allocations
                 if (configsCache.segmentsAllocations && configsCache.segmentsAllocations.length > 0) {
-                    configsCache.branches[i].segmentsAllocations = configsCache.segmentsAllocations.filter(function (value) {
-                        return value.QueueBranch_ID == BranchID;
-                    });
+                    configsCache.branches[i].segmentsAllocations = filterArray(configsCache.segmentsAllocations,BranchID);
                 }
                 else {
                     configsCache.branches[i].segmentsAllocations = [];
@@ -64,9 +63,7 @@ var populateEntities = async function () {
 
                 //Serives allocations
                 if (configsCache.servicesAllocations && configsCache.servicesAllocations.length > 0) {
-                    configsCache.branches[i].servicesAllocations = configsCache.servicesAllocations.filter(function (value) {
-                        return value.QueueBranch_ID == BranchID;
-                    });
+                    configsCache.branches[i].servicesAllocations = filterArray(configsCache.servicesAllocations,BranchID);
                 }
                 else {
                     configsCache.branches[i].servicesAllocations = [];
@@ -158,7 +155,7 @@ var cacheServerEnities = async function () {
         //services Allocate
         configsCache.servicesAllocations = await getAllEntities("ServiceAllocation_Config", "T_ServiceAllocation" );
         //services Config
-        configsCache.serviceConfigs = await await getEntitiesFilter("ServiceConfig_Config", "T_ServiceConfig", "Active", "1");
+        configsCache.serviceConfigs = await await getAllEntities("ServiceConfig_Config", "T_ServiceConfig");
         //Service Segment Priority Range
         configsCache.serviceSegmentPriorityRanges = await getAllEntities("ServiceSegmentPriorityRange_Config", "T_ServiceSegmentPriorityRange" );
         //Service Workflow Config
