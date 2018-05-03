@@ -6,6 +6,14 @@ var ConfigsWrapper = require("./ConfigsWrapper");
 var configsCache = new ConfigsWrapper();
 var fs = require("fs");
 
+var ReadCommands = {
+    branch: "branch",
+    counter: "counter",
+    segment: "segment",
+    service: "service"
+};
+
+
 //Populate branch cofigs
 var populateEntities = async function () {
     try {
@@ -18,8 +26,7 @@ var populateEntities = async function () {
                 if (configsCache.counters && configsCache.counters.length > 0) {
                     configsCache.branches[i].counters = configsCache.counters.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].counters = [];
@@ -29,8 +36,7 @@ var populateEntities = async function () {
                 if (configsCache.branch_UsersAllocations && configsCache.branch_UsersAllocations.length > 0) {
                     configsCache.branches[i].usersAllocations = configsCache.branch_UsersAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].usersAllocations = [];
@@ -40,8 +46,7 @@ var populateEntities = async function () {
                 if (configsCache.halls && configsCache.halls.length > 0) {
                     configsCache.branches[i].halls = configsCache.halls.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].halls = [];
@@ -51,8 +56,7 @@ var populateEntities = async function () {
                 if (configsCache.segmentsAllocations && configsCache.segmentsAllocations.length > 0) {
                     configsCache.branches[i].segmentsAllocations = configsCache.segmentsAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].segmentsAllocations = [];
@@ -62,8 +66,7 @@ var populateEntities = async function () {
                 if (configsCache.servicesAllocations && configsCache.servicesAllocations.length > 0) {
                     configsCache.branches[i].servicesAllocations = configsCache.servicesAllocations.filter(function (value) {
                         return value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].servicesAllocations = [];
@@ -73,8 +76,7 @@ var populateEntities = async function () {
                 if (configsCache.commonConfigs && configsCache.commonConfigs.length > 0) {
                     configsCache.branches[i].settings = configsCache.commonConfigs.filter(function (value) {
                         return (value.BranchConfig_ID == null && value.QueueBranch_ID == null) || value.BranchConfig_ID == BranchConfigID || value.QueueBranch_ID == BranchID;
-                    }
-                    );
+                    });
                 }
                 else {
                     configsCache.branches[i].settings = [];
@@ -82,10 +84,7 @@ var populateEntities = async function () {
 
             }
         }
-
-
-        fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
-
+        //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
         return common.success;
     }
     catch (error) {
@@ -180,41 +179,47 @@ var cacheServerEnities = async function () {
     }
 };
 
+function ReadCounters(apiMessagePayLoad,Cache) {
+    return Cache.counters.filter(function (value) {
+        return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1);
+    });
+}
+
+function ReadServices(BranchID,Cache) {
+    let servicesAllocations = Cache.branch_serviceAllocations.filter(function (value) {
+        return value.QueueBranch_ID == BranchID;
+    });
+    return Cache.services.filter(function (value) {
+        for (let i = 0; i < servicesAllocations.length; i++) {
+            if (servicesAllocations[i].Service_ID == value.ID) {
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
 var Read = function (apiMessagePayLoad) {
     try {
-        let servicesAllocations;
         let result = common.error;
         if (apiMessagePayLoad) {
             switch (apiMessagePayLoad.EntityName.toLowerCase()) {
-                case "branch":
+                case ReadCommands.branch:
                     apiMessagePayLoad.branches = this.configsCache.branches;
                     result = common.success;
                     break;
-                case "counter":
-                    apiMessagePayLoad.counters = this.configsCache.counters.filter(function (value) {
-                        return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1);
-                    });
+                case ReadCommands.counter:
+                    apiMessagePayLoad.counters = ReadCounters(apiMessagePayLoad,this.configsCache);
                     result = common.success;
                     break;
-
-                case "segment":
+                case ReadCommands.segment:
                     apiMessagePayLoad.segments = this.configsCache.segments;
                     apiMessagePayLoad.serviceSegmentPriorityRanges = this.configsCache.serviceSegmentPriorityRanges;
                     result = common.success;
                     break;
 
-                case "service":
-                    servicesAllocations = this.configsCache.branch_serviceAllocations.filter(function (value) {
-                        return value.QueueBranch_ID == apiMessagePayLoad.BranchID;
-                    });
-                    apiMessagePayLoad.services = this.configsCache.services.filter(function (value) {
-                        for (let i = 0; i < servicesAllocations.length; i++) {
-                            if (servicesAllocations[i].Service_ID == value.ID) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    });
+                case ReadCommands.service:
+                    apiMessagePayLoad.services = ReadServices(apiMessagePayLoad.BranchID,this.configsCache);
                     result = common.success;
                     break;
                 default:
@@ -232,11 +237,11 @@ var Read = function (apiMessagePayLoad) {
 
 
 var getService = function (ServiceID) {
-    return this.configsCache.services.find(function (value) { return value.ID == ServiceID });
+    return this.configsCache.services.find(function (value) { return value.ID == ServiceID; });
 };
 
 var getServiceConfig = function (ServiceConfigID) {
-    return this.configsCache.serviceConfigs.find(function (value) { return value.ID == ServiceConfigID });
+    return this.configsCache.serviceConfigs.find(function (value) { return value.ID == ServiceConfigID; });
 };
 
 var getServiceConfigFromService = function (ServiceID) {
