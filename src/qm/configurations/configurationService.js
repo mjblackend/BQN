@@ -13,11 +13,15 @@ var ReadCommands = {
     service: "service"
 };
 
-function filterArray(ArrayOfEntities,BranchID)
-{
-    return  ArrayOfEntities.filter(function (value) {
-        return value.QueueBranch_ID == BranchID;
-    });
+function filterArray(ArrayOfEntities, BranchID) {
+    if (ArrayOfEntities && ArrayOfEntities.length > 0) {
+        return ArrayOfEntities.filter(function (value) {
+            return value.QueueBranch_ID == BranchID;
+        });
+    }
+    else {
+        return [];
+    }
 }
 
 
@@ -30,44 +34,19 @@ var populateEntities = async function () {
                 let BranchID = configsCache.branches[i].ID;
                 let BranchConfigID = configsCache.branches[i].BranchConfig_ID;
                 //Assign counters
-                if (configsCache.counters && configsCache.counters.length > 0) {
-                    configsCache.branches[i].counters = filterArray(configsCache.counters,BranchID);
-                }
-                else {
-                    configsCache.branches[i].counters = [];
-                }
+                configsCache.branches[i].counters = filterArray(configsCache.counters, BranchID);
 
                 //Branch Users Allocations
-                if (configsCache.branch_UsersAllocations && configsCache.branch_UsersAllocations.length > 0) {
-                    configsCache.branches[i].usersAllocations = filterArray(configsCache.branch_UsersAllocations,BranchID);
-                }
-                else {
-                    configsCache.branches[i].usersAllocations = [];
-                }
+                configsCache.branches[i].usersAllocations = filterArray(configsCache.branch_UsersAllocations, BranchID);
 
                 //Halls
-                if (configsCache.halls && configsCache.halls.length > 0) {
-                    configsCache.branches[i].halls = filterArray(configsCache.halls,BranchID);
-                }
-                else {
-                    configsCache.branches[i].halls = [];
-                }
+                configsCache.branches[i].halls = filterArray(configsCache.halls, BranchID);
 
                 //Segment Allocations
-                if (configsCache.segmentsAllocations && configsCache.segmentsAllocations.length > 0) {
-                    configsCache.branches[i].segmentsAllocations = filterArray(configsCache.segmentsAllocations,BranchID);
-                }
-                else {
-                    configsCache.branches[i].segmentsAllocations = [];
-                }
+                configsCache.branches[i].segmentsAllocations = filterArray(configsCache.segmentsAllocations, BranchID);
 
                 //Serives allocations
-                if (configsCache.servicesAllocations && configsCache.servicesAllocations.length > 0) {
-                    configsCache.branches[i].servicesAllocations = filterArray(configsCache.servicesAllocations,BranchID);
-                }
-                else {
-                    configsCache.branches[i].servicesAllocations = [];
-                }
+                configsCache.branches[i].servicesAllocations = filterArray(configsCache.servicesAllocations, BranchID);
 
                 //commonConfigs
                 if (configsCache.commonConfigs && configsCache.commonConfigs.length > 0) {
@@ -134,7 +113,7 @@ async function getAllEntities(EntityClass, EntityTable) {
 //Cache Server Configs from DB
 var cacheServerEnities = async function () {
     try {
-        
+
         let result = common.success;
         //Branches
         configsCache.branches = await getEntitiesFilter("QueueBranch_config", "T_QueueBranch", "Active", "1");
@@ -143,29 +122,29 @@ var cacheServerEnities = async function () {
         //Halls
         configsCache.halls = await getEntitiesFilter("Hall_Config", "T_Hall", "Active", "1");
         //PriorityRanges
-        configsCache.priorityRanges = await getAllEntities("PriorityRange_Config", "T_PriorityRange" );
+        configsCache.priorityRanges = await getAllEntities("PriorityRange_Config", "T_PriorityRange");
         //Special case since the many to many have same columns names
         configsCache.branch_serviceAllocations = await getBranchServiceAllocation();
         //segments
         configsCache.segments = await getEntitiesFilter("Segment_Config", "T_Segment", "Active", "1");
         //segments Allocate
-        configsCache.segmentsAllocations = await getAllEntities("SegmentAllocation_Config", "T_SegmentAllocation" );
+        configsCache.segmentsAllocations = await getAllEntities("SegmentAllocation_Config", "T_SegmentAllocation");
         //services
         configsCache.services = await getEntitiesFilter("Service_Config", "T_Service", "Active", "1");
         //services Allocate
-        configsCache.servicesAllocations = await getAllEntities("ServiceAllocation_Config", "T_ServiceAllocation" );
+        configsCache.servicesAllocations = await getAllEntities("ServiceAllocation_Config", "T_ServiceAllocation");
         //services Config
         configsCache.serviceConfigs = await await getAllEntities("ServiceConfig_Config", "T_ServiceConfig");
         //Service Segment Priority Range
-        configsCache.serviceSegmentPriorityRanges = await getAllEntities("ServiceSegmentPriorityRange_Config", "T_ServiceSegmentPriorityRange" );
+        configsCache.serviceSegmentPriorityRanges = await getAllEntities("ServiceSegmentPriorityRange_Config", "T_ServiceSegmentPriorityRange");
         //Service Workflow Config
-        configsCache.serviceWorkFlow = await getAllEntities("ServiceWorkflow_Config", "T_ServiceWorkflow" );
+        configsCache.serviceWorkFlow = await getAllEntities("ServiceWorkflow_Config", "T_ServiceWorkflow");
         //User Config
-        configsCache.users = await getAllEntities("User_Config", "T_User" );
+        configsCache.users = await getAllEntities("User_Config", "T_User");
         //User Allocation Config
-        configsCache.branch_UsersAllocations = await getAllEntities("UserAllocation_Config", "X_USERS_BRANCHES" );
+        configsCache.branch_UsersAllocations = await getAllEntities("UserAllocation_Config", "X_USERS_BRANCHES");
         //Common Config
-        configsCache.commonConfigs = await getAllEntities("CommonConfig_Config", "T_CommonConfig" );
+        configsCache.commonConfigs = await getAllEntities("CommonConfig_Config", "T_CommonConfig");
 
         result = await populateEntities();
         return result;
@@ -176,13 +155,13 @@ var cacheServerEnities = async function () {
     }
 };
 
-function ReadCounters(apiMessagePayLoad,Cache) {
+function ReadCounters(apiMessagePayLoad, Cache) {
     return Cache.counters.filter(function (value) {
         return value.QueueBranch_ID == apiMessagePayLoad.BranchID && (!apiMessagePayLoad.types || apiMessagePayLoad.types.indexOf(value.Type_LV.toString()) > -1);
     });
 }
 
-function ReadServices(BranchID,Cache) {
+function ReadServices(BranchID, Cache) {
     let servicesAllocations = Cache.branch_serviceAllocations.filter(function (value) {
         return value.QueueBranch_ID == BranchID;
     });
@@ -206,7 +185,7 @@ var Read = function (apiMessagePayLoad) {
                     result = common.success;
                     break;
                 case ReadCommands.counter:
-                    apiMessagePayLoad.counters = ReadCounters(apiMessagePayLoad,this.configsCache);
+                    apiMessagePayLoad.counters = ReadCounters(apiMessagePayLoad, this.configsCache);
                     result = common.success;
                     break;
                 case ReadCommands.segment:
@@ -216,7 +195,7 @@ var Read = function (apiMessagePayLoad) {
                     break;
 
                 case ReadCommands.service:
-                    apiMessagePayLoad.services = ReadServices(apiMessagePayLoad.BranchID,this.configsCache);
+                    apiMessagePayLoad.services = ReadServices(apiMessagePayLoad.BranchID, this.configsCache);
                     result = common.success;
                     break;
                 default:
