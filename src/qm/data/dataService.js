@@ -33,30 +33,20 @@ async function cacheBranchUserActivities(branch) {
 
         if (userActivities) {
             branch.userActivitiesData = userActivities;
-            if (branch.userActivitiesData) {
-                //Set the user activities on the counter data
-                for (let i = 0; i < branch.userActivitiesData.length; i++) {
-
-                    let UserActivity = branch.userActivitiesData[i];
-                    let tcounterData = new counterData();
-                    tcounterData.id = UserActivity.counter_ID;
-                    tcounterData.currentState_ID = UserActivity.id;
-                    if (tcounterData.id > 0) {
-                        let found = false;
-                        for (let i = 0; i < branch.countersData.length; i++) {
-                            if (branch.countersData[i].id == UserActivity.counter_ID) {
-                                found = true;
-                                branch.countersData[i].currentState_ID = UserActivity.id;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            let tcounterData = new counterData();
-                            tcounterData.id = UserActivity.counter_ID;
-                            tcounterData.currentState_ID = UserActivity.id;
-                            branch.countersData.push(tcounterData);
-                        }
-                    }
+            //Set the user activities on the counter data
+            for (let i = 0; i < branch.userActivitiesData.length; i++) {
+                let UserActivity = branch.userActivitiesData[i];
+                let CurrentCounterData = branch.countersData.find(function (value) {
+                    return value.id == UserActivity.counter_ID;
+                });
+                if (CurrentCounterData) {
+                    CurrentCounterData.currentState_ID = UserActivity.id;
+                }
+                else {
+                    CurrentCounterData = new counterData();
+                    CurrentCounterData.id = UserActivity.counter_ID;
+                    CurrentCounterData.currentState_ID = UserActivity.id;
+                    branch.countersData.push(CurrentCounterData);
                 }
             }
         }
@@ -96,23 +86,17 @@ async function cacheBranchTransactions(branch) {
 
                 //Set the counter data
                 if (transaction.counter_ID > 0) {
-                    let tcounterData = new counterData();
-                    tcounterData.id = transaction.counter_ID;
-                    tcounterData.currentTransaction_ID = transaction.id;
-
-                    let found = false;
-                    for (let i = 0; i < branch.countersData.length; i++) {
-                        if (branch.countersData[i].id == transaction.counter_ID) {
-                            found = true;
-                            branch.countersData[i].currentTransaction_ID = transaction.id;
-                            break;
-                        }
+                    let CurrentCounterData = branch.countersData.find(function (value) {
+                        return value.id == transaction.counter_ID;
+                    });
+                    if (CurrentCounterData) {
+                        CurrentCounterData.currentTransaction_ID = transaction.id;
                     }
-                    if (!found) {
-                        let tcounterData = new counterData();
-                        tcounterData.id = transaction.counter_ID;
-                        tcounterData.currentTransaction_ID = transaction.id;
-                        branch.countersData.push(tcounterData);
+                    else {
+                        CurrentCounterData = new counterData();
+                        CurrentCounterData.id = transaction.counter_ID;
+                        CurrentCounterData.currentTransaction_ID = transaction.id;
+                        branch.countersData.push(CurrentCounterData);
                     }
                 }
 
