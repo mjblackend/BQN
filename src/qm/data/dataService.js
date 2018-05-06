@@ -10,17 +10,26 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
 
 
-
-async function cacheBranchUserActivities(branch) {
+async function getTodaysUserActivitiesFromDB(branchID) {
     try {
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
-        
-        //Get user activities
-        let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branch.id, "0"]);
+        let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branchID, "0"]);
         userActivities = userActivities.filter(function (value) {
             return value.startTime > Today && value.closed == 0;
         });
+        return userActivities;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+async function cacheBranchUserActivities(branch) {
+    try {
+        //Get user activities
+        let userActivities = await getTodaysUserActivitiesFromDB(branch.id);
 
         if (userActivities) {
             branch.userActivitiesData = userActivities;
@@ -59,47 +68,54 @@ async function cacheBranchUserActivities(branch) {
     }
 }
 
-async function cacheBranchTransactions(branch) {
+async function getTodaysTransactionFromDB(branchID) {
     try {
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
 
         //Get only the transactions for the day
         let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
-        let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branch.id, States]);
-        if (transactionsData) {
-            //Get only the transactions for the day
-            branch.transactionsData = transactionsData.filter(function (value) {
+        let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branchID, States]);
+        transactionsData = transactionsData.filter(function (value) {
+            return value.creationTime > Today;
+        });
+        return transactionsData;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+async function cacheBranchTransactions(branch) {
+    try {
+        branch.transactionsData = await getTodaysTransactionFromDB(branch.id);
+        if (branch.transactionsData) {
+            for (let i = 0; i < branch.transactionsData.length; i++) {
+                let transaction = branch.transactionsData[i];
+
                 //Set the counter data
-                if (value.creationTime > Today && value.counter_ID > 0) {
+                if (transaction.counter_ID > 0) {
                     let tcounterData = new counterData();
-                    tcounterData.id = value.counter_ID;
-                    tcounterData.currentTransaction_ID = value.id;
+                    tcounterData.id = transaction.counter_ID;
+                    tcounterData.currentTransaction_ID = transaction.id;
 
                     let found = false;
                     for (let i = 0; i < branch.countersData.length; i++) {
-                        if (branch.countersData[i].id == value.counter_ID) {
+                        if (branch.countersData[i].id == transaction.counter_ID) {
                             found = true;
-                            branch.countersData[i].currentTransaction_ID = value.id;
+                            branch.countersData[i].currentTransaction_ID = transaction.id;
                             break;
                         }
                     }
                     if (!found) {
                         let tcounterData = new counterData();
-                        tcounterData.id = value.counter_ID;
-                        tcounterData.currentTransaction_ID = value.id;
+                        tcounterData.id = transaction.counter_ID;
+                        tcounterData.currentTransaction_ID = transaction.id;
                         branch.countersData.push(tcounterData);
                     }
-
                 }
-                return value.creationTime > Today;
-            }
-            );
-        }
 
-        if (branch.transactionsData) {
-            for (let i = 0; i < branch.transactionsData.length; i++) {
-                let transaction = branch.transactionsData[i];
                 //To Visit Data
                 let VisitData;
                 if (branch.visitData) {
