@@ -10,113 +10,134 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
 
 
-//Cache Server Configs from DB
-var cacheData = async function () {
+
+async function cacheBranchUserActivities(branch) {
+    try {
+        let Now = new Date();
+        let Today = Now.setHours(0, 0, 0, 0);
+        
+        //Get user activities
+        let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branch.id, "0"]);
+        userActivities = userActivities.filter(function (value) {
+            return value.startTime > Today && value.closed == 0;
+        });
+
+        if (userActivities) {
+            branch.userActivitiesData = userActivities;
+            if (branch.userActivitiesData) {
+                //Set the user activities on the counter data
+                for (let i = 0; i < branch.userActivitiesData.length; i++) {
+
+                    let UserActivity = branch.userActivitiesData[i];
+                    let tcounterData = new counterData();
+                    tcounterData.id = UserActivity.counter_ID;
+                    tcounterData.currentState_ID = UserActivity.id;
+                    if (tcounterData.id > 0) {
+                        let found = false;
+                        for (let i = 0; i < branch.countersData.length; i++) {
+                            if (branch.countersData[i].id == UserActivity.counter_ID) {
+                                found = true;
+                                branch.countersData[i].currentState_ID = UserActivity.id;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            let tcounterData = new counterData();
+                            tcounterData.id = UserActivity.counter_ID;
+                            tcounterData.currentState_ID = UserActivity.id;
+                            branch.countersData.push(tcounterData);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
+async function cacheBranchTransactions(branch) {
     try {
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
 
+        //Get only the transactions for the day
+        let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
+        let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branch.id, States]);
+        if (transactionsData) {
+            //Get only the transactions for the day
+            branch.transactionsData = transactionsData.filter(function (value) {
+                //Set the counter data
+                if (value.creationTime > Today && value.counter_ID > 0) {
+                    let tcounterData = new counterData();
+                    tcounterData.id = value.counter_ID;
+                    tcounterData.currentTransaction_ID = value.id;
+
+                    let found = false;
+                    for (let i = 0; i < branch.countersData.length; i++) {
+                        if (branch.countersData[i].id == value.counter_ID) {
+                            found = true;
+                            branch.countersData[i].currentTransaction_ID = value.id;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        let tcounterData = new counterData();
+                        tcounterData.id = value.counter_ID;
+                        tcounterData.currentTransaction_ID = value.id;
+                        branch.countersData.push(tcounterData);
+                    }
+
+                }
+                return value.creationTime > Today;
+            }
+            );
+        }
+
+        if (branch.transactionsData) {
+            for (let i = 0; i < branch.transactionsData.length; i++) {
+                let transaction = branch.transactionsData[i];
+                //To Visit Data
+                let VisitData;
+                if (branch.visitData) {
+                    VisitData = branch.visitData.find(function (value) {
+                        return transaction.visit_ID == value.visit_ID;
+                    });
+                }
+                if (!VisitData) {
+                    VisitData = new visitData();
+                    VisitData.visit_ID = transaction.visit_ID;
+                    VisitData.customer_ID = transaction.customer_ID;
+                    VisitData.transactions_IDs.push(transaction.id);
+                    branch.visitData.push(VisitData);
+
+                } else {
+                    branch.transactions_IDs.push(transaction.id);
+                }
+            }
+
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
+//Cache Server Configs from DB
+var cacheData = async function () {
+    try {
         let result = common.success;
         let BranchesConfig = configurationService.configsCache.branches;
         if (BranchesConfig != null && BranchesConfig.length > 0) {
             for (let i = 0; i < BranchesConfig.length; i++) {
                 let branch = new branchData();
                 branch.id = BranchesConfig[i].ID;
-
-
-                //Get user activities
-                let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branch.id, "0"]);
-                userActivities = userActivities.filter(function (value) {
-                    return value.startTime > Today && value.closed == 0;
-                });
-
-                if (userActivities) {
-                    branch.userActivitiesData = userActivities;
-                    if (branch.userActivitiesData) {
-                        //Set the user activities on the counter data
-                        for (let i = 0; i < branch.userActivitiesData.length; i++) {
-
-                            let UserActivity = branch.userActivitiesData[i];
-                            let tcounterData = new counterData();
-                            tcounterData.id = UserActivity.counter_ID;
-                            tcounterData.currentState_ID = UserActivity.id;
-                            if (tcounterData.id > 0) {
-                                let found = false;
-                                for (let i = 0; i < branch.countersData.length; i++) {
-                                    if (branch.countersData[i].id == UserActivity.counter_ID) {
-                                        found = true;
-                                        branch.countersData[i].currentState_ID = UserActivity.id;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    let tcounterData = new counterData();
-                                    tcounterData.id = UserActivity.counter_ID;
-                                    tcounterData.currentState_ID = UserActivity.id;
-                                    branch.countersData.push(tcounterData);
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-                //Get only the transactions for the day
-                let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
-                let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branch.id, States]);
-                if (transactionsData) {
-                    //Get only the transactions for the day
-                    branch.transactionsData = transactionsData.filter(function (value) {
-                        //Set the counter data
-                        if (value.creationTime > Today && value.counter_ID > 0) {
-                            let tcounterData = new counterData();
-                            tcounterData.id = value.counter_ID;
-                            tcounterData.currentTransaction_ID = value.id;
-
-                            let found = false;
-                            for (let i = 0; i < branch.countersData.length; i++) {
-                                if (branch.countersData[i].id == value.counter_ID) {
-                                    found = true;
-                                    branch.countersData[i].currentTransaction_ID = value.id;
-                                    break;
-                                }
-                            }
-                            if (!found) {
-                                let tcounterData = new counterData();
-                                tcounterData.id = value.counter_ID;
-                                tcounterData.currentTransaction_ID = value.id;
-                                branch.countersData.push(tcounterData);
-                            }
-
-                        }
-                        return value.creationTime > Today;
-                    }
-                    );
-                }
-
-                if (branch.transactionsData) {
-                    for (let i = 0; i < branch.transactionsData.length; i++) {
-                        let transaction = branch.transactionsData[i];
-                        //To Visit Data
-                        let VisitData;
-                        if (branch.visitData) {
-                            VisitData = branch.visitData.find(function (value) {
-                                return transaction.visit_ID == value.visit_ID;
-                            });
-                        }
-                        if (!VisitData) {
-                            VisitData = new visitData();
-                            VisitData.visit_ID = transaction.visit_ID;
-                            VisitData.customer_ID = transaction.customer_ID;
-                            VisitData.transactions_IDs.push(transaction.id);
-                            branch.visitData.push(VisitData);
-
-                        } else {
-                            branch.transactions_IDs.push(transaction.id);
-                        }
-                    }
-
-                }
+                await cacheBranchUserActivities(branch);
+                await cacheBranchTransactions(branch);
                 branchesData.push(branch);
             }
         }
