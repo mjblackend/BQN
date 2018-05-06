@@ -14,6 +14,7 @@ var logError = function(error)
         }
     });
     console.log(str);
+    return true;
 };
 
 

@@ -64,19 +64,16 @@ describe('Queuing Command Manager Test', function () {
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" successfully', async function () {
         let result = await queueCommandManager.issueTicket(ticketInfo);
         (result === common.success).should.true();
-
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" Second time successfully', async function () {
         let result = await queueCommandManager.issueTicket(ticketInfo);
         (result === common.success).should.true();
-
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "366" branchid: "106" successfully', async function () {
         let result = await queueCommandManager.issueTicket(ticketInfo2);
         (result === common.success).should.true();
-
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "386" branchid: "106" throws error', async function () {
@@ -104,7 +101,6 @@ describe('Queuing Command Manager Test', function () {
         let result = await queueCommandManager.counterOpen(CounterInfo);
         (result === common.success).should.true();
     });
-
 
     it('Counter Take Break for counter ID = 120 successfully', async function () {
         let result = await queueCommandManager.counterBreak(CounterInfo);

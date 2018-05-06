@@ -9,17 +9,17 @@ const BranchID = "106";
 
 should.toString();
 
-describe('statisticsManager initialize successfully', function () {
+describe('statisticsManager initialize successfully', async function () {
     it('statisticsManager', async function () {
         this.timeout(10000);
         let result = await statisticsManager.initialize();
         (result === common.success).should.true();
     });
+
+    it('Read Branch(106) statistics successfully', async function () {
+        let branchID= BranchID;
+        let result = await statisticsManager.ReadBranchStatistics(branchID);
+        (result === common.success).should.true();
+    });
 });
 
-it('Read Branch(106) statistics successfully', async function () {
-
-    let branchID= BranchID;
-    let result = await statisticsManager.ReadBranchStatistics(branchID);
-    (result === common.success).should.true();
-});
