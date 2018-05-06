@@ -38,12 +38,10 @@ function getCounterData(BracnhData, CounterID) {
 function getCurrentActivity(BracnhData, CounterData) {
     try {
         let CurrentActivity;
-        if (CounterData) {
-            if (CounterData.currentState_ID) {
-                CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
-                    return CounterData.currentState_ID == value.id;
-                });
-            }
+        if (CounterData && CounterData.currentState_ID) {
+            CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
+                return CounterData.currentState_ID == value.id;
+            });
         }
         return CurrentActivity;
     }
@@ -56,12 +54,10 @@ function getCurrentActivity(BracnhData, CounterData) {
 function getCurrentTransaction(BracnhData, CounterData) {
     try {
         let CurrentTransaction;
-        if (CounterData) {
-            if (CounterData.currentTransaction_ID) {
-                CurrentTransaction = BracnhData.transactionsData.find(function (value) {
-                    return CounterData.currentTransaction_ID == value.id;
-                });
-            }
+        if (CounterData && CounterData.currentTransaction_ID) {
+            CurrentTransaction = BracnhData.transactionsData.find(function (value) {
+                return CounterData.currentTransaction_ID == value.id;
+            });
         }
         return CurrentTransaction;
     }
@@ -98,7 +94,7 @@ async function cacheBranchUserActivities(branch) {
             //Set the user activities on the counter data
             for (let i = 0; i < branch.userActivitiesData.length; i++) {
                 let UserActivity = branch.userActivitiesData[i];
-                let CurrentCounterData = getCounterData(branch,UserActivity.counter_ID)
+                let CurrentCounterData = getCounterData(branch, UserActivity.counter_ID)
                 if (CurrentCounterData) {
                     CurrentCounterData.currentState_ID = UserActivity.id;
                 }
@@ -137,9 +133,8 @@ async function getTodaysTransactionFromDB(branchID) {
     }
 }
 
-function AddorUpdateVisitData(branchData,transaction)
-{
-    try{
+function AddorUpdateVisitData(branchData, transaction) {
+    try {
         let VisitData;
         if (branchData.visitData) {
             VisitData = branchData.visitData.find(function (value) {
@@ -171,7 +166,7 @@ async function cacheBranchTransactions(branch) {
 
                 //Set the counter data
                 if (transaction.counter_ID > 0) {
-                    let CurrentCounterData = getCounterData(branch,transaction.counter_ID)
+                    let CurrentCounterData = getCounterData(branch, transaction.counter_ID)
                     if (CurrentCounterData) {
                         CurrentCounterData.currentTransaction_ID = transaction.id;
                     }
@@ -184,7 +179,7 @@ async function cacheBranchTransactions(branch) {
                 }
 
                 //To Visit Data
-                AddorUpdateVisitData(branch,transaction);
+                AddorUpdateVisitData(branch, transaction);
             }
         }
     }
