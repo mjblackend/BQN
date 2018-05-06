@@ -7,7 +7,8 @@ var it = mocha.it;
 var common = require("../../common/common");
 const ServiceID = "364";
 const ServiceConfig_ID= "363";
-const BranchID = "106";
+const Invalid_ServiceConfig_ID= "33333";
+const branchid = "106";
 const AutoNext = "EnableAutoNext";
 should.toString();
 
@@ -24,13 +25,62 @@ describe('Configration Service', function () {
         let ServiceConfig = await configurationService.getServiceConfig(ServiceConfig_ID);
         (ServiceConfig != undefined).should.true();
     });
+    it('Get Service Config failed', async function () {
+        let ServiceConfig = await configurationService.getServiceConfig(Invalid_ServiceConfig_ID);
+        (ServiceConfig == undefined).should.true();
+    });
 
     it('Get Service Config from ServiceID successfully', async function () {
         let ServiceConfig = await configurationService.getServiceConfigFromService(ServiceID);
         (ServiceConfig != undefined).should.true();
     });
     it('Get common Config successfully', async function () {
-        let commonConfig = await configurationService.getCommonSettings(BranchID,AutoNext);
+        let commonConfig = await configurationService.getCommonSettings(branchid,AutoNext);
         (commonConfig != undefined).should.true();
     });    
+    it('Read Branches successfully', async function () {
+        var payload = {
+            EntityName: "branch"
+        }
+        let result = await configurationService.Read(payload);
+        (result == common.success).should.true();
+    });  
+    it('Read Service on Branch 106 successfully', async function () {
+        var payload ={
+            EntityName: "service",
+            BranchID: branchid
+        }
+        let result = await configurationService.Read(payload);
+        (result == common.success).should.true();
+    });  
+    it('Read Segments on Branch 106 successfully', async function () {
+        var payload ={
+            EntityName: "segment",
+            BranchID: branchid
+        }
+        let result = await configurationService.Read(payload);
+        (result == common.success).should.true();
+    });  
+    it('Read Counters on Branch 106 successfully', async function () {
+        var payload = {
+            EntityName: "counter",
+            BranchID: branchid,
+            types: ["0", "3"]
+        }
+        let result = await configurationService.Read(payload);
+        (result == common.success).should.true();
+    });  
+    it('Read invalid entity on Branch throws error', async function () {
+        var payload = {
+            EntityName: "invalidEntity"
+        }
+        let result = await configurationService.Read(payload);
+        (result == common.error).should.true();
+    });  
+
+
+
+
+
+
 });

@@ -70,31 +70,6 @@ exports.all=function(query, params) {
     }) ;
 };
 
-// each row returned one by one 
-exports.each=function(query, params, action) {
-    return new Promise(function(resolve, reject) {
-        let db = this.db;
-        db.serialize(function() {
-            db.each(query, params, function(err, row)  {
-                if(err) 
-                {
-                    logger.logError("Read error: "+ err.message);
-                    reject("Read error: " + err.message);
-                }
-                else {
-                    if(row) {
-                        action(row);
-                    }    
-                }
-            });
-            db.get("", function(err, row)  {
-                console.log(row);
-                resolve(true);
-            });     
-        });
-    }) ;
-};
-
 exports.close=function() {
     return new Promise(function(resolve) {
         this.db.close();

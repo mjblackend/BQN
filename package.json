@@ -6,7 +6,9 @@
     "start": "node ./bin/www",
     "lint": "esw *.js src",
     "lint:watch": "npm run lint -- --watch",
-    "test": "nyc mocha -R spec --recursive ./src"
+    "test": "mocha -R spec --recursive ./src",
+    "testnyc": "nyc mocha -R spec --recursive ./src",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --recursive ./src"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -28,6 +30,7 @@
     "sqlite3": "^4.0.0"
   },
   "devDependencies": {
+    "istanbul": "^0.4.5",
     "nyc": "^11.7.1"
   }
 }

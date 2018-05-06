@@ -258,7 +258,6 @@ var initialize = async function () {
             var result = await cacheServerEnities();
             return result;
         }
-
     }
     catch (error) {
         logger.logError(error);

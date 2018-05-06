@@ -1,0 +1,6 @@
+instrumentation:
+    root: .
+    extensions:
+        - .js
+    default-excludes: true
+    excludes: ['**/customer/**','**/userMessaging/**', '**/common/**', '**/routes/**', '**/TestAPI/**','**/public/**','src/app.js','src/notificationHub.js']

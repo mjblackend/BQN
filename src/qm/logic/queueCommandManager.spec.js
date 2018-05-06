@@ -71,6 +71,11 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+    it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" third time successfully', async function () {
+        let result = await queueCommandManager.issueTicket(ticketInfo);
+        (result === common.success).should.true();
+    });
+
     it('Issue Ticket segmentid: "325" serviceid: "366" branchid: "106" successfully', async function () {
         let result = await queueCommandManager.issueTicket(ticketInfo2);
         (result === common.success).should.true();
@@ -81,6 +86,11 @@ describe('Queuing Command Manager Test', function () {
         (result === common.error).should.true();
     });
 
+
+    it('Next Customer Get for counter ID = 120', async function () {
+        let result = await queueCommandManager.counterNext(CounterInfo);
+        (result === common.success).should.true();
+    });
 
     it('Next Customer Get for counter ID = 120', async function () {
         let result = await queueCommandManager.counterNext(CounterInfo);
@@ -107,6 +117,15 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+    it('Open Counter Successfully', async function () {
+        let result = await queueCommandManager.counterOpen(CounterInfo);
+        (result === common.success).should.true();
+    });
+
+    it('Counter open for counter ID = 120 will failed because the counter is already opened', async function () {
+        let result = await queueCommandManager.counterOpen(CounterInfo);
+        (result === common.not_valid).should.true();
+    });
 
     it('Get All Branches', async function () {
 
