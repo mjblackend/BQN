@@ -162,12 +162,8 @@ var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, Finish
 
             //Finish Serving the previous Ticket if exists
             let Current_Counter_Data;
-            for (let i = 0; i < BracnhData.countersData.length; i++) {
-                if (BracnhData.countersData[i].id == CounterID) {
-                    Current_Counter_Data = BracnhData.countersData[i];
-                    break;
-                }
-            }
+            Current_Counter_Data = dataService.getCounterData(BracnhData, CounterID)
+
             if (Current_Counter_Data && Current_Counter_Data.currentTransaction_ID) {
                 CurrentCustomerTransaction = BracnhData.transactionsData.find(function (transaction_Data) {
                     return transaction_Data.id == Current_Counter_Data.currentTransaction_ID;

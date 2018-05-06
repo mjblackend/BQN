@@ -256,7 +256,7 @@ var initialize = async function () {
         return false;
     }
 };
-
+module.exports.getCounterData = getCounterData;
 module.exports.AddorUpdateVisitData = AddorUpdateVisitData;
 module.exports.getCurrentData = getCurrentData;
 module.exports.initialize = initialize;
