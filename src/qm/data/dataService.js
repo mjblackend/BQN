@@ -137,6 +137,31 @@ async function getTodaysTransactionFromDB(branchID) {
     }
 }
 
+function AddorUpdateVisitData(branchData,transaction)
+{
+    try{
+        let VisitData;
+        if (branchData.visitData) {
+            VisitData = branchData.visitData.find(function (value) {
+                return transaction.visit_ID == value.visit_ID;
+            });
+        }
+        if (!VisitData) {
+            VisitData = new visitData();
+            VisitData.visit_ID = transaction.visit_ID;
+            VisitData.customer_ID = transaction.customer_ID;
+            VisitData.transactions_IDs.push(transaction.id);
+            branchData.visitData.push(VisitData);
+
+        } else {
+            VisitData.transactions_IDs.push(transaction.id);
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+}
+
 async function cacheBranchTransactions(branch) {
     try {
         branch.transactionsData = await getTodaysTransactionFromDB(branch.id);
@@ -159,24 +184,8 @@ async function cacheBranchTransactions(branch) {
                 }
 
                 //To Visit Data
-                let VisitData;
-                if (branch.visitData) {
-                    VisitData = branch.visitData.find(function (value) {
-                        return transaction.visit_ID == value.visit_ID;
-                    });
-                }
-                if (!VisitData) {
-                    VisitData = new visitData();
-                    VisitData.visit_ID = transaction.visit_ID;
-                    VisitData.customer_ID = transaction.customer_ID;
-                    VisitData.transactions_IDs.push(transaction.id);
-                    branch.visitData.push(VisitData);
-
-                } else {
-                    VisitData.transactions_IDs.push(transaction.id);
-                }
+                AddorUpdateVisitData(branch,transaction);
             }
-
         }
     }
     catch (error) {
