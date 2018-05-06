@@ -13,6 +13,59 @@ var generateID = function (transactions) {
     return transactions.branch_ID + "_" + transactions.service_ID + "_" + transactions.segment_ID + "_" + transactions.hall_ID + "_" + transactions.counter_ID + "_" + transactions.user_ID;
 };
 
+
+function UpdateWaitingCustomers(t_Statistics,transactions) {
+    //Waiting Customer
+    if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
+        t_Statistics.WaitingCustomers = t_Statistics.WaitingCustomers + 1;
+    }
+}
+function UpdateWaitingCustomers(t_Statistics,transactions) {
+    //Waiting Customer
+    if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
+        t_Statistics.WaitingCustomers = t_Statistics.WaitingCustomers + 1;
+    }
+}
+function UpdateServedCustomersNo(t_Statistics,transactions) {
+        //served customers
+        if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.SetAsServed || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
+            t_Statistics.ServedCustomersNo = t_Statistics.ServedCustomersNo + 1;
+        }
+}
+
+function UpdateNoShowCustomersNo(t_Statistics,transactions) {
+        //number of no show
+        if (transactions.servingType == enums.CustomerServingType.NoShow) {
+            t_Statistics.NoShowCustomersNo = t_Statistics.NoShowCustomersNo + 1;
+        }
+}
+
+function UpdateNonServedCustomersNo(t_Statistics,transactions) {
+    if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
+        t_Statistics.NonServedCustomersNo = t_Statistics.NonServedCustomersNo + 1;
+    }
+}
+
+function UpdateServiceStatistics(t_Statistics,transactions,ServiceConfig) {
+    if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
+        if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime) {
+            t_Statistics.TotalServiceTime = t_Statistics.TotalServiceTime + transactions.serviceSeconds;
+            t_Statistics.ASTWeight = t_Statistics.ASTWeight + 1;
+            t_Statistics.AvgServiceTime = t_Statistics.TotalServiceTime / t_Statistics.ASTWeight;
+        }
+    }
+}
+
+function UpdateWaitingStatistics(t_Statistics,transactions,ServiceConfig) {
+    if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
+        t_Statistics.WaitedCustomersNo = t_Statistics.WaitedCustomersNo + 1;
+        if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
+            t_Statistics.TotalWaitingTime = t_Statistics.TotalWaitingTime + transactions.waitingSeconds;
+            t_Statistics.AvgWaitingTime = t_Statistics.TotalWaitingTime / t_Statistics.WaitedCustomersNo;
+        }
+    }
+}
+
 var CreateNewstatistics = function (transactions) {
     try {
         let ServiceConfig = configurationService.getServiceConfigFromService(transactions.service_ID);
@@ -32,42 +85,23 @@ var CreateNewstatistics = function (transactions) {
 
 
         //Waiting Customer
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
-            t_Statistics.WaitingCustomers = t_Statistics.WaitingCustomers + 1;
-        }
+        UpdateWaitingCustomers(t_Statistics,transactions);
 
         //served customers
-        if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.SetAsServed || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-            t_Statistics.ServedCustomersNo = t_Statistics.ServedCustomersNo + 1;
-        }
+        UpdateServedCustomersNo(t_Statistics,transactions);
 
         //number of no show
-        if (transactions.servingType == enums.CustomerServingType.NoShow) {
-            t_Statistics.NoShowCustomersNo = t_Statistics.NoShowCustomersNo + 1;
-        }
+        UpdateNoShowCustomersNo(t_Statistics,transactions);
 
         //number of non served customers
-        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
-            t_Statistics.NonServedCustomersNo = t_Statistics.NonServedCustomersNo + 1;
-        }
+        UpdateNonServedCustomersNo(t_Statistics,transactions);
 
         //avrage serving customers
-        if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-            if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime) {
-                t_Statistics.TotalServiceTime = t_Statistics.TotalServiceTime + transactions.serviceSeconds;
-                t_Statistics.ASTWeight = t_Statistics.ASTWeight + 1;
-                t_Statistics.AvgServiceTime = t_Statistics.TotalServiceTime / t_Statistics.ASTWeight;
-            }
-        }
+        UpdateServiceStatistics(t_Statistics,transactions,ServiceConfig);
 
         //waited customer
-        if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            t_Statistics.WaitedCustomersNo = t_Statistics.WaitedCustomersNo + 1;
-            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
-                t_Statistics.TotalWaitingTime = t_Statistics.TotalWaitingTime + transactions.waitingSeconds;
-                t_Statistics.AvgWaitingTime = t_Statistics.TotalWaitingTime / t_Statistics.WaitedCustomersNo;
-            }
-        }
+        UpdateWaitingStatistics(t_Statistics,transactions,ServiceConfig);
+
         return t_Statistics;
     }
     catch (error) {
@@ -81,44 +115,26 @@ var UpdateStatistics = function (Statistics, transactions) {
         let ServiceConfig = configurationService.getServiceConfigFromService(transactions.service_ID);
         Statistics.StatisticsDate = Date.now();
         Statistics.ID = generateID(transactions);
+
+      
         //Waiting Customer
-        if (transactions.state == enums.StateType.Pending || transactions.state == enums.StateType.PendingRecall || transactions.state == enums.StateType.OnHold) {
-            Statistics.WaitingCustomers = Statistics.WaitingCustomers + 1;
-        }
+        UpdateWaitingCustomers(Statistics,transactions);
 
         //served customers
-        if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.SetAsServed || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-            Statistics.ServedCustomersNo = Statistics.ServedCustomersNo + 1;
-        }
+        UpdateServedCustomersNo(Statistics,transactions);
 
         //number of no show
-        if (transactions.servingType == enums.CustomerServingType.NoShow) {
-            Statistics.NoShowCustomersNo = Statistics.NoShowCustomersNo + 1;
-        }
+        UpdateNoShowCustomersNo(Statistics,transactions);
 
         //number of non served customers
-        if (transactions.servingType == enums.CustomerServingType.NoCalled || transactions.servingType == enums.CustomerServingType.NoShow) {
-            Statistics.NonServedCustomersNo = Statistics.NonServedCustomersNo + 1;
-        }
-
+        UpdateNonServedCustomersNo(Statistics,transactions);
 
         //avrage serving customers
-        if (transactions.serviceSeconds > 0 && (transactions.servingType == enums.CustomerServingType.Served || transactions.servingType == enums.CustomerServingType.ServedWithAdded)) {
-            if (transactions.serviceSeconds <= ServiceConfig.MaxServiceTime) {
-                Statistics.TotalServiceTime = Statistics.TotalServiceTime + transactions.serviceSeconds;
-                Statistics.ASTWeight = Statistics.ASTWeight + 1;
-                Statistics.AvgServiceTime = Statistics.TotalServiceTime / Statistics.ASTWeight;
-            }
-        }
+        UpdateServiceStatistics(Statistics,transactions,ServiceConfig);
 
         //waited customer
-        if (transactions.waitingSeconds > 0 && transactions.origin != enums.OriginType.AddVirtualService && transactions.servingType != enums.CustomerServingType.CancelledDueTransfer) {
-            Statistics.WaitedCustomersNo = Statistics.WaitedCustomersNo + 1;
-            if (transactions.waitingSeconds <= ServiceConfig.MaxServiceTime) {
-                Statistics.TotalWaitingTime = Statistics.TotalWaitingTime + transactions.waitingSeconds;
-                Statistics.AvgWaitingTime = Statistics.TotalWaitingTime / Statistics.WaitedCustomersNo;
-            }
-        }
+        UpdateWaitingStatistics(Statistics,transactions,ServiceConfig);
+
         return Statistics;
 
     }
