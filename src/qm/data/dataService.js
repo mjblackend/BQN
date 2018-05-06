@@ -9,6 +9,68 @@ var configurationService = require("../configurations/configurationService");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
 
+function getCounterData(BracnhData, CounterID) {
+    try {
+        let CounterData;
+        if (BracnhData && BracnhData.countersData) {
+            for (let i = 0; i < BracnhData.countersData.length; i++) {
+                if (BracnhData.countersData[i].id == CounterID) {
+                    CounterData = BracnhData.countersData[i];
+                    break;
+                }
+            }
+            if (!CounterData) {
+                let tcounterData = new counterData();
+                tcounterData.id = CounterID;
+                BracnhData.countersData.push(tcounterData);
+                CounterData = BracnhData.countersData[BracnhData.countersData.length - 1];
+            }
+        }
+        return CounterData;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+
+function getCurrentActivity(BracnhData, CounterData) {
+    try {
+        let CurrentActivity;
+        if (CounterData) {
+            if (CounterData.currentState_ID) {
+                CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
+                    return CounterData.currentState_ID == value.id;
+                });
+            }
+        }
+        return CurrentActivity;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+function getCurrentTransaction(BracnhData, CounterData) {
+    try {
+        let CurrentTransaction;
+        if (CounterData) {
+            if (CounterData.currentTransaction_ID) {
+                CurrentTransaction = BracnhData.transactionsData.find(function (value) {
+                    return CounterData.currentTransaction_ID == value.id;
+                });
+            }
+        }
+        return CurrentTransaction;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
 
 async function getTodaysUserActivitiesFromDB(branchID) {
     try {
@@ -36,9 +98,7 @@ async function cacheBranchUserActivities(branch) {
             //Set the user activities on the counter data
             for (let i = 0; i < branch.userActivitiesData.length; i++) {
                 let UserActivity = branch.userActivitiesData[i];
-                let CurrentCounterData = branch.countersData.find(function (value) {
-                    return value.id == UserActivity.counter_ID;
-                });
+                let CurrentCounterData = getCounterData(branch,UserActivity.counter_ID)
                 if (CurrentCounterData) {
                     CurrentCounterData.currentState_ID = UserActivity.id;
                 }
@@ -86,9 +146,7 @@ async function cacheBranchTransactions(branch) {
 
                 //Set the counter data
                 if (transaction.counter_ID > 0) {
-                    let CurrentCounterData = branch.countersData.find(function (value) {
-                        return value.id == transaction.counter_ID;
-                    });
+                    let CurrentCounterData = getCounterData(branch,transaction.counter_ID)
                     if (CurrentCounterData) {
                         CurrentCounterData.currentTransaction_ID = transaction.id;
                     }
@@ -149,66 +207,6 @@ var cacheData = async function () {
     }
 };
 
-function getCounterData(BracnhData, CounterID) {
-    try {
-        let CounterData;
-        if (BracnhData && BracnhData.countersData) {
-            for (let i = 0; i < BracnhData.countersData.length; i++) {
-                if (BracnhData.countersData[i].id == CounterID) {
-                    CounterData = BracnhData.countersData[i];
-                    break;
-                }
-            }
-            if (!CounterData) {
-                let tcounterData = new counterData();
-                tcounterData.id = CounterID;
-                BracnhData.countersData.push(tcounterData);
-                CounterData = BracnhData.countersData[BracnhData.countersData.length - 1];
-            }
-        }
-        return CounterData;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
-
-function getCurrentActivity(BracnhData, CounterData) {
-    try {
-        let CurrentActivity;
-        if (CounterData) {
-            if (CounterData.currentState_ID) {
-                CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
-                    return CounterData.currentState_ID == value.id;
-                });
-            }
-        }
-        return CurrentActivity;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
-
-function getCurrentTransaction(BracnhData, CounterData) {
-    try {
-        let CurrentTransaction;
-        if (CounterData) {
-            if (CounterData.currentTransaction_ID) {
-                CurrentTransaction = BracnhData.transactionsData.find(function (value) {
-                    return CounterData.currentTransaction_ID == value.id;
-                });
-            }
-        }
-        return CurrentTransaction;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
 //Get the Branch Data and counter data then the current Activity
 function getCurrentData(OrgID, BranchID, CounterID, output) {
     try {
