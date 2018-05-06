@@ -257,6 +257,7 @@ var initialize = async function () {
     }
 };
 
+module.exports.AddorUpdateVisitData = AddorUpdateVisitData;
 module.exports.getCurrentData = getCurrentData;
 module.exports.initialize = initialize;
 module.exports.branchesData = branchesData;

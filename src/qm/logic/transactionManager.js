@@ -71,22 +71,8 @@ var AddTransaction = function (transaction) {
             BracnhData.transactionsData.push(transaction);
 
             //To Visit Data
-            let VisitData;
-            if (BracnhData.visitData) {
-                VisitData = BracnhData.visitData.find(function (value) {
-                    return transaction.visit_ID == value.visit_ID;
-                });
-            }
-            if (!VisitData) {
-                VisitData = new visitData();
-                VisitData.visit_ID = transaction.visit_ID;
-                VisitData.customer_ID = transaction.customer_ID;
-                VisitData.transactions_IDs.push(transaction.id);
-                BracnhData.visitData.push(VisitData);
+            dataService.AddorUpdateVisitData(BracnhData, transaction);
 
-            } else {
-                VisitData.transactions_IDs.push(transaction.id);
-            }
             //Update the Statistics
             statisticsManager.AddOrUpdateTransaction(transaction);
 
