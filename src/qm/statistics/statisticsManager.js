@@ -221,9 +221,12 @@ var RefreshBranchStatistics = function (BranchID) {
                 }
             }
         }
+
+        return common.success;
     }
     catch (error) {
         logger.logError(error);
+        return common.error;
     }
 };
 
@@ -296,7 +299,7 @@ var initialize = async function () {
 
 
 //Get branch statistics
-var ReadBranchStatistics = async function (apiMessagePayLoad) {
+var ReadBranchStatistics = function (apiMessagePayLoad) {
     try {
         let BranchID = apiMessagePayLoad.BranchID;
         //RefreshBranchStatistics(BranchID);
@@ -341,7 +344,7 @@ function SumStatistics(TotalStatistics, ToBeAddedStatistics) {
 }
 
 //Get single statistics
-var GetSpecificStatistics = async function (FilterStatistics) {
+var GetSpecificStatistics = function (FilterStatistics) {
     try {
         let TotalStatistics = new statisticsData();
         if (FilterStatistics.branch_ID > 0) {
@@ -374,9 +377,10 @@ var GetSpecificStatistics = async function (FilterStatistics) {
                         SumStatistics(TotalStatistics,tStatistics);
                     }
                 }
+                return TotalStatistics;
             }
         }
-        return TotalStatistics;
+        return undefined;
     }
     catch (error) {
         logger.logError(error);
