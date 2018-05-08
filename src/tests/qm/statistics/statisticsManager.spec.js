@@ -32,21 +32,18 @@ describe('statisticsManager initialize successfully', async function () {
         let result = await statisticsManager.RefreshBranchStatistics(branchID);
         (result === common.success).should.true();
     });
-    it('Read Branch(106) Statistic for segment ' + SegmentID + ' and service ' + ServiceID + ' successfully', async function () {
+    it('Read Branch(106) Statistic for service ' + ServiceID + ' successfully', async function () {
 
         let FilterStatistics = new statisticsData();
         FilterStatistics.branch_ID = BranchID;
-        FilterStatistics.segment_ID = SegmentID;
         FilterStatistics.service_ID = ServiceID;
         let result = await statisticsManager.GetSpecificStatistics(FilterStatistics);
-        (result && result.WaitedCustomersNo > 0).should.true();
+        (result && result.WaitingCustomers > 0).should.true();
     });
-    it('Read Branch(106) Statistic for segment ' + SegmentID + ' and service ' + ServiceID + '  Counter =  ' + CounterID + ' successfully', async function () {
+    it('Read Branch(106) Statistic for Counter =  ' + CounterID + ' successfully', async function () {
 
         let FilterStatistics = new statisticsData();
         FilterStatistics.branch_ID = BranchID;
-        FilterStatistics.segment_ID = SegmentID;
-        FilterStatistics.service_ID = ServiceID;
         FilterStatistics.counter_ID = CounterID;
 
         let result = await statisticsManager.GetSpecificStatistics(FilterStatistics);
