@@ -249,15 +249,8 @@ var getServiceConfigFromService = function (ServiceID) {
 
 var initialize = async function () {
     try {
-        if (common.moch) {
-            let configs = await fs.readFileSync("Configs.json");
-            this.configsCache = JSON.parse(configs);
-            return common.success;
-        }
-        else {
-            var result = await cacheServerEnities();
-            return result;
-        }
+        var result = await cacheServerEnities();
+        return result;
     }
     catch (error) {
         logger.logError(error);
