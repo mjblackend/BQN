@@ -6,7 +6,7 @@ var common = require("../../common/common");
 var idGenerator = require("./idGenerator");
 //Transaction Attributes
 var transactioninst = new transaction();
-var attributes = Object.getOwnPropertyNames(transactioninst);
+var attributes = Object.getOwnPropertyNames(transactioninst).filter(function(value){ return !value.startsWith("_"); });
 var attributesStr = attributes.join(",");
 var updateTransactions = [];
 var addTransactions = [];

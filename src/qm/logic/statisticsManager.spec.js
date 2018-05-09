@@ -26,12 +26,6 @@ describe('StatisticsManager initialize successfully', async function () {
         let result = await statisticsManager.ReadBranchStatistics(branchID);
         (result === common.success).should.true();
     });
-
-    it('Refresh Branch(' + BranchID + ') statistics successfully', async function () {
-        let branchID = BranchID;
-        let result = await statisticsManager.RefreshBranchStatistics(branchID);
-        (result === common.success).should.true();
-    });
     it('Read Branch(106) Statistic for service ' + ServiceID + ' successfully', async function () {
 
         let FilterStatistics = new statisticsData();

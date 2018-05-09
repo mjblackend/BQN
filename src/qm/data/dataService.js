@@ -5,6 +5,7 @@ var enums = require("../../common/enums");
 var branchData = require("./branchData");
 var visitData = require("./visitData");
 var counterData = require("./counterData");
+var transaction = require("./transaction");
 var configurationService = require("../configurations/configurationService");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
@@ -118,13 +119,19 @@ async function getTodaysTransactionFromDB(branchID) {
     try {
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
-
+        let transactionsData = [];
         //Get only the transactions for the day
         let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
-        let transactionsData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branchID, States]);
-        transactionsData = transactionsData.filter(function (value) {
+        let transactionsDBData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branchID, States]);
+        transactionsDBData = transactionsDBData.filter(function (value) {
             return value.creationTime > Today;
         });
+        if (transactionsDBData && transactionsDBData.length > 0) {
+            for (let i = 0; i < transactionsDBData.length; i++) {
+                let t_transaction = new transaction(transactionsDBData[i]);
+                transactionsData.push(t_transaction);
+            }
+        }
         return transactionsData;
     }
     catch (error) {

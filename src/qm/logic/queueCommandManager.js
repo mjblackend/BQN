@@ -14,9 +14,6 @@ var initialized = false;
 
 var FinishingCommand = async function (BranchID) {
     try {
-        //Refresh Statistics
-        statisticsManager.RefreshBranchStatistics(BranchID);
-
         //Commit DB Actions
         await repositoriesManager.commit();
     }
