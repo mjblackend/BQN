@@ -9,7 +9,7 @@ var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
-var statisticsManager = require("../statistics/statisticsManager");
+var statisticsManager = require("./statisticsManager");
 var initialized = false;
 
 var FinishingCommand = async function (BranchID) {

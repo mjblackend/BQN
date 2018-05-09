@@ -1,8 +1,8 @@
 "use strict";
-var statisticsManager = require("../../../qm/statistics/statisticsManager");
-var statisticsData = require("../../../qm/data/statisticsData");
-var queueCommandManager = require("../../../qm/logic/queueCommandManager");
-var common = require("../../../common/common");
+var statisticsManager = require("./statisticsManager");
+var statisticsData = require("../data/statisticsData");
+var queueCommandManager = require("./queueCommandManager");
+var common = require("../../common/common");
 var should = require("should");
 var mocha = require("mocha");
 var describe = mocha.describe;
@@ -14,8 +14,8 @@ const CounterID = "120";
 should.toString();
 
 
-describe('statisticsManager initialize successfully', async function () {
-    it('statisticsManager', async function () {
+describe('StatisticsManager initialize successfully', async function () {
+    it('StatisticsManager', async function () {
         this.timeout(15000);
         let result = await queueCommandManager.initialize();
         result = await statisticsManager.initialize();

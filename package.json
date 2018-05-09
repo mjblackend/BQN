@@ -6,9 +6,9 @@
     "start": "node ./bin/www",
     "lint": "esw *.js src",
     "lint:watch": "npm run lint -- --watch",
-    "test": "mocha -R spec --recursive ./src/tests",
-    "testnyc": "nyc mocha -R spec --recursive ./src/tests",
-    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --recursive ./src/tests"
+    "test": "mocha -R spec --recursive ./src",
+    "testnyc": "nyc mocha -R spec --recursive ./src",
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --recursive ./src"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",

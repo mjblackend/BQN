@@ -6,6 +6,8 @@ var mocha = require("mocha");
 var describe = mocha.describe;
 var it = mocha.it;
 
+
+
 const OrgID = "1";
 const SegmentID = "325";
 const ServiceID = "364";
@@ -76,6 +78,11 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+    it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" fourth time successfully', async function () {
+        let result = await queueCommandManager.issueTicket(ticketInfo);
+        (result === common.success).should.true();
+    });
+
     it('Issue Ticket segmentid: "325" serviceid: "366" branchid: "106" successfully', async function () {
         let result = await queueCommandManager.issueTicket(ticketInfo2);
         (result === common.success).should.true();
@@ -87,12 +94,17 @@ describe('Queuing Command Manager Test', function () {
     });
 
 
-    it('Next Customer Get for counter ID = 120', async function () {
+    it('First Next Customer Get for counter ID = 120', async function () {
         let result = await queueCommandManager.counterNext(CounterInfo);
         (result === common.success).should.true();
     });
 
-    it('Next Customer Get for counter ID = 120', async function () {
+    it('Second Next Customer Get for counter ID = 120', async function () {
+        let result = await queueCommandManager.counterNext(CounterInfo);
+        (result === common.success).should.true();
+    });
+
+    it('Third Next Customer Get for counter ID = 120', async function () {
         let result = await queueCommandManager.counterNext(CounterInfo);
         (result === common.success).should.true();
     });

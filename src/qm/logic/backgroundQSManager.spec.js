@@ -10,6 +10,7 @@ var it = mocha.it;
 console.log("backgroundQSManager.spec");
 should.toString();
 
+
 describe('Background QS Manager', function () {
     it('Initialize Queuing Command Manager successfully', async function () {
         this.timeout(15000);

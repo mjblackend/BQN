@@ -8,6 +8,36 @@ var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
 var queueCommandManager = require("./queueCommandManager");
 var autoNextID;
+
+
+var performAutoNextForBranch = async function (branchData) {
+    try {
+        if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
+            let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
+                return userActivityManager.isCounterValidForAutoNext(value);
+            }
+            );
+            if (readyCountersActivities) {
+                for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
+                    let activity = readyCountersActivities[iActivity];
+                    var counterInfo = {
+                        orgid: activity.org_ID,
+                        counterid: activity.counter_ID.toString(),
+                        branchid: branchData.id.toString()
+                    };
+                    queueCommandManager.counterNext(counterInfo);
+                }
+            }
+
+        }
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
 //Automatic Commands
 var automaticNext = async function () {
     try {
@@ -22,30 +52,11 @@ var automaticNext = async function () {
                     let branchData = dataService.branchesData[iBranch];
                     let EnableAutoNext = configurationService.getCommonSettings(branchData.id, "EnableAutoNext");
                     if (EnableAutoNext == "1") {
-                        if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
-                            let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
-                                return userActivityManager.isCounterValidForAutoNext(value);
-                            }
-                            );
-                            if (readyCountersActivities) {
-                                for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
-                                    let activity = readyCountersActivities[iActivity];
-                                    var counterInfo = {
-                                        orgid: activity.org_ID,
-                                        counterid: activity.counter_ID.toString(),
-                                        branchid: branchData.id.toString()
-                                    };
-                                    queueCommandManager.counterNext(counterInfo);
-                                }
-                            }
-
-                        }
+                        performAutoNextForBranch(branchData);
                     }
-
                 }
             }
         }
-
         let duration = (Date.now() - date1) / 1000;
         console.log("Autonext ends " + duration + " seconds");
 
@@ -61,7 +72,7 @@ var automaticNext = async function () {
 var startBackgroundActions = async function (ticketInfo) {
     try {
         if (!autoNextID) {
-            autoNextID = setInterval(automaticNext, 10000);
+            autoNextID = setInterval(automaticNext, 5000);
         }
         return common.success;
     }

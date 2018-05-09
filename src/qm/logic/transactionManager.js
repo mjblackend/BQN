@@ -9,7 +9,7 @@ var visitData = require("../data/visitData");
 var TicketSeqData = require("../data/ticketSeqData");
 var idGenerator = require("../localRepositories/idGenerator");
 var counterData = require("../data/counterData");
-var statisticsManager = require("../statistics/statisticsManager");
+var statisticsManager = require("./statisticsManager");
 const Separators = ["", " ", "-", "/", "."];
 
 

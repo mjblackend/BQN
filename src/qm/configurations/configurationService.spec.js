@@ -2,6 +2,7 @@
 var configurationService = require("./configurationService");
 var should = require("should");
 var mocha = require("mocha");
+var fs = require("fs");
 var describe = mocha.describe;
 var it = mocha.it;
 var common = require("../../common/common");
@@ -11,6 +12,16 @@ const Invalid_ServiceConfig_ID= "33333";
 const branchid = "106";
 const AutoNext = "EnableAutoNext";
 should.toString();
+
+var sinon = require('sinon');
+var stub = sinon.stub();
+sinon.stub(configurationService,'initialize').callsFake (async function(){
+    let configs = await fs.readFileSync("Configs.json");
+    this.configsCache = JSON.parse(configs);
+    console.log("########################Mock Data###########################################");
+    return common.success;
+});
+
 
 describe('Configration Service', function () {
     it('Initialize Configration Service successfully', async function () {
