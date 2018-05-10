@@ -125,6 +125,32 @@ var entitiesRepo = function (db) {
             }
         };
 
+        this.clear = async function (entity) {
+            try {
+                let that = this.db;
+                if (entity) {
+                    //Do the Query
+
+                    let tableName = table_Prefex + entity.constructor.name;
+                    let sql = " delete from " + tableName ;
+                    let isSuccess = await that.run(sql);
+                    if (isSuccess) {
+                        return common.success;
+                    }
+                    else {
+                        return common.error;
+                    }
+                }
+                else {
+                    return common.error;
+                }
+
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
 
         this.Update = async function (entity) {
             try {

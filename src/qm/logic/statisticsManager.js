@@ -7,6 +7,7 @@ var branchStatisticsData = require("../data/branchStatisticsData");
 var transactionStatisticsData = require("../data/transactionStatisticsData");
 var statisticsData = require("../data/statisticsData");
 var configurationService = require("../configurations/configurationService");
+var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branches_statisticsData = [];
 const UpdateTypes = {
     Add: 0,
@@ -122,39 +123,41 @@ var CreateNewstatistics = function (transaction) {
     try {
         let ServiceConfig = configurationService.getServiceConfigFromService(transaction.service_ID);
 
-        let t_Statistics = new statisticsData();
-        t_Statistics.StatisticsDate = Date.now();
+        let Statistics = new statisticsData();
+        Statistics.StatisticsDate = Date.now();
 
         //Attributes
-        t_Statistics.ID = generateID(transaction);
-        t_Statistics.branch_ID = transaction.branch_ID;
-        t_Statistics.segment_ID = transaction.segment_ID;
-        t_Statistics.hall_ID = transaction.hall_ID;
-        t_Statistics.counter_ID = transaction.counter_ID;
-        t_Statistics.user_ID = transaction.user_ID;
-        t_Statistics.service_ID = transaction.service_ID;
+        Statistics.ID = generateID(transaction);
+        Statistics.branch_ID = transaction.branch_ID;
+        Statistics.segment_ID = transaction.segment_ID;
+        Statistics.hall_ID = transaction.hall_ID;
+        Statistics.counter_ID = transaction.counter_ID;
+        Statistics.user_ID = transaction.user_ID;
+        Statistics.service_ID = transaction.service_ID;
 
 
 
         //Waiting Customer
-        UpdateWaitingCustomers(UpdateTypes.Add, t_Statistics, transaction);
+        UpdateWaitingCustomers(UpdateTypes.Add, Statistics, transaction);
 
         //served customers
-        UpdateServedCustomersNo(UpdateTypes.Add, t_Statistics, transaction);
+        UpdateServedCustomersNo(UpdateTypes.Add, Statistics, transaction);
 
         //number of no show
-        UpdateNoShowCustomersNo(UpdateTypes.Add, t_Statistics, transaction);
+        UpdateNoShowCustomersNo(UpdateTypes.Add, Statistics, transaction);
 
         //number of non served customers
-        UpdateNonServedCustomersNo(UpdateTypes.Add, t_Statistics, transaction);
+        UpdateNonServedCustomersNo(UpdateTypes.Add, Statistics, transaction);
 
         //avrage serving customers
-        UpdateServiceStatistics(UpdateTypes.Add, t_Statistics, transaction, ServiceConfig);
+        UpdateServiceStatistics(UpdateTypes.Add, Statistics, transaction, ServiceConfig);
 
         //waited customer
-        UpdateWaitingStatistics(UpdateTypes.Add, t_Statistics, transaction, ServiceConfig);
+        UpdateWaitingStatistics(UpdateTypes.Add, Statistics, transaction, ServiceConfig);
 
-        return t_Statistics;
+        repositoriesManager.entitiesRepo.AddSynch(Statistics);
+
+        return Statistics;
     }
     catch (error) {
         logger.logError(error);
@@ -187,6 +190,8 @@ var UpdateStatistics = function (UpdateType, Statistics, transaction) {
 
         //waited customer
         UpdateWaitingStatistics(UpdateType, Statistics, transaction, ServiceConfig);
+
+        repositoriesManager.entitiesRepo.UpdateSynch(Statistics);
 
         return Statistics;
     }
@@ -253,7 +258,7 @@ var initialize = async function () {
         let Today = Now.setHours(0, 0, 0, 0);
         let tomorrow = new Date(Today + 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
         let t_Statistics;
-
+        await repositoriesManager.entitiesRepo.clear(new statisticsData());
         //Get all transactions
         let transactionsData = await repositoriesManager.entitiesRepo.getAll(new transaction());
         if (transactionsData && transactionsData.length > 0) {

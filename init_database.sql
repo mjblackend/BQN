@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS transactions(
+CREATE TABLE IF NOT EXISTS t_transaction(
         id NUMERIC PRIMARY KEY,
         org_ID NUMERIC NOT NULL,
         branch_ID NUMERIC NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS transactions(
         assignedByCounter_ID NUMERIC NULL
 );
 
-CREATE TABLE IF NOT EXISTS userActivites(
+CREATE TABLE IF NOT EXISTS t_userActivity(
         id NUMERIC PRIMARY KEY,
         org_ID NUMERIC NOT NULL,
         branch_ID NUMERIC NOT NULL,
@@ -61,6 +61,27 @@ CREATE TABLE IF NOT EXISTS userActivites(
         duration  integer NULL,
         calenderDuration  integer NULL,
         closed  integer NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS t_statisticsData(
+        ID NUMERIC PRIMARY KEY,
+        branch_ID NUMERIC NULL,
+        segment_ID NUMERIC NULL,
+        hall_ID NUMERIC NULL,
+        counter_ID NUMERIC NULL,
+        user_ID NUMERIC NULL,
+        service_ID NUMERIC NULL,
+        WaitingCustomers NUMERIC NULL,
+        AvgServiceTime NUMERIC NULL,
+        ASTWeight NUMERIC NULL,
+        AvgWaitingTime NUMERIC NULL,
+        TotalServiceTime NUMERIC NULL,
+        TotalWaitingTime NUMERIC NULL,
+        StatisticsDate NUMERIC NULL,
+        ServedCustomersNo NUMERIC NULL,
+        WaitedCustomersNo NUMERIC NULL,
+        NoShowCustomersNo NUMERIC NULL,
+        NonServedCustomersNo NUMERIC NULL
 );
 
 CREATE TABLE IF NOT EXISTS seq(
