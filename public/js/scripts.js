@@ -48,7 +48,7 @@ function readBranchStatistics() {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
@@ -108,7 +108,7 @@ function CGetCurrentState(){
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
@@ -201,7 +201,7 @@ function FillBranches(branchid) {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
@@ -230,7 +230,7 @@ function FillServices(branchid) {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
@@ -258,7 +258,7 @@ function FillSegments(branchid) {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
@@ -287,7 +287,7 @@ function FillCounters(branchid) {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/processCommand', true);
+    xhr.open('POST', '/getData', true);
     xhr.setRequestHeader('Content-type', 'application/json')
 
     xhr.onload = function () {
