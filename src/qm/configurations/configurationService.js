@@ -249,12 +249,19 @@ var getServiceConfigFromService = function (ServiceID) {
 
 var initialize = async function () {
     try {
-        var result = await cacheServerEnities();
-        return result;
+        if (common.mock) {
+            let str = fs.readFileSync("Configs.json")
+            configsCache = JSON.parse(str);
+            return common.success;
+        }
+        else {
+            var result = await cacheServerEnities();
+            return result;
+        }
     }
     catch (error) {
         logger.logError(error);
-        return false;
+        return common.error;
     }
 };
 
