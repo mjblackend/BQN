@@ -18,14 +18,14 @@ describe('Database testing', function () {
 
 describe('Test Transaction Repo', function () {
     it('Get All Transactions successfully', async function () {
-        let result = await repositoriesManager.transactionRep.getAll();
+        let result = await repositoriesManager.entitiesRepo.getAll(new transaction());
         (result !== undefined).should.true();
     });
 
     it('Create New transaction successfully', async function () {
         let transactioninst = new transaction();
         transactioninst.org_ID = 1;
-        let result = await repositoriesManager.transactionRep.Add(transactioninst);
+        let result = await repositoriesManager.entitiesRepo.Add(transactioninst);
         (result == common.success).should.true();
     });
 
@@ -33,20 +33,20 @@ describe('Test Transaction Repo', function () {
         let transactioninst = new transaction();
         transactioninst.id = 5;
         transactioninst.org_ID = 1;
-        let result = await repositoriesManager.transactionRep.Update(transactioninst);
+        let result = await repositoriesManager.entitiesRepo.Update(transactioninst);
         (result == common.success).should.true();
     });
     it('Get Transaction by ID, ID = 5 successfully', async function () {
-        let result = await repositoriesManager.transactionRep.getFilterBy(["id"], ["5"]);
+        let result = await repositoriesManager.entitiesRepo.getFilterBy(new transaction(),["id"], ["5"]);
         (result !== undefined).should.true();
     });
     it('Delete Transaction, ID = 6 successfully', async function () {
         let transactioninst = new transaction();
         transactioninst.id = 6;
         transactioninst.org_ID = 1;
-        let result = await repositoriesManager.transactionRep.Add(transactioninst);
+        let result = await repositoriesManager.entitiesRepo.Add(transactioninst);
         if (result == common.success) {
-            result = await repositoriesManager.transactionRep.delete(transactioninst);
+            result = await repositoriesManager.entitiesRepo.delete(transactioninst);
             (result == common.success).should.true();
         }
         else {
@@ -57,14 +57,14 @@ describe('Test Transaction Repo', function () {
 
 describe('Test User Activity Repo', function () {
     it('Get All user Activities successfully', async function () {
-        let result = await repositoriesManager.userActivitiesRep.getAll();
+        let result = await repositoriesManager.entitiesRepo.getAll(new userActivity());
         (result !== undefined).should.true();
     });
 
     it('Create New Activity successfully', async function () {
         let userActivityinst = new userActivity();
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.Add(userActivityinst);
+        let result = await repositoriesManager.entitiesRepo.Add(userActivityinst);
         (result == common.success).should.true();
     });
 
@@ -72,20 +72,20 @@ describe('Test User Activity Repo', function () {
         let userActivityinst = new userActivity();
         userActivityinst.id = 5;
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.Update(userActivityinst);
+        let result = await repositoriesManager.entitiesRepo.Update(userActivityinst);
         (result == common.success).should.true();
     });
     it('Get Activity by ID, ID = 5 successfully', async function () {
-        let result = await repositoriesManager.userActivitiesRep.getFilterBy(["id"], ["5"]);
+        let result = await repositoriesManager.entitiesRepo.getFilterBy(new userActivity(),["id"], ["5"]);
         (result !== undefined).should.true();
     });
     it('Delete Activity, ID = 6 successfully', async function () {
         let userActivityinst = new userActivity();
         userActivityinst.id = 6;
         userActivityinst.org_ID = 1;
-        let result = await repositoriesManager.userActivitiesRep.Update(userActivityinst);
+        let result = await repositoriesManager.entitiesRepo.Update(userActivityinst);
         if (result == common.success) {
-            result = await repositoriesManager.userActivitiesRep.delete(userActivityinst);
+            result = await repositoriesManager.entitiesRepo.delete(userActivityinst);
             (result == common.success).should.true();
         }
         else {

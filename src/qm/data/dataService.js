@@ -6,6 +6,7 @@ var branchData = require("./branchData");
 var visitData = require("./visitData");
 var counterData = require("./counterData");
 var transaction = require("./transaction");
+var userActivity  = require("./userActivity");
 var configurationService = require("../configurations/configurationService");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
@@ -73,7 +74,7 @@ async function getTodaysUserActivitiesFromDB(branchID) {
     try {
         let Now = new Date();
         let Today = Now.setHours(0, 0, 0, 0);
-        let userActivities = await repositoriesManager.userActivitiesRep.getFilterBy(["branch_ID", "closed"], [branchID, "0"]);
+        let userActivities = await repositoriesManager.entitiesRepo.getFilterBy(new userActivity(),["branch_ID", "closed"], [branchID, "0"]);
         userActivities = userActivities.filter(function (value) {
             return value.startTime > Today && value.closed == 0;
         });
@@ -122,7 +123,7 @@ async function getTodaysTransactionFromDB(branchID) {
         let transactionsData = [];
         //Get only the transactions for the day
         let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
-        let transactionsDBData = await repositoriesManager.transactionRep.getFilterBy(["branch_ID", "state"], [branchID, States]);
+        let transactionsDBData = await repositoriesManager.entitiesRepo.getFilterBy(new transaction(),["branch_ID", "state"], [branchID, States]);
         transactionsDBData = transactionsDBData.filter(function (value) {
             return value.creationTime > Today;
         });

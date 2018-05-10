@@ -30,7 +30,7 @@ var UpdateActivity = function (userActivity) {
 
 
             //Update To data base
-            repositoriesManager.userActivitiesRep.UpdateSynch(userActivity);
+            repositoriesManager.entitiesRepo.UpdateSynch(userActivity);
             return common.success;
         }
         else {
@@ -63,7 +63,7 @@ var AddActivity = function (userActivity) {
             BracnhData.userActivitiesData.push(userActivity);
 
             //Update To data base
-            repositoriesManager.userActivitiesRep.AddSynch(userActivity);
+            repositoriesManager.entitiesRepo.AddSynch(userActivity);
             return common.success;
         }
         else {
@@ -103,7 +103,7 @@ var CreateNewActivity = function (OrgID, BranchID, CounterID, type) {
 var UpdateActionTime = function (Activity) {
     try {
         Activity.lastActionTime = Date.now();
-        repositoriesManager.userActivitiesRep.AddSynch(Activity);
+        repositoriesManager.entitiesRepo.AddSynch(Activity);
         return Activity;
     }
     catch (error) {

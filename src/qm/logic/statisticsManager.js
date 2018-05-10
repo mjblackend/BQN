@@ -2,6 +2,7 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var logger = require("../../common/logger");
 var common = require("../../common/common");
 var enums = require("../../common/enums");
+var transaction = require("../data/transaction");
 var branchStatisticsData = require("../data/branchStatisticsData");
 var transactionStatisticsData = require("../data/transactionStatisticsData");
 var statisticsData = require("../data/statisticsData");
@@ -254,7 +255,7 @@ var initialize = async function () {
         let t_Statistics;
 
         //Get all transactions
-        let transactionsData = await repositoriesManager.transactionRep.getAll();
+        let transactionsData = await repositoriesManager.entitiesRepo.getAll(new transaction());
         if (transactionsData && transactionsData.length > 0) {
             //filter for today only 
             transactionsData = transactionsData.filter(function (value) {

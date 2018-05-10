@@ -34,7 +34,7 @@ var UpdateTransaction = function (transaction) {
             statisticsManager.AddOrUpdateTransaction(transaction);
 
             //Update To data base
-            repositoriesManager.transactionRep.UpdateSynch(transaction);
+            repositoriesManager.entitiesRepo.UpdateSynch(transaction);
             return common.success;
         }
         else {
@@ -77,7 +77,7 @@ var AddTransaction = function (transaction) {
             statisticsManager.AddOrUpdateTransaction(transaction);
 
             //Update To data base
-            repositoriesManager.transactionRep.AddSynch(transaction);
+            repositoriesManager.entitiesRepo.AddSynch(transaction);
             return common.success;
         }
         else {
@@ -346,6 +346,7 @@ var issueSingleTicket = function (errors, transaction) {
         transaction.priorityTime = transaction.creationTime;
         transaction.arrivalTime = transaction.creationTime;
         transaction.state = enums.StateType.Pending;
+
         //Get Range ID
         let ticketSequence = 0;
         let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {

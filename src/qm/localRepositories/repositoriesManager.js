@@ -2,8 +2,7 @@ var sqlite3 = require("./aa-sqlite");
 var common = require("../../common/common");
 var fs = require("fs");
 var logger = require("../../common/logger");
-var transactionRep = require("./transactionRep");
-var userActivitiesRep = require("./userActivitiesRep");
+var entitiesRepo = require("./entitiesRepo");
 var idGenerator = require("./idGenerator");
 var initialized = false;
 "use strict";
@@ -40,9 +39,7 @@ var initialize = async function () {
         await idGenerator.initialize(sqlite3);
 
         //Initialize Repos
-        this.transactionRep = new transactionRep(sqlite3);
-        this.userActivitiesRep = new userActivitiesRep(sqlite3);
-
+        this.entitiesRepo = new entitiesRepo(sqlite3);
 
         initialized = true;
         return common.success;
@@ -54,8 +51,7 @@ var initialize = async function () {
 };
 var commit = async function () {
     try {
-        await this.transactionRep.commit();
-        await this.userActivitiesRep.commit();
+        await this.entitiesRepo.commit();
     }
     catch (error) {
         logger.logError(error);
@@ -63,8 +59,6 @@ var commit = async function () {
     }
 };
 
-
 module.exports.commit = commit;
-module.exports.transactionRep = transactionRep;
-module.exports.userActivitiesRep = userActivitiesRep;
+module.exports.entitiesRepo = entitiesRepo;
 module.exports.initialize = initialize;
