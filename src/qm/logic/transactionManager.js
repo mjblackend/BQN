@@ -302,7 +302,7 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
                 NextCustomerTransaction.counter_ID = CounterID;
                 NextCustomerTransaction.serveStep = 1;
                 NextCustomerTransaction.lastOfVisit = 1;
-                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + (NextCustomerTransaction.startServingTime - NextCustomerTransaction.arrivalTime);
+                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((NextCustomerTransaction.startServingTime - NextCustomerTransaction.arrivalTime)/1000);
 
                 let found = false;
                 for (let i = 0; i < BracnhData.countersData.length; i++) {
