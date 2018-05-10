@@ -251,7 +251,7 @@ var initialize = async function () {
     try {
         if (common.mock) {
             let str = fs.readFileSync("Configs.json")
-            configsCache = JSON.parse(str);
+            this.configsCache = JSON.parse(str);
             return common.success;
         }
         else {
