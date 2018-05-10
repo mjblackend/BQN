@@ -5,12 +5,16 @@ var express = require('express');
 var router = express.Router();
 var notificationHub=require('../notificationHub');
 
+
 /* GET home page. */
 /*eslint-disable no-unused-vars*/
 router.post('/processCommand', async function (req, res, next) {
   try {
+
     let apiMessage = req.body;
     await queueCommandManager.processCommand(apiMessage);
+
+
     let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType + " " + ' ErrorMessage=' +  apiMessage.payload.errorMessage;
     console.log(tbody);
     if(apiMessage.payload.displayTicketNumber)
@@ -19,11 +23,12 @@ router.post('/processCommand', async function (req, res, next) {
     }
     else
     {
-      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.CurrentDisplayTicketNumber);
+     notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.CurrentDisplayTicketNumber);
     }
     
     res.body=apiMessage;
     res.end(JSON.stringify(apiMessage.payload));
+   
   }
   catch (error) {
     logger.log(error);
@@ -31,6 +36,8 @@ router.post('/processCommand', async function (req, res, next) {
   }
 
 });
+
+
 
 router.post('/getData', async function (req, res, next) {
   try {

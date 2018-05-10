@@ -6,10 +6,10 @@ var idGenerator = require("./idGenerator");
 const table_Prefex = "t_";
 //collections for update
 var updateEntities = [];
-var addEntities  = [];
+var addEntities = [];
 
 //Prepare Values for insert or update
-var GetValuesFromObject = function (entity,attributes) {
+var GetValuesFromObject = function (entity, attributes) {
     try {
         //Prepare the values array
         let values = "";
@@ -78,7 +78,7 @@ var entitiesRepo = function (db) {
 
 
 
-        this.getFilterBy = async function (entity,filterKeys, filterValues) {
+        this.getFilterBy = async function (entity, filterKeys, filterValues) {
             let that = this.db;
             try {
                 if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
@@ -105,7 +105,7 @@ var entitiesRepo = function (db) {
                     //Do the Query
 
                     let tableName = table_Prefex + entity.constructor.name;
-                    let sql = " delete from " + tableName +" where id = " + entity.id;
+                    let sql = " delete from " + tableName + " where id = " + entity.id;
                     let isSuccess = await that.run(sql);
                     if (isSuccess) {
                         return common.success;
@@ -132,7 +132,7 @@ var entitiesRepo = function (db) {
                     //Do the Query
 
                     let tableName = table_Prefex + entity.constructor.name;
-                    let sql = " delete from " + tableName ;
+                    let sql = " delete from " + tableName;
                     let isSuccess = await that.run(sql);
                     if (isSuccess) {
                         return common.success;
@@ -156,12 +156,12 @@ var entitiesRepo = function (db) {
             try {
                 let that = this.db;
                 if (entity) {
-                    let attributes = Object.getOwnPropertyNames(entity).filter(function(value){ return !value.startsWith("_"); });
+                    let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
                     let attributesStr = attributes.join(",");
                     let tableName = table_Prefex + entity.constructor.name;
 
-                                        //Prepare the values array
-                    let values = GetValuesFromObject(entity,attributes);
+                    //Prepare the values array
+                    let values = GetValuesFromObject(entity, attributes);
 
                     //Do the Query
                     let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
@@ -189,14 +189,14 @@ var entitiesRepo = function (db) {
             try {
                 let that = this.db;
                 if (entity) {
-                    let attributes = Object.getOwnPropertyNames(entity).filter(function(value){ return !value.startsWith("_"); });
+                    let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
                     let attributesStr = attributes.join(",");
                     let tableName = table_Prefex + entity.constructor.name;
-                     //Prepare the values array
-                    let values = GetValuesFromObject(entity,attributes);
+                    //Prepare the values array
+                    let values = GetValuesFromObject(entity, attributes);
 
                     //Do the Query
-                    let sql = " insert or replace into " + tableName +" (" + attributesStr + ") values (" + values + ")";
+                    let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
                     let isSuccess = await that.run(sql);
                     if (isSuccess) {
                         await idGenerator.UpdateSeqOnDB(that);
@@ -232,6 +232,17 @@ var entitiesRepo = function (db) {
         this.AddSynch = function (Entity) {
             try {
                 addEntities.push(Entity);
+                return common.success;
+            }
+            catch (error) {
+                logger.logError(error);
+                return common.error;
+            }
+        };
+        this.clearEntities = async function () {
+            try {
+                addEntities = [];
+                updateEntities = [];
                 return common.success;
             }
             catch (error) {

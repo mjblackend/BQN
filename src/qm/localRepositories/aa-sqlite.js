@@ -24,6 +24,7 @@ exports.open=function(path) {
 
 //Any query: insert/delete/update
 exports.run=function(query) {
+
     return new Promise(function(resolve, reject) {
         this.db.run(query, 
             function(err)  {
@@ -31,7 +32,10 @@ exports.run=function(query) {
                     logger.logError("run error: "+ err.message);
                     reject(err.message);
                 }
-                else    resolve(true);
+                else    
+                {
+                    resolve(true);
+                }
         });
     })    ;
 };

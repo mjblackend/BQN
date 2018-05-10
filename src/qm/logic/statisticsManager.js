@@ -305,6 +305,7 @@ var initialize = async function () {
                 }
             }
         }
+        await repositoriesManager.entitiesRepo.clearEntities();
         return common.success;
     }
     catch (error) {
