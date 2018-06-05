@@ -8,5 +8,5 @@ module.exports.EnableHallSlipRange = "EnableHallSlipRange";
 module.exports.EnableSplitRangeOverAllocatedHalls = "EnableSplitRangeOverAllocatedHalls";
 
 module.exports.dbConnection = "./db/queuing.db";
-module.exports.mock=false;
+module.exports.mock=true;
 
