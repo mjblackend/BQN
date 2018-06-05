@@ -69,7 +69,7 @@ var populateEntities = async function () {
                 configsCache.branches[i].settings = filterCommonConfigs(configsCache.commonConfigs, BranchID, BranchConfigID);
             }
         }
-        //fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
+        fs.writeFileSync("Configs.json", JSON.stringify(configsCache));
         return common.success;
     }
     catch (error) {

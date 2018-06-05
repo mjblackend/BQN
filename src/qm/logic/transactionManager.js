@@ -382,7 +382,7 @@ function CreateAddServiceTransaction(ServiceID, OriginalTransaction, AddedServic
             }
             );
             if (AllServiceRanges) {
-                let TotalPriority=0;
+                let TotalPriority = 0;
                 AllServiceRanges.forEach(function (serviceSegmentPriorityRange) {
                     let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
                         return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
@@ -509,7 +509,8 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
     }
 };
 
-function getServableTransaction(branch, BracnhData, counter) {
+
+function getAllocatedSegments(branch, counter) {
     try {
         var allocated_segments = [];
         var isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll);
@@ -521,38 +522,75 @@ function getServableTransaction(branch, BracnhData, counter) {
             }
             );
         }
+        return allocated_segments;
+    }
+    catch (error) {
+        logger.logError(error);
+        return [];
+    }
+}
 
+function getAllocatedServices(branch, counter) {
+    try {
         //Get Allocated Service
-        var allocated_services = branch.servicesAllocations.filter(function (value) {
+        let allocated_services = branch.servicesAllocations.filter(function (value) {
             return value.Counter_ID == counter.ID;
         }
         );
-        let transactions = BracnhData.transactionsData.filter(function (transaction_Data) {
-            var servable = false;
-            if (transaction_Data.state == enums.StateType.Pending || transaction_Data.state == enums.StateType.PendingRecall) {
-                if (transaction_Data.hall_ID && counter.Hall_ID.toString() != transaction_Data.hall_ID.toString()) {
-                    return false;
+        return allocated_services;
+    }
+    catch (error) {
+        logger.logError(error);
+        return [];
+    }
+}
+
+function isTransactionServable(transaction_Data, counter, allocated_segments, allocated_services) {
+    try {
+        let isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll);
+        var servable = false;
+        if (transaction_Data.state == enums.StateType.Pending || transaction_Data.state == enums.StateType.PendingRecall) {
+            if (transaction_Data.hall_ID && counter.Hall_ID.toString() != transaction_Data.hall_ID.toString()) {
+                return false;
+            }
+            if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
+                let tSegment = allocated_segments.find(function (segment) {
+                    return segment.Segment_ID == transaction_Data.segment_ID;
                 }
-                if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
-                    let tSegment = allocated_segments.find(function (segment) {
-                        return segment.Segment_ID == transaction_Data.segment_ID;
-                    }
-                    );
-                    if (!tSegment) {
-                        return servable;
-                    }
-                }
-                if (allocated_services && allocated_services.length > 0) {
-                    let tService = allocated_services.find(function (service) {
-                        return service.Service_ID == transaction_Data.service_ID;
-                    }
-                    );
-                    if (tService) {
-                        servable = true;
-                    }
+                );
+                if (!tSegment) {
+                    return servable;
                 }
             }
-            return servable;
+            if (allocated_services && allocated_services.length > 0) {
+                let tService = allocated_services.find(function (service) {
+                    return service.Service_ID == transaction_Data.service_ID;
+                }
+                );
+                if (tService) {
+                    servable = true;
+                }
+            }
+        }
+        return servable;
+    }
+    catch (error) {
+        logger.logError(error);
+        return false;
+    }
+}
+
+function getServableTransaction(branch, BracnhData, counter) {
+    try {
+
+        //Get Allocated Segments
+        let allocated_segments = getAllocatedSegments(branch, counter);
+
+        //Get Allocated Service
+        var allocated_services = getAllocatedServices(branch, counter);
+
+        let transactions = BracnhData.transactionsData.filter(function (transaction_Data) {
+            return isTransactionServable(transaction_Data, counter, allocated_segments, allocated_services);
         }
         );
         return transactions;
@@ -886,7 +924,7 @@ function getHallsAllocatedonServiceSegment(Branch, BranchesData, Service_ID, Seg
     }
 }
 //Get the next number in the sequence
-function getNexrSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange) {
+function getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange) {
     try {
 
         let Now = new Date;
@@ -1035,7 +1073,7 @@ var issueSingleTicket = function (errors, transaction) {
                 Min_TicketNumber = Math.floor((RangeLength * HallIndex) + t_Min_TicketNumber);
                 Max_TicketNumber = Math.floor((RangeLength * (HallIndex + 1)) + t_Min_TicketNumber - 1);
             }
-            ticketSequence = getNexrSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
+            ticketSequence = getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
         }
         transaction.ticketSequence = ticketSequence;
         transaction.displayTicketNumber = prepareDisplayTicketNumber(transaction, PriorityRange.MaxSlipNo, Separators[PriorityRange.Separator_LV]);
