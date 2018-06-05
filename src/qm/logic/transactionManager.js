@@ -13,15 +13,8 @@ var statisticsManager = require("./statisticsManager");
 const Separators = ["", " ", "-", "/", "."];
 
 
-
-//Update Transaction
-var UpdateTransaction = function (transaction) {
+function UpdateTransactionInBranchData(BracnhData, transaction) {
     try {
-        //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == transaction.branch_ID;
-        }
-        );
         if (BracnhData != null && BracnhData.transactionsData != null) {
             for (let i = 0; i < BracnhData.transactionsData.length; i++) {
                 if (BracnhData.transactionsData[i].id == transaction.id) {
@@ -29,18 +22,35 @@ var UpdateTransaction = function (transaction) {
                     break;
                 }
             }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+}
+
+//Update Transaction
+var UpdateTransaction = function (transaction) {
+    try {
+        let result = common.error;
+        //Get Branch Data
+        let BracnhData = dataService.branchesData.find(function (value) {
+            return value.id == transaction.branch_ID;
+        }
+        );
+        if (BracnhData != null && BracnhData.transactionsData != null) {
+
+            //Update branch data
+            UpdateTransactionInBranchData(BracnhData, transaction);
 
             //Update the Statistics
             statisticsManager.AddOrUpdateTransaction(transaction);
 
             //Update To data base
             repositoriesManager.entitiesRepo.UpdateSynch(transaction);
-            return common.success;
+            result = common.success;
         }
-        else {
-            return common.error;
-        }
-
+        return result;
     }
     catch (error) {
         logger.logError(error);
@@ -92,6 +102,34 @@ var AddTransaction = function (transaction) {
 
 };
 
+function getBestHallFromStatistics(branch_ID, HallsToVerfify) {
+    try {
+        let Hall_ID;
+        //If multiple halls get the best one
+        let HallStatistics = statisticsManager.GetHallsStatistics(branch_ID, HallsToVerfify.map(hall => hall.Hall_ID));
+        let ratio = 100000000000;
+        for (let i = 0; i < HallsToVerfify.length; i++) {
+            let tmp_ratio = 0;
+            if (HallsToVerfify[i].WorkingNumber > 0) {
+                tmp_ratio = HallStatistics[i].WaitingCustomers / HallsToVerfify[i].WorkingNumber;
+            }
+            else {
+                tmp_ratio = HallStatistics[i].WaitingCustomers / HallsToVerfify[i].TotalNumber;
+            }
+            if (tmp_ratio < ratio) {
+                ratio = tmp_ratio;
+                Hall_ID = HallsToVerfify[i].Hall_ID;
+            }
+        }
+        return Hall_ID;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
+
 //Get Hall Number
 var getHallID = function (transaction, pAllHalls, pAllocatedHalls) {
     try {
@@ -134,22 +172,7 @@ var getHallID = function (transaction, pAllHalls, pAllocatedHalls) {
                 Hall_ID = HallsToVerfify[0].Hall_ID;
             }
             else {
-                //If multiple halls get the best one
-                let HallStatistics = statisticsManager.GetHallsStatistics(transaction.branch_ID, HallsToVerfify.map(hall => hall.Hall_ID));
-                let ratio = 100000000000;
-                for (let i = 0; i < HallsToVerfify.length; i++) {
-                    let tmp_ratio = 0;
-                    if (HallsToVerfify[i].WorkingNumber > 0) {
-                        tmp_ratio = HallStatistics[i].WaitingCustomers / HallsToVerfify[i].WorkingNumber;
-                    }
-                    else {
-                        tmp_ratio = HallStatistics[i].WaitingCustomers / HallsToVerfify[i].TotalNumber;
-                    }
-                    if (tmp_ratio < ratio) {
-                        ratio = tmp_ratio;
-                        Hall_ID = HallsToVerfify[i].Hall_ID;
-                    }
-                }
+                Hall_ID = getBestHallFromStatistics(transaction.branch_ID, HallsToVerfify);
             }
         }
         return Hall_ID;
