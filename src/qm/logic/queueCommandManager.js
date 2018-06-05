@@ -67,6 +67,50 @@ var issueTicketMulti = function (ticketInfo) {
     return true;
 };
 
+
+
+var addService = function (counterInfo) {
+    try {
+        let result = common.error;
+        let errors = [];
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let ServiceID = counterInfo["serviceid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let Transactions = [];
+        let CurrentStateType = [];
+        counterInfo.ServedDisplayTicketNumber = "...";
+        //Check Current State if allow next
+        result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
+        if (result == common.success) {
+            result = transactionManager.addService(errors, OrgID, BranchID, CounterID, ServiceID, Transactions);
+            if (result == common.success) {
+                //set the state to ready or serving
+                result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CurrentStateType);
+                if (result == common.success) {
+                    if (Transactions && Transactions.length > 0) {
+                        counterInfo.ServedDisplayTicketNumber = Transactions[0].displayTicketNumber;
+                        counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                        counterInfo.CurrentStateType = CurrentStateType[0];
+                    }
+                    else {
+                        counterInfo.CurrentDisplayTicketNumber = "...";
+                        counterInfo.CurrentStateType = CurrentStateType;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
 //break customer from counter
 var counterBreak = async function (counterInfo) {
     try {
@@ -116,7 +160,120 @@ var counterBreak = async function (counterInfo) {
         return common.error;
     }
 };
+var counterServeCustomer = async function (counterInfo) {
+    try {
+        let result = common.error;
+        let errors = [];
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let TransactionID = counterInfo["transactionid"];
+        let Transactions = [];
+        let CurrentStateType = [];
+        counterInfo.ServedDisplayTicketNumber = "...";
 
+        //Check Current State if allow next
+        result = userActivityManager.CounterValidationForServe(errors, OrgID, BranchID, CounterID);
+        if (result == common.success) {
+            //Finish serving the current customer
+            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions);
+            if (result == common.success) {
+                if (Transactions && Transactions.length > 0) {
+                    counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                }
+                Transactions = [];
+                //Get next customer
+                result = transactionManager.serveCustomer(errors, OrgID, BranchID, CounterID, TransactionID, Transactions);
+                if (result == common.success) {
+                    //set the state to ready or serving
+                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CurrentStateType);
+                    if (result == common.success) {
+                        if (Transactions && Transactions.length > 0) {
+                            counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                            counterInfo.CurrentStateType = CurrentStateType[0];
+                        }
+                        else {
+                            counterInfo.CurrentDisplayTicketNumber = "...";
+                            counterInfo.CurrentStateType = CurrentStateType;
+                        }
+                    }
+                }
+            }
+        }
+        counterInfo.result = result;
+        if (counterInfo.result != common.success) {
+            counterInfo.errorMessage = errors.join(",");
+        }
+        else {
+            counterInfo.errorMessage = "";
+        }
+
+        await FinishingCommand(BranchID);
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
+var counterHoldCustomer = async function (counterInfo) {
+    try {
+        let result = common.error;
+        let errors = [];
+        let OrgID = counterInfo["orgid"];
+        let BranchID = counterInfo["branchid"];
+        let CounterID = counterInfo["counterid"];
+        let LanguageIndex = counterInfo["languageindex"];
+        let holdreasonid = counterInfo["holdreasonid"];
+        let Transactions = [];
+        let CurrentStateType = [];
+        counterInfo.ServedDisplayTicketNumber = "...";
+        //Check Current State if allow hold
+        result = userActivityManager.CounterValidationForHold(errors, OrgID, BranchID, CounterID);
+        if (result == common.success) {
+            //Hold Current Customer
+            result = transactionManager.holdCurrentCustomer(errors, OrgID, BranchID, CounterID, holdreasonid, Transactions);
+            if (result == common.success) {
+                if (Transactions && Transactions.length > 0) {
+                    counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                }
+                Transactions = [];
+                //Get next customer
+                result = transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions);
+                if (result == common.success) {
+                    //Change the status (Ready or Serving depending on next customer)
+                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CurrentStateType);
+                    if (result == common.success) {
+                        if (Transactions && Transactions.length > 0) {
+                            counterInfo.CurrentDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
+                            counterInfo.CurrentStateType = CurrentStateType[0];
+                        }
+                        else {
+                            counterInfo.CurrentDisplayTicketNumber = "...";
+                            counterInfo.CurrentStateType = CurrentStateType;
+                        }
+                    }
+                }
+            }
+        }
+        counterInfo.result = result;
+        if (counterInfo.result != common.success) {
+            counterInfo.errorMessage = errors.join(",");
+        }
+        else {
+            counterInfo.errorMessage = "";
+        }
+
+        await FinishingCommand(BranchID);
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
 
 //Take break on counter
 var counterNext = async function (counterInfo) {
@@ -257,15 +414,7 @@ var counterTransferWaitingCustomer = function (TransferInfo) {
     return true;
 };
 
-//Hold Customer Service
-var counterHoldCustomer = function (counterInfo) {
-    return true;
-};
 
-//Serve/Unhold waiting customer
-var counterServeCustomer = function (customerInfo) {
-    return true;
-};
 
 //Update Customer Note
 var saveCustomerNote = function (customerInfo) {
@@ -322,11 +471,20 @@ var processCommand = async function (apiMessage) {
                 case enums.commands.Next:
                     result = await this.counterNext(apiMessage.payload);
                     break;
+                case enums.commands.Hold:
+                    result = await this.counterHoldCustomer(apiMessage.payload);
+                    break;
+                case enums.commands.ServeCustomer:
+                    result = await this.counterServeCustomer(apiMessage.payload);
+                    break;
                 case enums.commands.Break:
                     result = await this.counterBreak(apiMessage.payload);
                     break;
                 case enums.commands.Open:
                     result = await this.counterOpen(apiMessage.payload);
+                    break;
+                case enums.commands.AddService:
+                    result = await this.addService(apiMessage.payload);
                     break;
                 default:
                     result = common.error;
@@ -372,10 +530,16 @@ var initialize = async function (ticketInfo) {
 module.exports.initialize = initialize;
 module.exports.initialized = initialized;
 module.exports.issueTicket = issueTicket;
-module.exports.issueTicketMulti = issueTicketMulti;
 module.exports.counterNext = counterNext;
 module.exports.counterOpen = counterOpen;
 module.exports.counterBreak = counterBreak;
+module.exports.counterServeCustomer = counterServeCustomer;
+module.exports.counterHoldCustomer = counterHoldCustomer;
+module.exports.addService = addService;
+
+
+
+module.exports.issueTicketMulti = issueTicketMulti;
 module.exports.counterTransferToCounter = counterTransferToCounter;
 module.exports.counterTransferToService = counterTransferToService;
 module.exports.userLogin = userLogin;
@@ -383,8 +547,6 @@ module.exports.userLogoff = userLogoff;
 module.exports.issueAppointmentTicket = issueAppointmentTicket;
 module.exports.counterRecallCurrentCustomer = counterRecallCurrentCustomer;
 module.exports.counterTransferWaitingCustomer = counterTransferWaitingCustomer;
-module.exports.counterHoldCustomer = counterHoldCustomer;
-module.exports.counterServeCustomer = counterServeCustomer;
 module.exports.saveCustomerNote = saveCustomerNote;
 module.exports.counterNotReady = counterNotReady;
 module.exports.counterTransferBack = counterTransferBack;

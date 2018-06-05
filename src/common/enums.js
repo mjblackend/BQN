@@ -13,6 +13,10 @@ const EmployeeActiontypes = {
     NoCallServing: 12
 };
 
+const AllocationTypes = {
+    Counter: "0",
+    User: "1"
+};
 
 const StateType = {
     Pending: 0,
@@ -63,11 +67,15 @@ const OriginType = {
 const commands = {
     IssueTicket: "issueTicket",
     Next: "next",
+    Hold: "hold",
+    ServeCustomer: "serveCustomer",
+    AddService:"addService",
     Break: "break",
     Open: "open",
     Read: "read",
     ReadBranchStatistics: "readBranchStatistics",
-    GetCounterStatus: "getCounterStatus"
+    GetCounterStatus: "getCounterStatus",
+    GetHeldCustomers:"getHeldCustomers"
 };
 
 const counterTypes = {
@@ -76,7 +84,7 @@ const counterTypes = {
     TicketDispenserWithUser: 2,
     NoCallServing: 3
 };
-
+module.exports.AllocationTypes = AllocationTypes;
 module.exports.counterTypes = counterTypes;
 module.exports.OriginType = OriginType;
 module.exports.SegmentAllocationType = SegmentAllocationType;

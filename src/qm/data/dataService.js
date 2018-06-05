@@ -6,7 +6,7 @@ var branchData = require("./branchData");
 var visitData = require("./visitData");
 var counterData = require("./counterData");
 var transaction = require("./transaction");
-var userActivity  = require("./userActivity");
+var userActivity = require("./userActivity");
 var configurationService = require("../configurations/configurationService");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var branchesData = [];
@@ -40,9 +40,9 @@ function getCounterData(BracnhData, CounterID) {
 function getCurrentActivity(BracnhData, CounterData) {
     try {
         let CurrentActivity;
-        if (CounterData && CounterData.currentState_ID) {
+        if (CounterData && CounterData.currentState) {
             CurrentActivity = BracnhData.userActivitiesData.find(function (value) {
-                return CounterData.currentState_ID == value.id;
+                return CounterData.currentState.id == value.id;
             });
         }
         return CurrentActivity;
@@ -72,9 +72,9 @@ function getCurrentTransaction(BracnhData, CounterData) {
 
 async function getTodaysUserActivitiesFromDB(branchID) {
     try {
-        let Now = new Date();
+        let Now = new Date;
         let Today = Now.setHours(0, 0, 0, 0);
-        let userActivities = await repositoriesManager.entitiesRepo.getFilterBy(new userActivity(),["branch_ID", "closed"], [branchID, "0"]);
+        let userActivities = await repositoriesManager.entitiesRepo.getFilterBy(new userActivity(), ["branch_ID", "closed"], [branchID, "0"]);
         userActivities = userActivities.filter(function (value) {
             return value.startTime > Today && value.closed == 0;
         });
@@ -89,23 +89,28 @@ async function getTodaysUserActivitiesFromDB(branchID) {
 async function cacheBranchUserActivities(branch) {
     try {
         //Get user activities
-        let userActivities = await getTodaysUserActivitiesFromDB(branch.id);
+        let DBuserActivities = await getTodaysUserActivitiesFromDB(branch.id);
 
-        if (userActivities) {
-            branch.userActivitiesData = userActivities;
+        if (DBuserActivities) {
+            //Convert it to javascript entity
+            for (let i = 0; i < DBuserActivities.length; i++) {
+                let t_userActivity =  new userActivity(DBuserActivities[i]);
+                branch.userActivitiesData.push(t_userActivity);
+            }
             //Set the user activities on the counter data
             for (let i = 0; i < branch.userActivitiesData.length; i++) {
                 let UserActivity = branch.userActivitiesData[i];
                 let CurrentCounterData = getCounterData(branch, UserActivity.counter_ID)
                 if (CurrentCounterData) {
-                    CurrentCounterData.currentState_ID = UserActivity.id;
+                    CurrentCounterData.currentState = UserActivity;
                 }
                 else {
                     CurrentCounterData = new counterData();
                     CurrentCounterData.id = UserActivity.counter_ID;
-                    CurrentCounterData.currentState_ID = UserActivity.id;
+                    CurrentCounterData.currentState = UserActivity;
                     branch.countersData.push(CurrentCounterData);
                 }
+
             }
         }
 
@@ -118,12 +123,12 @@ async function cacheBranchUserActivities(branch) {
 
 async function getTodaysTransactionFromDB(branchID) {
     try {
-        let Now = new Date();
+        let Now =  new Date;
         let Today = Now.setHours(0, 0, 0, 0);
         let transactionsData = [];
         //Get only the transactions for the day
-        let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving];
-        let transactionsDBData = await repositoriesManager.entitiesRepo.getFilterBy(new transaction(),["branch_ID", "state"], [branchID, States]);
+        let States = [enums.StateType.Pending, enums.StateType.PendingRecall, enums.StateType.Serving, enums.StateType.OnHold];
+        let transactionsDBData = await repositoriesManager.entitiesRepo.getFilterBy(new transaction(), ["branch_ID", "state"], [branchID, States]);
         transactionsDBData = transactionsDBData.filter(function (value) {
             return value.creationTime > Today;
         });
@@ -219,6 +224,37 @@ var cacheData = async function () {
     }
 };
 
+function getHeldCustomers(OrgID, BranchID, CounterID, output) {
+    try {
+        let result = common.success;
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        let CurrentTransaction;
+
+        //Get Branch Data
+        BracnhData = branchesData.find(function (value) {
+            return value.id == BranchID;
+        }
+        );
+        let heldTransactions = BracnhData.transactionsData.filter(function (transaction) {
+            return transaction.state == enums.StateType.OnHold && transaction.heldByCounter_ID == CounterID;;
+        });
+
+        if (heldTransactions && heldTransactions.length) {
+            heldTransactions.forEach(function (transaction) {
+                output.push(transaction);
+            });
+        }
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
+
 //Get the Branch Data and counter data then the current Activity
 function getCurrentData(OrgID, BranchID, CounterID, output) {
     try {
@@ -264,6 +300,8 @@ var initialize = async function () {
         return false;
     }
 };
+
+module.exports.getHeldCustomers = getHeldCustomers;
 module.exports.getCounterData = getCounterData;
 module.exports.AddorUpdateVisitData = AddorUpdateVisitData;
 module.exports.getCurrentData = getCurrentData;

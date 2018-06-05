@@ -28,7 +28,6 @@
     <label>Select Segments</label>
     <select id="segments">
     </select>
-
     <label>Select Services</label>
     <select id="services">
     </select>
@@ -56,6 +55,11 @@
   <button type="button" onclick="Next()" style="display: inline;">Next</button>
   <button type="button" onclick="nextMultiple(1000)" style="display: inline;">Next1000</button>
   <button type="button" onclick="CBreak()" style="display: inline;">Break</button>
+  <button type="button" onclick="CHold()" style="display: inline;">Hold</button>
+  <label>Select Services</label>
+  <select id="addservices">
+  </select>
+  <button type="button" onclick="CAddService()" style="display: inline;">Add Service</button>
   <p id="calls">...</p>
   <div></div>
   <h3 style="display: inline;">Counter state: </h3>
@@ -66,6 +70,12 @@
   <div></div>
   <h3 style="display: inline;">Current Ticket Number: </h3>
   <p id='ticketnumberCalled' style="display: inline;">...</p>
+  <div></div>
+  <button type="button" onclick="CgetCustomers()" style="display: inline;">Get Hold Customers</button>
+  <input type="text" id="transactionid">
+  <button type="button" onclick="CServeCustomer()" style="display: inline;">Serve Customer</button>
+  <table id="heldCustomers" style="width:100%">
+  </table>
   <hr>
   <h2>Branch Statistics</h2>
   <button type="button" onclick="readBranchStatistics()" style="display: inline;">Refresh Statistics</button>

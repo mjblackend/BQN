@@ -1,5 +1,6 @@
 "use strict";
 var queueCommandManager = require("./queueCommandManager");
+var externalDataRequestService = require("./externalDataRequestService");
 var common = require("../../common/common");
 var should = require("should");
 var mocha = require("mocha");
@@ -50,7 +51,8 @@ var CounterInfo = {
     orgid: OrgID,
     counterid: CounterID,
     branchid: BranchID,
-    languageindex: Origin
+    languageindex: Origin,
+    holdreasonid: "0"
 };
 
 
@@ -104,11 +106,65 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
-    it('Third Next Customer Get for counter ID = 120', async function () {
-        let result = await queueCommandManager.counterNext(CounterInfo);
+    it('Add Service to Customer with the same segment allocated (use direct priority) for counter ID = 120', async function () {
+        let CounterInfoAddService = {
+            orgid: OrgID,
+            counterid: CounterID,
+            branchid: BranchID,
+            serviceid: ServiceID2,
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.addService(CounterInfoAddService);
         (result === common.success).should.true();
     });
 
+    it('Add Service to Customer without the same segment allocated (use average priority) for counter ID = 120', async function () {
+        let CounterInfoAddService = {
+            orgid: OrgID,
+            counterid: CounterID,
+            branchid: BranchID,
+            serviceid: ServiceID3,
+            languageindex: "0"
+        };
+        let result = await queueCommandManager.addService(CounterInfoAddService);
+        (result === common.success).should.true();
+    });
+
+
+    it('Hold Current Customer Get for counter ID = 120 successfully', async function () {
+        let result = await queueCommandManager.counterHoldCustomer(CounterInfo);
+        (result === common.success).should.true();
+    });
+
+    
+    it('Unhold customer from list successfully', async function () {
+        let message = {
+            title: "getHeldCustomers",
+            payload: {
+                orgid: OrgID,
+                branchid: BranchID,
+                counterid: CounterID,
+                languageindex: "0",
+                origin: "0"
+            }
+        };
+        let result = await externalDataRequestService.getData(message);
+        if (result === common.success)
+        {
+            let heldCustomer = message.payload.HeldCustomers[0];
+            let CustomerInfo = {
+                orgid: OrgID,
+                counterid: CounterID,
+                branchid: BranchID,
+                transactionid: heldCustomer.id,
+                languageindex: "0",
+                origin: "0"
+            }
+            result =  await queueCommandManager.counterServeCustomer(CustomerInfo);
+        }
+        (result === common.success).should.true();
+    });
+    
     it('Counter Take Break for counter ID = 120 successfully', async function () {
         let result = await queueCommandManager.counterBreak(CounterInfo);
         (result === common.success).should.true();

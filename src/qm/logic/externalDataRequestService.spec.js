@@ -103,9 +103,9 @@ describe('Queuing Command Manager Test', function () {
     it('Get counter state', async function () {
 
         var apiMessagePayLoad = {
-            EntityName: "segment",
-            BranchID: BranchID,
-            CounterID: CounterID
+            orgid: OrgID,
+            branchid: BranchID,
+            counterid: CounterID
         };
         var message = {
             title: "getCounterStatus",
@@ -115,4 +115,20 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
 
+    it('Get counter held customers', async function () {
+
+        var apiMessagePayLoad = {
+            orgid: OrgID,
+            branchid: BranchID,
+            counterid: CounterID,
+            languageindex: "0",
+            origin: "0"
+        };
+        var message = {
+            title: "getHeldCustomers",
+            payload: apiMessagePayLoad
+        };
+        let result = await externalDataRequestService.getData(message);
+        (result === common.success).should.true();
+    });
 });

@@ -41,8 +41,8 @@ var performAutoNextForBranch = async function (branchData) {
 //Automatic Commands
 var automaticNext = async function () {
     try {
-        let date1 = Date.now();
-        console.log("Autonext starts");
+        //let date1 = Date.now();
+        //console.log("Autonext starts");
 
         let errors = [];
         //Automatic next
@@ -57,8 +57,8 @@ var automaticNext = async function () {
                 }
             }
         }
-        let duration = (Date.now() - date1) / 1000;
-        console.log("Autonext ends " + duration + " seconds");
+        //let duration = (Date.now() - date1) / 1000;
+        //console.log("Autonext ends " + duration + " seconds");
 
         return common.success;
     }

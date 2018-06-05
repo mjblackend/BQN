@@ -168,7 +168,7 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
         }
         else {
             CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState_ID = CurrentActivity.id;
+            CounterData.currentState = CurrentActivity;
             return common.success;
         }
     }
@@ -210,7 +210,7 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
             CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.NoCallServing);
         }
 
-        CounterData.currentState_ID = CurrentActivity.id;
+        CounterData.currentState = CurrentActivity;
         CurrentStateTypes.push(CurrentActivity.type);
         return common.success;
     }
@@ -249,7 +249,7 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
         }
         else {
             CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState_ID = CurrentActivity.id;
+            CounterData.currentState = CurrentActivity;
             return common.success;
         }
     }
@@ -261,9 +261,98 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
 };
 
 
+//Check Counter Validation For Hold
+var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
+    try {
 
+        let output = [];
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
+        BracnhData = output[0];
+        CounterData = output[1];
+        CurrentActivity = output[2];
 
+        let counter = configurationService.configsCache.counters.find(function (value) {
+            return value.ID == CounterData.id;
+        }
+        );
 
+        //Check for correct type
+        if (counter && counter.Type_LV != enums.counterTypes.CustomerServing) {
+
+            return common.not_valid;
+        }
+
+        // ths status should be serving
+        if (CurrentActivity) {
+            if (CurrentActivity.type == enums.EmployeeActiontypes.Serving) {
+                return common.success;
+            }
+            else {
+                return common.not_valid;
+            }
+        }
+        else
+        {
+            return common.not_valid;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+        return common.error;
+    }
+};
+
+//Check Counter Validation ForNext
+var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
+    try {
+
+        let output = [];
+        let BracnhData;
+        let CounterData;
+        let CurrentActivity;
+        dataService.getCurrentData(OrgID, BranchID, CounterID, output);
+        BracnhData = output[0];
+        CounterData = output[1];
+        CurrentActivity = output[2];
+
+        let counter = configurationService.configsCache.counters.find(function (value) {
+            return value.ID == CounterData.id;
+        }
+        );
+
+        //Check for correct type
+        if (counter && counter.Type_LV != enums.counterTypes.CustomerServing &&  counter.Type_LV != enums.counterTypes.NoCallServing) {
+
+            return common.not_valid;
+        }
+
+        // Change the Current activity
+        if (CurrentActivity) {
+            if (CurrentActivity.type == enums.EmployeeActiontypes.Serving || CurrentActivity.type == enums.EmployeeActiontypes.NoCallServing ||
+                 CurrentActivity.type == enums.EmployeeActiontypes.Ready || CurrentActivity.type == enums.EmployeeActiontypes.Serving || CurrentActivity.type == enums.EmployeeActiontypes.Processing) {
+                return common.success;
+            }
+            else {
+                return common.not_valid;
+            }
+        }
+        else {
+            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
+            CounterData.currentState = CurrentActivity;
+            return common.success;
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+        return common.error;
+    }
+};
 
 
 //Check Counter Validation ForNext
@@ -301,7 +390,7 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
         }
         else {
             CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState_ID = CurrentActivity.id;
+            CounterData.currentState = CurrentActivity;
             return common.success;
         }
     }
@@ -332,7 +421,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
         }
 
         CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Break);
-        CounterData.currentState_ID = CurrentActivity.id;
+        CounterData.currentState = CurrentActivity;
         CurrentStateTypes.push(CurrentActivity.type);
         return common.success;
     }
@@ -386,7 +475,7 @@ var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, Counte
             }
         }
 
-        CounterData.currentState_ID = CurrentActivity.id;
+        CounterData.currentState = CurrentActivity;
         CurrentStateTypes.push(CurrentActivity.type);
         return common.success;
     }
@@ -398,9 +487,10 @@ var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, Counte
 };
 
 
-
+module.exports.CounterValidationForHold = CounterValidationForHold;
 module.exports.isCounterValidForAutoNext = isCounterValidForAutoNext;
 module.exports.CounterValidationForNext = CounterValidationForNext;
+module.exports.CounterValidationForServe = CounterValidationForServe;
 module.exports.ChangeCurrentCounterStateForNext = ChangeCurrentCounterStateForNext;
 module.exports.CounterValidationForBreak = CounterValidationForBreak;
 module.exports.ChangeCurrentCounterStateForBreak = ChangeCurrentCounterStateForBreak;

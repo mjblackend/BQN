@@ -9,7 +9,7 @@ var logger = require("../../common/logger");
 var filepath = "dbconfig.txt";
 var config = {
     user: "sa",
-    password: "fileworx@123",
+    password: "sedco@123",
     server: "majd",
     database: "new"
 };
@@ -38,7 +38,28 @@ var FilterTheReservedColumnNames = async function (columns) {
     return Filtered;
 };
 
+async function RecoverConnection()
+{
+    let tries=3;
+    while(tries > 0 )
+    {
+        try{
+            if (connection == null) {
+                connection = await mssql.connect(config);
+                return ;
+            }
 
+        }
+        catch (error) {
+            mssql.close();
+            connection=undefined;
+            logger.logError(error);
+        }
+        finally{
+            tries -= 1;
+        }
+    }
+}
 
 
 //Get entities
@@ -52,7 +73,7 @@ var GetAll = async function (columns, table_name) {
         }
 
         if (connection == null) {
-            connection = await mssql.connect(config);
+            await RecoverConnection();
         }
 
         let request = new mssql.Request();
@@ -83,7 +104,7 @@ var GetByFilter = async function (columns, table_name, FilterName, FilterValue) 
         }
 
         if (connection == null) {
-            connection = await mssql.connect(config);
+           await RecoverConnection();
         }
 
         let request = new mssql.Request();

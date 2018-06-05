@@ -14,7 +14,7 @@ function LoadPage() {
         elem.innerHTML = data;
     });
     FillBranches();
-    setInterval(CGetCurrentState,5000);
+    //setInterval(CGetCurrentState,5000);
 }
 
 function SendMessage() {
@@ -69,16 +69,16 @@ function readBranchStatistics() {
 
         for (let i = 0; i < statistics.length; i++) {
             options = options + '<tr>';
-            options = options + '<th>'+ statistics[i].service_ID + '</th>';
-            options = options + '<th>'+ statistics[i].segment_ID + '</th>';
-            options = options + '<th>'+ statistics[i].hall_ID + '</th>';
-            options = options + '<th>'+ statistics[i].counter_ID + '</th>';
+            options = options + '<th>' + statistics[i].service_ID + '</th>';
+            options = options + '<th>' + statistics[i].segment_ID + '</th>';
+            options = options + '<th>' + statistics[i].hall_ID + '</th>';
+            options = options + '<th>' + statistics[i].counter_ID + '</th>';
 
-            options = options + '<th>'+ statistics[i].WaitingCustomers + '</th>';
-            options = options + '<th>'+ statistics[i].ServedCustomersNo + '</th>';
-            options = options + '<th>'+ statistics[i].NoShowCustomersNo + '</th>';
-            options = options + '<th>'+ statistics[i].AvgServiceTime + '</th>';
-            options = options + '<th>'+ statistics[i].AvgWaitingTime + '</th>';
+            options = options + '<th>' + statistics[i].WaitingCustomers + '</th>';
+            options = options + '<th>' + statistics[i].ServedCustomersNo + '</th>';
+            options = options + '<th>' + statistics[i].NoShowCustomersNo + '</th>';
+            options = options + '<th>' + statistics[i].AvgServiceTime + '</th>';
+            options = options + '<th>' + statistics[i].AvgWaitingTime + '</th>';
             options = options + '</tr>';
         }
 
@@ -86,12 +86,94 @@ function readBranchStatistics() {
         elem.innerHTML = options;
     };
     xhr.send(JSON.stringify(Message));
-
 }
 
+function CServeCustomer() {
+    var e = document.getElementById("counters");
+    let counterID = e.options[e.selectedIndex].value;
+    let transaction = document.getElementById("transactionid");
+    var Message = {
+        time: new Date(),
+        title: 'serveCustomer',
+        payload: {
+            orgid: "1",
+            counterid: counterID,
+            branchid: branchID,
+            transactionid: transaction.value,
+            languageindex: "0",
+            origin: "0"
+        }
+    };
 
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
 
-function CGetCurrentState(){
+    xhr.onload = function () {
+
+        // do something to response
+        var HeldCustomers = JSON.parse(this.responseText).HeldCustomers;
+        var options = `<tr>
+                <th>Trans ID</th>
+                <th>Ticket Number</th>
+              </tr>`;
+
+        for (let i = 0; i < HeldCustomers.length; i++) {
+            options = options + '<tr>';
+            options = options + '<th>' + HeldCustomers[i].id + '</th>';
+            options = options + '<th>' + HeldCustomers[i].displayTicketNumber + '</th>';
+            options = options + '</tr>';
+        }
+
+        var elem = document.getElementById('heldCustomers');
+        elem.innerHTML = options;
+    };
+    xhr.send(JSON.stringify(Message));
+}
+
+function CgetCustomers() {
+    var e = document.getElementById("counters");
+    let counterID = e.options[e.selectedIndex].value;
+
+    var Message = {
+        time: new Date(),
+        title: 'getHeldCustomers',
+        payload: {
+            orgid: "1",
+            counterid: counterID,
+            branchid: branchID,
+            languageindex: "0",
+            origin: "0"
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/getData', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+
+        // do something to response
+        var HeldCustomers = JSON.parse(this.responseText).HeldCustomers;
+        var options = `<tr>
+                <th>Trans ID</th>
+                <th>Ticket Number</th>
+              </tr>`;
+
+        for (let i = 0; i < HeldCustomers.length; i++) {
+            options = options + '<tr>';
+            options = options + '<th>' + HeldCustomers[i].id + '</th>';
+            options = options + '<th>' + HeldCustomers[i].displayTicketNumber + '</th>';
+            options = options + '</tr>';
+        }
+
+        var elem = document.getElementById('heldCustomers');
+        elem.innerHTML = options;
+    };
+    xhr.send(JSON.stringify(Message));
+}
+
+function CGetCurrentState() {
     var e = document.getElementById("counters");
     let counterID = e.options[e.selectedIndex].value;
 
@@ -243,6 +325,9 @@ function FillServices(branchid) {
 
         elem = document.getElementById('services');
         elem.innerHTML = options;
+
+        elem = document.getElementById('addservices');
+        elem.innerHTML = options;
     };
     xhr.send(JSON.stringify(Message));
 };
@@ -303,7 +388,50 @@ function FillCounters(branchid) {
     };
     xhr.send(JSON.stringify(Message));
 };
+function CAddService(){
+    var e = document.getElementById("counters");
+    let counterID = e.options[e.selectedIndex].value;
+    e = document.getElementById("addservices");
+    let serviceID = e.options[e.selectedIndex].value;
 
+    var Message = {
+        time: new Date(),
+        title: 'addService',
+        payload: {
+            orgid: "1",
+            counterid: counterID,
+            branchid: branchID,
+            serviceid: serviceID,
+            languageindex: "0",
+            origin: "0"
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+        // do something to response
+        count += 1;
+        console.log(this.responseText);
+
+        var elem = document.getElementById('servedticketnumber');
+        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
+
+        elem = document.getElementById('ticketnumberCalled');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
+
+        elem = document.getElementById('counterState');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
+
+        elem = document.getElementById('errorMessage');
+        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+
+
+    };
+    xhr.send(JSON.stringify(Message));
+}
 
 function COpen() {
 
@@ -349,6 +477,47 @@ function COpen() {
 
 
 
+}
+function CHold() {
+    var e = document.getElementById("counters");
+    let counterID = e.options[e.selectedIndex].value;
+
+    var Message = {
+        time: new Date(),
+        title: 'hold',
+        payload: {
+            orgid: "1",
+            counterid: counterID,
+            branchid: branchID,
+            languageindex: "0",
+            origin: "0",
+            holdreasonid: "0"
+        }
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/processCommand', true);
+    xhr.setRequestHeader('Content-type', 'application/json')
+
+    xhr.onload = function () {
+        // do something to response
+        count += 1;
+        console.log(this.responseText);
+
+        var elem = document.getElementById('servedticketnumber');
+        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
+
+        elem = document.getElementById('ticketnumberCalled');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
+
+        elem = document.getElementById('counterState');
+        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
+
+        elem = document.getElementById('errorMessage');
+        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+
+    };
+    xhr.send(JSON.stringify(Message));
 }
 function CBreak() {
 

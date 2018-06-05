@@ -20,6 +20,7 @@ var generateID = function (transaction) {
 };
 
 
+
 function UpdateWaitingCustomers(UpdateType, t_Statistics, transaction) {
     //Waiting Customer
     if (transaction.state == enums.StateType.Pending || transaction.state == enums.StateType.PendingRecall || transaction.state == enums.StateType.OnHold) {
@@ -164,6 +165,46 @@ var CreateNewstatistics = function (transaction) {
         return undefined;
     }
 
+};
+var GetHallsStatistics = function (BranchID, Hall_IDs) {
+    try {
+        let hall_statistics = [];
+        if (Hall_IDs && Hall_IDs.length > 0) {
+            let Branchstatistics = branches_statisticsData.find(
+                function (value) {
+                    return value.branch_ID == BranchID;
+                }
+            );
+            for (let i = 0; i < Hall_IDs.length; i++) {
+                //Create initial hall
+                let hall_id = Hall_IDs[i];
+                let hall = {
+                    Hall_ID: hall_id,
+                    WaitingCustomers: 0
+                }
+                //If there is statistics
+                if (Branchstatistics)
+                {
+                    let statistics = Branchstatistics.statistics;
+                    if (statistics && statistics.length>0)
+                    {
+                        statistics.forEach(statistics => {
+                            if (statistics.hall_ID==hall_id)
+                            {
+                                hall.WaitingCustomers += statistics.WaitingCustomers;
+                            }
+                        });
+                    }
+                }
+                hall_statistics.push(hall);
+            }
+        }
+        return hall_statistics;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
 };
 
 var UpdateStatistics = function (UpdateType, Statistics, transaction) {
@@ -405,7 +446,7 @@ var GetSpecificStatistics = function (FilterStatistics) {
 
 };
 
-
+module.exports.GetHallsStatistics = GetHallsStatistics;
 module.exports.GetSpecificStatistics = GetSpecificStatistics;
 module.exports.AddOrUpdateTransaction = AddOrUpdateTransaction;
 module.exports.ReadBranchStatistics = ReadBranchStatistics;

@@ -43,11 +43,24 @@ function getCounterStatus(counterInfo) {
     }
 };
 
- function Read  (apiMessagePayload) {
-    return  configurationService.Read(apiMessagePayload);
+function Read(apiMessagePayload) {
+    return configurationService.Read(apiMessagePayload);
 };
- function ReadBranchStatistics(apiMessagePayload) {
-    return  statisticsManager.ReadBranchStatistics(apiMessagePayload);
+
+function getHeldCustomers(counterInfo) {
+    let result = common.success;
+    let errors = [];
+    let output = [];
+    let OrgID = counterInfo["orgid"];
+    let BranchID = counterInfo["branchid"];
+    let CounterID = counterInfo["counterid"];
+    result = dataService.getHeldCustomers(OrgID, BranchID, CounterID, output);
+    counterInfo.HeldCustomers = output;
+    return result;
+};
+
+function ReadBranchStatistics(apiMessagePayload) {
+    return statisticsManager.ReadBranchStatistics(apiMessagePayload);
 };
 
 var getData = async function (apiMessage) {
@@ -57,6 +70,9 @@ var getData = async function (apiMessage) {
             switch (apiMessage.title) {
                 case enums.commands.Read:
                     result = await Read(apiMessage.payload);
+                    break;
+                case enums.commands.GetHeldCustomers:
+                    result = await getHeldCustomers(apiMessage.payload);
                     break;
                 case enums.commands.ReadBranchStatistics:
                     result = await ReadBranchStatistics(apiMessage.payload);

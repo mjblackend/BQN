@@ -1,4 +1,5 @@
 const INT_NULL = -1;
+const INT_ZERO = 0;
 const STRING_NULL = "";
 const TIME_NULL = 0;
 var transactionStatisticsData =require("./transactionStatisticsData");
@@ -83,7 +84,7 @@ class transaction {
         this.orderOfServing = INT_NULL;
         this.note = STRING_NULL;
         this.recallNo = INT_NULL;
-        this.holdCount = INT_NULL;
+        this.holdCount = INT_ZERO;
         this.holdReason_ID = INT_NULL;
         this.appointment_ID = INT_NULL;
         this.servingSession = STRING_NULL;
