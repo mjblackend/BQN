@@ -223,7 +223,13 @@ var cacheData = async function () {
         return common.error;
     }
 };
-
+function getBranchData(BranchID)
+{
+    var branchData = branchesData.find(function (value) {
+        return value.id == BranchID;
+    });
+    return branchData;
+}
 function getHeldCustomers(OrgID, BranchID, CounterID, output) {
     try {
         let result = common.success;
@@ -301,6 +307,7 @@ var initialize = async function () {
     }
 };
 
+module.exports.getBranchData = getBranchData;
 module.exports.getHeldCustomers = getHeldCustomers;
 module.exports.getCounterData = getCounterData;
 module.exports.AddorUpdateVisitData = AddorUpdateVisitData;

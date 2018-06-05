@@ -14,18 +14,13 @@ const Separators = ["", " ", "-", "/", "."];
 
 
 function UpdateTransactionInBranchData(BracnhData, transaction) {
-    try {
-        if (BracnhData != null && BracnhData.transactionsData != null) {
-            for (let i = 0; i < BracnhData.transactionsData.length; i++) {
-                if (BracnhData.transactionsData[i].id == transaction.id) {
-                    BracnhData.transactionsData[i] = transaction;
-                    break;
-                }
+    if (BracnhData) {
+        for (let i = 0; i < BracnhData.transactionsData.length; i++) {
+            if (BracnhData.transactionsData[i].id == transaction.id) {
+                BracnhData.transactionsData[i] = transaction;
+                break;
             }
         }
-    }
-    catch (error) {
-        logger.logError(error);
     }
 }
 
@@ -62,11 +57,11 @@ var UpdateTransaction = function (transaction) {
 //Add or Update Transaction
 var AddTransaction = function (transaction) {
     try {
+        let result = common.error;
         //Generate ID in not exists
         if (transaction.id <= 0) {
             transaction.id = idGenerator.getNewID();
         }
-
         //If visit ID was not set then take the same as ID
         if (transaction.visit_ID <= 0) {
             transaction.visit_ID = transaction.id;
@@ -79,21 +74,15 @@ var AddTransaction = function (transaction) {
         if (BracnhData != null && BracnhData.transactionsData != null) {
             //To Branch Transactions
             BracnhData.transactionsData.push(transaction);
-
             //To Visit Data
             dataService.AddorUpdateVisitData(BracnhData, transaction);
-
             //Update the Statistics
             statisticsManager.AddOrUpdateTransaction(transaction);
-
             //Update To data base
             repositoriesManager.entitiesRepo.AddSynch(transaction);
-            return common.success;
+            result = common.success;
         }
-        else {
-            return common.error;
-        }
-
+        return result;
     }
     catch (error) {
         logger.logError(error);
@@ -137,12 +126,10 @@ var getHallID = function (transaction, pAllHalls, pAllocatedHalls) {
 
 
         //Branch Config
-        var branch = configurationService.configsCache.branches.find(function (value) {
-            return value.ID == transaction.branch_ID;
-        });
-        var branchesData = dataService.branchesData.find(function (value) {
-            return value.id == transaction.branch_ID;
-        });
+        var branch = configurationService.getBranchConfig(transaction.branch_ID);
+
+        var branchesData = dataService.getBranchData(transaction.branch_ID);
+
         branch.halls.forEach(function (hall) {
             pAllHalls.push(hall.ID);
         });
@@ -465,18 +452,14 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
         let Now = Date.now();
 
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(BranchID);
 
         //Branch Config
-        var branch = configurationService.configsCache.branches.find(function (value) {
-            return value.ID == BranchID;
-        });
+        let branch = configurationService.getBranchConfig(BranchID);
+
 
         //Branch Counters to get the specific counter
-        var counter = branch.counters.find(function (value) {
+        let counter = branch.counters.find(function (value) {
             return value.ID == CounterID;
         });
         //Get the transactions that can be served
@@ -633,15 +616,10 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
         let Now = Date.now();
 
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(BranchID);
 
         //Branch Config
-        var branch = configurationService.configsCache.branches.find(function (value) {
-            return value.ID == BranchID;
-        });
+        var branch = configurationService.getBranchConfig(BranchID);
 
         //Branch Counters to get the specific counter
         var counter = branch.counters.find(function (value) {

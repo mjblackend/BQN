@@ -101,6 +101,15 @@ var getCommonSettings = function (BranchID, Key) {
     }
 };
 
+function getBranchConfig(BranchID) {
+    //Branch Config
+    var branch = this.configsCache.branches.find(function (value) {
+        return value.ID == BranchID;
+    });
+    return branch;
+}
+
+
 /*eslint complexity: ["error", 100]*/
 async function getBranchServiceAllocation() {
     //Special case since the many to many have same columns names
@@ -264,7 +273,7 @@ var initialize = async function () {
         return common.error;
     }
 };
-
+module.exports.getBranchConfig = getBranchConfig;
 module.exports.getService = getService;
 module.exports.getServiceConfig = getServiceConfig;
 module.exports.getServiceConfigFromService = getServiceConfigFromService;
