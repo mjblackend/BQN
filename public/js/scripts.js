@@ -507,6 +507,7 @@ function CHold() {
 
         var payload = JSON.parse(this.responseText);
         RenderUI(payload);
+        CgetCustomers();
 
     };
     xhr.send(JSON.stringify(Message));
