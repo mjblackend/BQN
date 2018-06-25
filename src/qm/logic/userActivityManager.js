@@ -180,7 +180,7 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
 };
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, CounterID, CountersInfo) {
     try {
 
         let output = [];
@@ -211,7 +211,7 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
         }
 
         CounterData.currentState = CurrentActivity;
-        CurrentStateTypes.push(CurrentActivity.type);
+        CountersInfo.push(CurrentActivity);
         return common.success;
     }
     catch (error) {
@@ -404,7 +404,7 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, CounterID, CountersInfo) {
     try {
 
         let output = [];
@@ -422,7 +422,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
 
         CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Break);
         CounterData.currentState = CurrentActivity;
-        CurrentStateTypes.push(CurrentActivity.type);
+        CountersInfo.push(CurrentActivity);
         return common.success;
     }
     catch (error) {
@@ -435,7 +435,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
 
 
 //Change Current Counter State
-var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, CounterID, CurrentStateTypes) {
+var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, CounterID, CountersInfo) {
     try {
         let output = [];
         let BracnhData;
@@ -476,7 +476,7 @@ var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, Counte
         }
 
         CounterData.currentState = CurrentActivity;
-        CurrentStateTypes.push(CurrentActivity.type);
+        CountersInfo.push(CurrentActivity);
         return common.success;
     }
     catch (error) {

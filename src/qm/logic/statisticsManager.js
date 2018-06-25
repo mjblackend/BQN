@@ -404,7 +404,7 @@ function SumStatistics(TotalStatistics, ToBeAddedStatistics) {
 var GetSpecificStatistics = function (FilterStatistics) {
     try {
         let TotalStatistics = new statisticsData();
-        if (FilterStatistics.branch_ID > 0) {
+        if (FilterStatistics && FilterStatistics.branch_ID > 0) {
             //search from branch
             let BranchID = FilterStatistics.branch_ID;
             let t_branches_statisticsData = branches_statisticsData.find(function (value) {

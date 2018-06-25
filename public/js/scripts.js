@@ -1,6 +1,7 @@
 var count = 0;
 var callsnumber = 0;
 var socket;
+var empty ="...";
 
 var branchID;
 
@@ -9,9 +10,23 @@ function LoadPage() {
     socket.on('connect', function (data) {
         // socket.emit('join', 'Hello World from client');
     });
-    socket.on('broadcast', function (data) {
+    socket.on('broadcast', function (apiMessage) {
+
+
+        let tbody =" .... ";
+        if (apiMessage.payload.transactionsInfo && apiMessage.payload.transactionsInfo.length > 0)
+        {
+          tbody = 'Ticket Number=' + apiMessage.payload.transactionsInfo[0].displayTicketNumber + " ";
+        }
+        if (apiMessage.payload.countersInfo && apiMessage.payload.countersInfo.length > 0)
+        {
+          tbody =  tbody  + ' Counter State =' + apiMessage.payload.countersInfo[0].type + " "
+        }
+    
+        tbody =  tbody  +  ' ErrorMessage=' +  apiMessage.payload.errorCode;
+
         var elem = document.getElementById('ticketnumberAll');
-        elem.innerHTML = data;
+        elem.innerHTML = tbody;
     });
     FillBranches();
     //setInterval(CGetCurrentState,5000);
@@ -40,7 +55,7 @@ function readBranchStatistics() {
 
     var Message = {
         time: new Date(),
-        title: 'readBranchStatistics',
+        topicName: 'readBranchStatistics',
         payload: {
             EntityName: "service",
             BranchID: branchid
@@ -93,8 +108,8 @@ function CServeCustomer() {
     let counterID = e.options[e.selectedIndex].value;
     let transaction = document.getElementById("transactionid");
     var Message = {
-        time: new Date(),
-        title: 'serveCustomer',
+        packetID: Date.now(),
+        topicName: 'serveCustomer',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -112,21 +127,9 @@ function CServeCustomer() {
     xhr.onload = function () {
 
         // do something to response
-        var HeldCustomers = JSON.parse(this.responseText).HeldCustomers;
-        var options = `<tr>
-                <th>Trans ID</th>
-                <th>Ticket Number</th>
-              </tr>`;
-
-        for (let i = 0; i < HeldCustomers.length; i++) {
-            options = options + '<tr>';
-            options = options + '<th>' + HeldCustomers[i].id + '</th>';
-            options = options + '<th>' + HeldCustomers[i].displayTicketNumber + '</th>';
-            options = options + '</tr>';
-        }
-
-        var elem = document.getElementById('heldCustomers');
-        elem.innerHTML = options;
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
+        CgetCustomers();
     };
     xhr.send(JSON.stringify(Message));
 }
@@ -136,8 +139,8 @@ function CgetCustomers() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'getHeldCustomers',
+        packetID: Date.now(),
+        topicName: 'getHeldCustomers',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -178,8 +181,8 @@ function CGetCurrentState() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'getCounterStatus',
+        packetID: Date.now(),
+        topicName: 'getCounterStatus',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -198,20 +201,46 @@ function CGetCurrentState() {
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = "...";
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
-
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
     };
     xhr.send(JSON.stringify(Message));
+}
+
+
+function RenderUI(payload)
+{
+    var transactionsInfo = payload.transactionsInfo;
+    var elem = document.getElementById('servedticketnumber');
+    if (transactionsInfo && transactionsInfo.length > 0)
+    {
+        elem.innerHTML = transactionsInfo[0].displayTicketNumber;
+    }
+    else
+    {
+        elem.innerHTML = empty;
+    }
+
+    elem = document.getElementById('ticketnumberCalled');
+    if (transactionsInfo && transactionsInfo.length > 0)
+    {
+        elem.innerHTML = transactionsInfo[transactionsInfo.length - 1].displayTicketNumber;
+    }
+    else
+    {
+        elem.innerHTML = empty;
+    }
+
+
+    if (payload.countersInfo && payload.countersInfo.length > 0)
+    {
+        elem = document.getElementById('counterState');
+        elem.innerHTML = payload.countersInfo[0].type;
+    }
+
+
+    elem = document.getElementById('errorMessage');
+    elem.innerHTML = payload.errorCode;
 }
 
 function Next() {
@@ -220,8 +249,8 @@ function Next() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'next',
+        packetID: Date.now(),
+        topicName: 'next',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -240,18 +269,8 @@ function Next() {
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
-
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
     };
     xhr.send(JSON.stringify(Message));
 
@@ -275,8 +294,8 @@ function Connect() {
 function FillBranches(branchid) {
 
     var Message = {
-        time: new Date(),
-        title: 'read',
+        packetID: Date.now(),
+        topicName: 'read',
         payload: {
             EntityName: "branch"
         }
@@ -303,8 +322,8 @@ function FillBranches(branchid) {
 function FillServices(branchid) {
 
     var Message = {
-        time: new Date(),
-        title: 'read',
+        packetID: Date.now(),
+        topicName: 'read',
         payload: {
             EntityName: "service",
             BranchID: branchid
@@ -334,8 +353,8 @@ function FillServices(branchid) {
 function FillSegments(branchid) {
 
     var Message = {
-        time: new Date(),
-        title: 'read',
+        packetID: Date.now(),
+        topicName: 'read',
         payload: {
             EntityName: "segment",
             BranchID: branchid
@@ -362,8 +381,8 @@ function FillSegments(branchid) {
 function FillCounters(branchid) {
     //Get serving or no call counters
     var Message = {
-        time: new Date(),
-        title: 'read',
+        packetID: Date.now(),
+        topicName: 'read',
         payload: {
             EntityName: "counter",
             BranchID: branchid,
@@ -388,15 +407,15 @@ function FillCounters(branchid) {
     };
     xhr.send(JSON.stringify(Message));
 };
-function CAddService(){
+function CAddService() {
     var e = document.getElementById("counters");
     let counterID = e.options[e.selectedIndex].value;
     e = document.getElementById("addservices");
     let serviceID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'addService',
+        packetID: Date.now(),
+        topicName: 'addService',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -416,17 +435,8 @@ function CAddService(){
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
 
 
     };
@@ -439,8 +449,8 @@ function COpen() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'open',
+        packetID: Date.now(),
+        topicName: 'open',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -459,17 +469,8 @@ function COpen() {
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
 
 
     };
@@ -483,8 +484,8 @@ function CHold() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'hold',
+        packetID: Date.now(),
+        topicName: 'hold',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -504,17 +505,8 @@ function CHold() {
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
 
     };
     xhr.send(JSON.stringify(Message));
@@ -525,8 +517,8 @@ function CBreak() {
     let counterID = e.options[e.selectedIndex].value;
 
     var Message = {
-        time: new Date(),
-        title: 'break',
+        packetID: Date.now(),
+        topicName: 'break',
         payload: {
             orgid: "1",
             counterid: counterID,
@@ -545,17 +537,8 @@ function CBreak() {
         count += 1;
         console.log(this.responseText);
 
-        var elem = document.getElementById('servedticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).ServedDisplayTicketNumber;
-
-        elem = document.getElementById('ticketnumberCalled');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentDisplayTicketNumber;
-
-        elem = document.getElementById('counterState');
-        elem.innerHTML = JSON.parse(this.responseText).CurrentStateType;
-
-        elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+        var payload = JSON.parse(this.responseText);
+        RenderUI(payload);
 
     };
     xhr.send(JSON.stringify(Message));
@@ -573,9 +556,8 @@ function IssueTicket() {
     let segmentID = e.options[e.selectedIndex].value;
 
     var Message = {
-        source: 'user1',
-        time: 'password1',
-        title: 'issueTicket',
+        packetID: Date.now(),
+        topicName: 'issueTicket',
         payload: {
             orgid: "1",
             segmentid: segmentID,
@@ -596,10 +578,10 @@ function IssueTicket() {
         count += 1;
         console.log(this.responseText);
         var elem = document.getElementById('ticketnumber');
-        elem.innerHTML = JSON.parse(this.responseText).displayTicketNumber;
+        elem.innerHTML = JSON.parse(this.responseText).transactionsInfo[0].displayTicketNumber;
 
         elem = document.getElementById('errorMessage');
-        elem.innerHTML = JSON.parse(this.responseText).errorMessage;
+        elem.innerHTML = JSON.parse(this.responseText).errorCode;
 
         if (count < 1000) {
             // Postdata();

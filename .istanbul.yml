@@ -1,6 +1,12 @@
 instrumentation:
-    root: .
+    root: src
     extensions:
         - .js
     default-excludes: true
-    excludes: ['**/customer/**','**/userMessaging/**', '**/common/**', '**/routes/**', '**/TestAPI/**','**/public/**','src/app.js','src/notificationHub.js']
+    excludes: ['**/customer/**',
+    '**/dataMessage/**',
+    '**/configurations/**_config.js',
+    '**/configurations/**_Config.js', 
+    '**/routes/**', '**/TestAPI/**',
+    '**/public/**','src/app.js',
+    'src/notificationHub.js']

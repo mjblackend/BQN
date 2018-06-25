@@ -14,21 +14,14 @@ router.post('/processCommand', async function (req, res, next) {
     let apiMessage = req.body;
     await queueCommandManager.processCommand(apiMessage);
 
-
-    let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType + " " + ' ErrorMessage=' +  apiMessage.payload.errorMessage;
-    console.log(tbody);
-    if(apiMessage.payload.displayTicketNumber)
+   
+    console.log(apiMessage.payload);
+    if (apiMessage)
     {
-      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.displayTicketNumber);
-    }
-    else
-    {
-     notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.CurrentDisplayTicketNumber);
-    }
-    
+      notificationHub.broadcastMessage(apiMessage);
+    }    
     res.body=apiMessage;
     res.end(JSON.stringify(apiMessage.payload));
-   
   }
   catch (error) {
     logger.log(error);
@@ -43,15 +36,10 @@ router.post('/getData', async function (req, res, next) {
   try {
     let apiMessage = req.body;
     await externalDataRequestService.getData(apiMessage);
-    let tbody = 'Ticket Number=' + apiMessage.payload.displayTicketNumber + " " + ' Counter State =' + apiMessage.payload.CurrentStateType + " " + ' ErrorMessage=' +  apiMessage.payload.errorMessage;
-    console.log(tbody);
-    if(apiMessage.payload.displayTicketNumber)
+    console.log(apiMessage.payload);
+    if (apiMessage)
     {
-      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.displayTicketNumber);
-    }
-    else
-    {
-      notificationHub.broadcastMessage('Ticket Number=' + apiMessage.payload.CurrentDisplayTicketNumber);
+      notificationHub.broadcastMessage(apiMessage);
     }
     
     res.body=apiMessage;

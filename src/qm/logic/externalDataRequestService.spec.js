@@ -36,7 +36,7 @@ describe('Queuing Command Manager Test', function () {
             EntityName: "branch"
         };
         var message = {
-            title: "read",
+            topicName: "read",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);
@@ -50,7 +50,7 @@ describe('Queuing Command Manager Test', function () {
             BranchID: BranchID
         };
         var message = {
-            title: "read",
+            topicName: "read",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);
@@ -64,7 +64,7 @@ describe('Queuing Command Manager Test', function () {
             BranchID: BranchID
         };
         var message = {
-            title: "read",
+            topicName: "read",
             payload: apiMessagePayLoad
         };
 
@@ -79,7 +79,7 @@ describe('Queuing Command Manager Test', function () {
             BranchID: BranchID
         };
         var message = {
-            title: "read",
+            topicName: "read",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);
@@ -93,7 +93,7 @@ describe('Queuing Command Manager Test', function () {
             BranchID: BranchID
         };
         var message = {
-            title: "readBranchStatistics",
+            topicName: "readBranchStatistics",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);
@@ -108,7 +108,7 @@ describe('Queuing Command Manager Test', function () {
             counterid: CounterID
         };
         var message = {
-            title: "getCounterStatus",
+            topicName: "getCounterStatus",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);
@@ -125,7 +125,7 @@ describe('Queuing Command Manager Test', function () {
             origin: "0"
         };
         var message = {
-            title: "getHeldCustomers",
+            topicName: "getHeldCustomers",
             payload: apiMessagePayLoad
         };
         let result = await externalDataRequestService.getData(message);

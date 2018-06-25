@@ -67,7 +67,7 @@ var getData = async function (apiMessage) {
     try {
         let result = common.error;
         if (apiMessage) {
-            switch (apiMessage.title) {
+            switch (apiMessage.topicName) {
                 case enums.commands.Read:
                     result = await Read(apiMessage.payload);
                     break;

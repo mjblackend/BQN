@@ -7,6 +7,7 @@ var dataService = require("../data/dataService");
 var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
 var queueCommandManager = require("./queueCommandManager");
+var message = require("../../dataMessage/responsePayload");
 var autoNextID;
 
 
@@ -25,7 +26,9 @@ var performAutoNextForBranch = async function (branchData) {
                         counterid: activity.counter_ID.toString(),
                         branchid: branchData.id.toString()
                     };
-                    queueCommandManager.counterNext(counterInfo);
+                    let _message = new message();
+                    _message.payload=counterInfo;
+                    queueCommandManager.counterNext(_message);
                 }
             }
 

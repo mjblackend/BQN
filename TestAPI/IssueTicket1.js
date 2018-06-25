@@ -3,20 +3,11 @@ const http = require('http');
 var maxRequests = 1;
 var DoneRequests = 0 ;
 var Now=  new Date();
-
-
-class apiMessage {
-    constructor() {
-        this.source = "";
-        this.time = "";
-        this.title = "";
-        this.payload ;
-    }
-}
+var apiMessage = require("../src/dataMessage/apiMessage");
 
 //Moch Data
 var tapiMessage = new apiMessage;
-tapiMessage.title = "issueTicket";
+tapiMessage.topicName = "issueTicket";
 tapiMessage.payload = {
   orgid: "1",
   segmentid: "325",

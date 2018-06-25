@@ -2,6 +2,7 @@
 var queueCommandManager = require("./queueCommandManager");
 var externalDataRequestService = require("./externalDataRequestService");
 var common = require("../../common/common");
+var message = require("../../dataMessage/responsePayload");
 var should = require("should");
 var mocha = require("mocha");
 var describe = mocha.describe;
@@ -66,43 +67,59 @@ describe('Queuing Command Manager Test', function () {
         (result === common.success).should.true();
     });
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" successfully', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfo);
+        let _message = new message();
+        _message.payload=ticketInfo;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.success).should.true();
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" Second time successfully', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfo);
+        let _message = new message();
+        _message.payload=ticketInfo;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.success).should.true();
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" third time successfully', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfo);
+        let _message = new message();
+        _message.payload=ticketInfo;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.success).should.true();
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "364" branchid: "106" fourth time successfully', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfo);
+        let _message = new message();
+        _message.payload=ticketInfo;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.success).should.true();
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "366" branchid: "106" successfully', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfo2);
+        let _message = new message();
+        _message.payload=ticketInfo2;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.success).should.true();
     });
 
     it('Issue Ticket segmentid: "325" serviceid: "386" branchid: "106" throws error', async function () {
-        let result = await queueCommandManager.issueTicket(ticketInfoFail);
+        let _message = new message();
+        _message.payload=ticketInfoFail;
+        let result = await queueCommandManager.issueTicket(_message);
         (result === common.error).should.true();
     });
 
 
     it('First Next Customer Get for counter ID = 120', async function () {
-        let result = await queueCommandManager.counterNext(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterNext(_message);
         (result === common.success).should.true();
     });
 
     it('Second Next Customer Get for counter ID = 120', async function () {
-        let result = await queueCommandManager.counterNext(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterNext(_message);
         (result === common.success).should.true();
     });
 
@@ -114,7 +131,9 @@ describe('Queuing Command Manager Test', function () {
             serviceid: ServiceID2,
             languageindex: "0"
         };
-        let result = await queueCommandManager.addService(CounterInfoAddService);
+        let _message = new message();
+        _message.payload=CounterInfoAddService;
+        let result = await queueCommandManager.addService(_message);
         (result === common.success).should.true();
     });
 
@@ -126,20 +145,26 @@ describe('Queuing Command Manager Test', function () {
             serviceid: ServiceID3,
             languageindex: "0"
         };
-        let result = await queueCommandManager.addService(CounterInfoAddService);
+
+        let _message = new message();
+        _message.payload=CounterInfoAddService;
+
+        let result = await queueCommandManager.addService(_message);
         (result === common.success).should.true();
     });
 
 
     it('Hold Current Customer Get for counter ID = 120 successfully', async function () {
-        let result = await queueCommandManager.counterHoldCustomer(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterHoldCustomer(_message);
         (result === common.success).should.true();
     });
 
     
     it('Unhold customer from list successfully', async function () {
-        let message = {
-            title: "getHeldCustomers",
+        let Readmessage = {
+            topicName: "getHeldCustomers",
             payload: {
                 orgid: OrgID,
                 branchid: BranchID,
@@ -148,10 +173,10 @@ describe('Queuing Command Manager Test', function () {
                 origin: "0"
             }
         };
-        let result = await externalDataRequestService.getData(message);
+        let result = await externalDataRequestService.getData(Readmessage);
         if (result === common.success)
         {
-            let heldCustomer = message.payload.HeldCustomers[0];
+            let heldCustomer = Readmessage.payload.HeldCustomers[0];
             let CustomerInfo = {
                 orgid: OrgID,
                 counterid: CounterID,
@@ -160,38 +185,53 @@ describe('Queuing Command Manager Test', function () {
                 languageindex: "0",
                 origin: "0"
             }
-            result =  await queueCommandManager.counterServeCustomer(CustomerInfo);
+
+            let _message = new message();
+            _message.payload=CustomerInfo;
+            result =  await queueCommandManager.counterServeCustomer(_message);
         }
         (result === common.success).should.true();
     });
     
     it('Counter Take Break for counter ID = 120 successfully', async function () {
-        let result = await queueCommandManager.counterBreak(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterBreak(_message);
         (result === common.success).should.true();
     });
 
     it('Counter Take Break for counter ID = 120 will failed because the counter is already in break', async function () {
-        let result = await queueCommandManager.counterBreak(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterBreak(_message);
         (result === common.not_valid).should.true();
     });
 
     it('Counter open from break for counter ID = 120 successfully', async function () {
-        let result = await queueCommandManager.counterOpen(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterOpen(_message);
         (result === common.success).should.true();
     });
 
     it('Counter Take Break for counter ID = 120 successfully', async function () {
-        let result = await queueCommandManager.counterBreak(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterBreak(_message);
         (result === common.success).should.true();
     });
 
     it('Open Counter Successfully', async function () {
-        let result = await queueCommandManager.counterOpen(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterOpen(_message);
         (result === common.success).should.true();
     });
 
     it('Counter open for counter ID = 120 will failed because the counter is already opened', async function () {
-        let result = await queueCommandManager.counterOpen(CounterInfo);
+        let _message = new message();
+        _message.payload=CounterInfo;
+        let result = await queueCommandManager.counterOpen(_message);
         (result === common.not_valid).should.true();
     });
 });
