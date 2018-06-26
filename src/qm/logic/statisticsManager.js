@@ -347,17 +347,14 @@ function getBranchStatisticsData(BranchID)
         return undefined;
     }
 }
-//Get single statistics
-var GetSpecificStatistics = function (FilterStatistics) {
-    try {
+
+//calculate the Statistics
+function calculateBranchStatistics(statistics,FilterStatistics)
+{
+    try{
         let TotalStatistics = new statisticsData();
-        if (!FilterStatistics || FilterStatistics.branch_ID <= 0) {
-            return undefined;
-        }
-        //search from branch
-        let t_branches_statisticsData = getBranchStatisticsData(FilterStatistics.branch_ID);
-        if (t_branches_statisticsData && t_branches_statisticsData.statistics) {
-            let statistics = t_branches_statisticsData.statistics;
+        if (statistics)
+        {
             for (let i = 0; i < statistics.length; i++) {
                 let tStatistics = statistics[i];
                 let Addit = true;
@@ -380,6 +377,25 @@ var GetSpecificStatistics = function (FilterStatistics) {
                     SumStatistics(TotalStatistics, tStatistics);
                 }
             }
+        }
+        return TotalStatistics;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
+
+//Get single statistics
+var GetSpecificStatistics = function (FilterStatistics) {
+    try {
+        if (!FilterStatistics || FilterStatistics.branch_ID <= 0) {
+            return undefined;
+        }
+        //search from branch
+        let t_branches_statisticsData = getBranchStatisticsData(FilterStatistics.branch_ID);
+        if (t_branches_statisticsData) {
+            let TotalStatistics = calculateBranchStatistics(t_branches_statisticsData.statistics,FilterStatistics);
             return TotalStatistics;
         }
     }
