@@ -80,26 +80,23 @@ var addService = function (message) {
         let CounterID = counterInfo["counterid"];
         let ServiceID = counterInfo["serviceid"];
         let LanguageIndex = counterInfo["languageindex"];
-        let Transactions = [];
+        let ModifiedTransactions = [];
         let CountersInfo = [];
         let payload = new responsePayload();
 
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
-            result = transactionManager.addService(errors, OrgID, BranchID, CounterID, ServiceID, Transactions);
+            result = transactionManager.addService(errors, OrgID, BranchID, CounterID, ServiceID, ModifiedTransactions);
             if (result == common.success) {
                 //set the state to ready or serving
                 result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
                 if (result == common.success) {
-                    if (Transactions && Transactions.length > 0) {
-                        payload.transactionsInfo.push(Transactions[0]);
-                        payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                        payload.countersInfo.push(CountersInfo[0]);
+                    if (ModifiedTransactions && ModifiedTransactions.length > 0) {
+                        payload.transactionsInfo.push(ModifiedTransactions[0]);
+                        payload.transactionsInfo.push(ModifiedTransactions[ModifiedTransactions.length - 1]);
                     }
-                    else {
-                        payload.countersInfo.push(CountersInfo[0]);
-                    }
+                    payload.countersInfo.push(CountersInfo[0]);
                 }
             }
         }
@@ -144,11 +141,8 @@ var counterBreak = async function (message) {
                 if (result == common.success) {
                     if (FinishedTransaction && FinishedTransaction.length > 0) {
                         payload.transactionsInfo.push(FinishedTransaction[FinishedTransaction.length - 1]);
-                        payload.countersInfo.push(CountersInfo[0]);
                     }
-                    else {
-                        payload.countersInfo.push(CountersInfo[0]);
-                    }
+                    payload.countersInfo.push(CountersInfo[0]);
                 }
             }
         }
@@ -199,11 +193,8 @@ var counterServeCustomer = async function (message) {
                         if (Transactions && Transactions.length > 0) {
                             payload.transactionsInfo.push(Transactions[0]);
                             payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                            payload.countersInfo.push(CountersInfo[0]);
                         }
-                        else {
-                            payload.countersInfo.push(CountersInfo[0]);
-                        }
+                        payload.countersInfo.push(CountersInfo[0]);
                     }
                 }
             }
@@ -256,11 +247,8 @@ var counterHoldCustomer = async function (message) {
                     if (result == common.success) {
                         if (Transactions && Transactions.length > 0) {
                             payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                            payload.countersInfo.push(CountersInfo[0]);
                         }
-                        else {
-                            payload.countersInfo.push(CountersInfo[0]);
-                        }
+                        payload.countersInfo.push(CountersInfo[0]);
                     }
                 }
             }
@@ -310,11 +298,8 @@ var counterNext = async function (message) {
                         if (Transactions && Transactions.length > 0) {
                             payload.transactionsInfo.push(Transactions[0]);
                             payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                            payload.countersInfo.push(CountersInfo[0]);
                         }
-                        else {
-                            payload.countersInfo.push(CountersInfo[0]);
-                        }
+                        payload.countersInfo.push(CountersInfo[0]);
                     }
                 }
             }
