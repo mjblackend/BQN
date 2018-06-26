@@ -70,14 +70,11 @@ function UpdateWaitingStatistics(UpdateType, t_Statistics, transaction, ServiceC
     }
 }
 
-var CreateNewstatistics = function (transaction) {
-    try {
-        let ServiceConfig = configurationService.getServiceConfigFromService(transaction.service_ID);
 
-        let Statistics = new statisticsData();
-        Statistics.StatisticsDate = Date.now();
-
-        //Attributes
+function prepareNewStatistics(transaction) {
+    let Statistics = new statisticsData();
+    Statistics.StatisticsDate = Date.now();
+    if (transaction) {
         Statistics.ID = generateID(transaction);
         Statistics.branch_ID = transaction.branch_ID;
         Statistics.segment_ID = transaction.segment_ID;
@@ -85,8 +82,15 @@ var CreateNewstatistics = function (transaction) {
         Statistics.counter_ID = transaction.counter_ID;
         Statistics.user_ID = transaction.user_ID;
         Statistics.service_ID = transaction.service_ID;
+    }
+    return Statistics;
+}
+var CreateNewstatistics = function (transaction) {
+    try {
+        let ServiceConfig = configurationService.getServiceConfigFromService(transaction.service_ID);
 
-
+        //
+        let Statistics = prepareNewStatistics(transaction);
 
         //Waiting Customer
         UpdateWaitingCustomers(UpdateTypes.Add, Statistics, transaction);
@@ -231,6 +235,48 @@ var AddOrUpdateTransaction = function (transaction) {
         return undefined;
     }
 };
+async function initializeStatisticsFromTransactions(transactionsData) {
+    try {
+        if (transactionsData) {
+            for (let i = 0; i < transactionsData.length; i++) {
+                let transaction = transactionsData[i];
+                let BranchID = transaction.branch_ID;
+                let Statistics_ID = generateID(transaction);
+
+                //Add it to statistics collection
+                let branch_statistics = getBranchStatisticsData(BranchID);
+                if (branch_statistics) {
+                    //if the branch exists
+                    t_Statistics = branch_statistics.statistics.find(function (value) {
+                        return value.ID == Statistics_ID;
+                    });
+                    if (t_Statistics) {
+                        UpdateStatistics(UpdateTypes.Add, t_Statistics, transaction);
+                    }
+                    else {
+                        t_Statistics = CreateNewstatistics(transaction);
+                        branch_statistics.statistics.push(t_Statistics);
+                    }
+                }
+                else {
+                    //If the branch not exists
+                    let t_branchStatistics = new branchStatisticsData();
+                    //Create branch statistics
+                    t_branchStatistics.branch_ID = BranchID;
+                    //Create statistics
+                    let t_Statistics = CreateNewstatistics(transaction);
+                    //Add to herarichy
+                    t_branchStatistics.statistics.push(t_Statistics);
+                    branches_statisticsData.push(t_branchStatistics);
+                }
+            }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+};
+
 
 //Load for all branches statistics
 var initialize = async function () {
@@ -250,40 +296,7 @@ var initialize = async function () {
             }
             );
 
-            if (transactionsData) {
-                for (let i = 0; i < transactionsData.length; i++) {
-                    let transaction = transactionsData[i];
-                    let BranchID = transaction.branch_ID;
-                    let Statistics_ID = generateID(transaction);
-
-                    //Add it to statistics collection
-                    let branch_statistics = getBranchStatisticsData(BranchID);
-                    if (branch_statistics) {
-                        //if the branch exists
-                        t_Statistics = branch_statistics.statistics.find(function (value) {
-                            return value.ID == Statistics_ID;
-                        });
-                        if (t_Statistics) {
-                            UpdateStatistics(UpdateTypes.Add, t_Statistics, transaction);
-                        }
-                        else {
-                            t_Statistics = CreateNewstatistics(transaction);
-                            branch_statistics.statistics.push(t_Statistics);
-                        }
-                    }
-                    else {
-                        //If the branch not exists
-                        let t_branchStatistics = new branchStatisticsData();
-                        //Create branch statistics
-                        t_branchStatistics.branch_ID = BranchID;
-                        //Create statistics
-                        let t_Statistics = CreateNewstatistics(transaction);
-                        //Add to herarichy
-                        t_branchStatistics.statistics.push(t_Statistics);
-                        branches_statisticsData.push(t_branchStatistics);
-                    }
-                }
-            }
+            await initializeStatisticsFromTransactions(transactionsData);
         }
         await repositoriesManager.entitiesRepo.clearEntities();
         return common.success;
@@ -334,9 +347,8 @@ function SumStatistics(TotalStatistics, ToBeAddedStatistics) {
         return common.error;
     }
 }
-function getBranchStatisticsData(BranchID)
-{
-    try{
+function getBranchStatisticsData(BranchID) {
+    try {
         let t_branches_statisticsData = branches_statisticsData.find(function (value) {
             return value.branch_ID == BranchID;
         });
@@ -349,30 +361,19 @@ function getBranchStatisticsData(BranchID)
 }
 
 //calculate the Statistics
-function calculateBranchStatistics(statistics,FilterStatistics)
-{
-    try{
+function calculateBranchStatistics(statistics, FilterStatistics) {
+    try {
         let TotalStatistics = new statisticsData();
-        if (statistics)
-        {
+        if (statistics) {
             for (let i = 0; i < statistics.length; i++) {
                 let tStatistics = statistics[i];
                 let Addit = true;
-                if (FilterStatistics.segment_ID > 0 && (FilterStatistics.segment_ID != tStatistics.segment_ID)) {
-                    Addit = false;
-                }
-                if (FilterStatistics.service_ID > 0 && (FilterStatistics.service_ID != tStatistics.service_ID)) {
-                    Addit = false;
-                }
-                if (FilterStatistics.counter_ID > 0 && (FilterStatistics.counter_ID != tStatistics.counter_ID)) {
-                    Addit = false;
-                }
-                if (FilterStatistics.hall_ID > 0 && (FilterStatistics.hall_ID != tStatistics.hall_ID)) {
-                    Addit = false;
-                }
-                if (FilterStatistics.user_ID > 0 && (FilterStatistics.user_ID != tStatistics.user_ID)) {
-                    Addit = false;
-                }
+                //Check the filters
+                Addit = (FilterStatistics.segment_ID > 0 && (FilterStatistics.segment_ID != tStatistics.segment_ID)) ? false: Addit;
+                Addit = (FilterStatistics.service_ID > 0 && (FilterStatistics.service_ID != tStatistics.service_ID)) ? false: Addit;
+                Addit = (FilterStatistics.counter_ID > 0 && (FilterStatistics.counter_ID != tStatistics.counter_ID)) ? false: Addit;
+                Addit = (FilterStatistics.hall_ID > 0 && (FilterStatistics.hall_ID != tStatistics.hall_ID)) ? false: Addit;
+                Addit = (FilterStatistics.user_ID > 0 && (FilterStatistics.user_ID != tStatistics.user_ID)) ? false: Addit;
                 if (Addit) {
                     SumStatistics(TotalStatistics, tStatistics);
                 }
@@ -395,14 +396,14 @@ var GetSpecificStatistics = function (FilterStatistics) {
         //search from branch
         let t_branches_statisticsData = getBranchStatisticsData(FilterStatistics.branch_ID);
         if (t_branches_statisticsData) {
-            let TotalStatistics = calculateBranchStatistics(t_branches_statisticsData.statistics,FilterStatistics);
+            let TotalStatistics = calculateBranchStatistics(t_branches_statisticsData.statistics, FilterStatistics);
             return TotalStatistics;
         }
     }
     catch (error) {
-    logger.logError(error);
-    return undefined;
-}
+        logger.logError(error);
+        return undefined;
+    }
 
 };
 
