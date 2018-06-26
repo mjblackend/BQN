@@ -336,8 +336,6 @@ var processCommand = async function (message) {
                     result = await this.counterOpen(message);break;
                 case enums.commands.AddService:
                     result = await this.addService(message);break;
-                default:
-                    result = common.error;
             }
         }
         return result;
