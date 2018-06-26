@@ -316,9 +316,6 @@ var counterDeassignFromBMS = function (appointmentInfo) {
     return true;
 };
 
-
-
-
 //Deassign Counter from BMS
 var processCommand = async function (message) {
     try {
@@ -326,30 +323,22 @@ var processCommand = async function (message) {
         if (message) {
             switch (message.topicName) {
                 case enums.commands.IssueTicket:
-                    result = await this.issueTicket(message);
-                    break;
+                    result = await this.issueTicket(message); break;
                 case enums.commands.Next:
-                    result = await this.counterNext(message);
-                    break;
+                    result = await this.counterNext(message);break;
                 case enums.commands.Hold:
-                    result = await this.counterHoldCustomer(message);
-                    break;
+                    result = await this.counterHoldCustomer(message);break;
                 case enums.commands.ServeCustomer:
-                    result = await this.counterServeCustomer(message);
-                    break;
+                    result = await this.counterServeCustomer(message);break;
                 case enums.commands.Break:
-                    result = await this.counterBreak(message);
-                    break;
+                    result = await this.counterBreak(message);break;
                 case enums.commands.Open:
-                    result = await this.counterOpen(message);
-                    break;
+                    result = await this.counterOpen(message);break;
                 case enums.commands.AddService:
-                    result = await this.addService(message);
-                    break;
+                    result = await this.addService(message);break;
                 default:
                     result = common.error;
             }
-
         }
         return result;
     }
