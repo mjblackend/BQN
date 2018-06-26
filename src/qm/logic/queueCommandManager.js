@@ -12,6 +12,7 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("./statisticsManager");
 var responsePayload = require("../messagePayload/responsePayload");
 var requestPayload = require("../messagePayload/requestPayload");
+var dataPayloadManager = require("../messagePayload/dataPayloadManager");
 var initialized = false;
 
 
@@ -25,50 +26,14 @@ var FinishingCommand = async function (BranchID) {
         return common.error;
     }
 };
-function setResponsePayload(message,result,errors,transactionsInfo,countersInfo,statisticsInfo)
-{
-    try{
-        let payload = new responsePayload();
-        payload.transactionsInfo=transactionsInfo;
-        payload.countersInfo = countersInfo ;
-        payload.statisticsInfo = statisticsInfo ;
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload=payload;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
-function getQSRequestObject(MessagePayload) {
-    try {
-        let t_requestPayload = new requestPayload();
-        t_requestPayload.branchid = MessagePayload["branchid"];
-        t_requestPayload.segmentid = MessagePayload["segmentid"];
-        t_requestPayload.serviceid = MessagePayload["serviceid"];
-        t_requestPayload.counterid = MessagePayload["counterid"];
-        t_requestPayload.languageindex = MessagePayload["languageindex"];
-        t_requestPayload.origin = MessagePayload["origin"];
-        t_requestPayload.orgid = MessagePayload["orgid"];
-        t_requestPayload.transactionid = MessagePayload["transactionid"];
-        t_requestPayload.holdreasonid = MessagePayload["holdreasonid"];
-        return t_requestPayload;
-    }
-    catch (error) {
-        logger.logError(error);
-        return undefined;
-    }
-}
+
 //only functions and reference of branch data and configuration service.
 //Issue Ticket 
 var issueTicket = async function (message) {
     try {
         let result;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let transactioninst = new transaction();
         transactioninst.org_ID = requestPayload.orgid;
         transactioninst.branch_ID = requestPayload.branchid;
@@ -79,7 +44,7 @@ var issueTicket = async function (message) {
         let payload = new responsePayload();
         payload.transactionsInfo.push(transactioninst);
         //Perpare the response
-        setResponsePayload(message,result,errors,[transactioninst],[],[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,[transactioninst],[],[]);
         await FinishingCommand(requestPayload.branchid);
         return result;
     }
@@ -100,7 +65,7 @@ var addService = function (message) {
     try {
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let ServiceID = requestPayload.serviceid;
@@ -117,7 +82,7 @@ var addService = function (message) {
             }
         }
         //Perpare the response
-        setResponsePayload(message,result,errors,ModifiedTransactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,ModifiedTransactions,CountersInfo,[]);
         return result;
     }
     catch (error) {
@@ -132,7 +97,7 @@ var counterBreak = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let CounterID = requestPayload.counterid;
@@ -150,7 +115,7 @@ var counterBreak = async function (message) {
         }
 
         //Perpare the response
-        setResponsePayload(message,result,errors,FinishedTransaction,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,FinishedTransaction,CountersInfo,[]);
         await FinishingCommand(BranchID);
         return result;
     }
@@ -164,7 +129,7 @@ var counterServeCustomer = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let CounterID = requestPayload.counterid;
@@ -187,7 +152,7 @@ var counterServeCustomer = async function (message) {
         }
 
         //Perpare the response
-        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -204,7 +169,7 @@ var counterHoldCustomer = async function (message) {
         let counterInfo = message.payload;
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let CounterID = requestPayload.counterid;
@@ -227,7 +192,7 @@ var counterHoldCustomer = async function (message) {
         }
 
         //Perpare the response
-        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -244,7 +209,7 @@ var counterNext = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let CounterID = requestPayload.counterid;
@@ -266,7 +231,7 @@ var counterNext = async function (message) {
         }
 
         //Perpare the response
-        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -283,7 +248,7 @@ var counterOpen = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let requestPayload = getQSRequestObject(message.payload);
+        let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
         let OrgID = requestPayload.orgid;
         let BranchID = requestPayload.branchid;
         let CounterID = requestPayload.counterid;
@@ -296,7 +261,7 @@ var counterOpen = async function (message) {
         }
 
         //Perpare the response
-        setResponsePayload(message,result,errors,[],CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message,result,errors,[],CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -419,11 +384,9 @@ var processCommand = async function (message) {
                 default:
                     result = common.error;
             }
-            return result;
+
         }
-        else {
-            return result;
-        }
+        return result;
     }
     catch (error) {
         logger.logError(error);
@@ -466,9 +429,6 @@ module.exports.counterBreak = counterBreak;
 module.exports.counterServeCustomer = counterServeCustomer;
 module.exports.counterHoldCustomer = counterHoldCustomer;
 module.exports.addService = addService;
-
-
-
 module.exports.issueTicketMulti = issueTicketMulti;
 module.exports.counterTransferToCounter = counterTransferToCounter;
 module.exports.counterTransferToService = counterTransferToService;
