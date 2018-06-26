@@ -36,15 +36,12 @@ var GetFilterColumnsFromObject = function (filterKeys, filterValues) {
             if (Array.isArray(filterValues[i])) {
                 let values = filterValues[i].join(",");
                 filter = filter + filterKeys[i] + " in (" + values + ") ";
-                if (i != (filterKeys.length - 1)) {
-                    filter = filter + " and ";
-                }
             }
             else {
                 filter = filter + filterKeys[i] + " = " + filterValues[i];
-                if (i != (filterKeys.length - 1)) {
-                    filter = filter + " and ";
-                }
+            }
+            if (i != (filterKeys.length - 1)) {
+                filter = filter + " and ";
             }
         }
         return filter;
