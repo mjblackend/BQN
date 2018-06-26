@@ -11,6 +11,7 @@ var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("./statisticsManager");
 var responsePayload = require("../messagePayload/responsePayload");
+var requestPayload = require("../messagePayload/requestPayload");
 var initialized = false;
 
 
@@ -25,26 +26,37 @@ var FinishingCommand = async function (BranchID) {
     }
 };
 
-
+function getQSRequestObject(MessagePayload) {
+    try {
+        let t_requestPayload = new requestPayload();
+        t_requestPayload.branchid = MessagePayload["branchid"];
+        t_requestPayload.segmentid = MessagePayload["segmentid"];
+        t_requestPayload.serviceid = MessagePayload["serviceid"];
+        t_requestPayload.counterid = MessagePayload["counterid"];
+        t_requestPayload.languageindex = MessagePayload["languageindex"];
+        t_requestPayload.origin = MessagePayload["origin"];
+        t_requestPayload.orgid = MessagePayload["orgid"];
+        t_requestPayload.transactionid = MessagePayload["transactionid"];
+        t_requestPayload.holdreasonid = MessagePayload["holdreasonid"];
+        return t_requestPayload;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
 //only functions and reference of branch data and configuration service.
 //Issue Ticket 
 var issueTicket = async function (message) {
     try {
         let result;
         let errors = [];
-        let ticketInfo = message.payload;
-        let BranchID = ticketInfo["branchid"];
-        let SegmentID = ticketInfo["segmentid"];
-        let ServiceID = ticketInfo["serviceid"];
-        let LanguageIndex = ticketInfo["languageindex"];
-        let Origin = ticketInfo["origin"];
-        let OrgID = ticketInfo["orgid"];
-
+        let requestPayload = getQSRequestObject(message.payload);
         let transactioninst = new transaction();
-        transactioninst.org_ID = OrgID;
-        transactioninst.branch_ID = BranchID;
-        transactioninst.service_ID = ServiceID;
-        transactioninst.segment_ID = SegmentID;
+        transactioninst.org_ID = requestPayload.orgid;
+        transactioninst.branch_ID = requestPayload.branchid;
+        transactioninst.service_ID = requestPayload.serviceid;
+        transactioninst.segment_ID = requestPayload.segmentid;
 
         result = transactionManager.issueSingleTicket(errors, transactioninst);
         let payload = new responsePayload();
@@ -54,7 +66,7 @@ var issueTicket = async function (message) {
             payload.errorCode = errors.join(",");
         }
         message.payload = payload;
-        await FinishingCommand(BranchID);
+        await FinishingCommand(requestPayload.branchid);
         return result;
     }
     catch (error) {
@@ -74,12 +86,11 @@ var addService = function (message) {
     try {
         let result = common.error;
         let errors = [];
-        let counterInfo = message.payload;
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        let ServiceID = counterInfo["serviceid"];
-        let LanguageIndex = counterInfo["languageindex"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let ServiceID = requestPayload.serviceid;
+        let CounterID = requestPayload.counterid;
         let ModifiedTransactions = [];
         let CountersInfo = [];
         let payload = new responsePayload();
@@ -115,19 +126,16 @@ var addService = function (message) {
     }
 };
 
-
-
 //break customer from counter
 var counterBreak = async function (message) {
     try {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let counterInfo = message.payload;
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        //let LanguageIndex = counterInfo["languageindex"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let CounterID = requestPayload.counterid;
         let FinishedTransaction = [];
         let CountersInfo = [];
         //Check Current State if allow break
@@ -165,15 +173,13 @@ var counterServeCustomer = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let counterInfo = message.payload;
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        //let LanguageIndex = counterInfo["languageindex"];
-        let TransactionID = counterInfo["transactionid"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let CounterID = requestPayload.counterid;
+        let TransactionID = requestPayload.transactionid;
         let Transactions = [];
         let CountersInfo = [];
-
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForServe(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
@@ -218,11 +224,11 @@ var counterHoldCustomer = async function (message) {
         let counterInfo = message.payload;
         let result = common.error;
         let errors = [];
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        //let LanguageIndex = counterInfo["languageindex"];
-        let holdreasonid = counterInfo["holdreasonid"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let CounterID = requestPayload.counterid;
+        let holdreasonid = requestPayload.holdreasonid;
         let Transactions = [];
         let CountersInfo = [];
         //Check Current State if allow hold
@@ -268,11 +274,10 @@ var counterNext = async function (message) {
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let counterInfo = message.payload;
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        //let LanguageIndex = counterInfo["languageindex"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let CounterID = requestPayload.counterid;
         let Transactions = [];
         let CountersInfo = [];
         //Check Current State if allow next
@@ -316,14 +321,13 @@ var counterNext = async function (message) {
 //Open counter without calling customer
 var counterOpen = async function (message) {
     try {
-        let counterInfo = message.payload;
         let payload = new responsePayload();
         let result = common.error;
         let errors = [];
-        let OrgID = counterInfo["orgid"];
-        let BranchID = counterInfo["branchid"];
-        let CounterID = counterInfo["counterid"];
-        //let LanguageIndex = counterInfo["languageindex"];
+        let requestPayload = getQSRequestObject(message.payload);
+        let OrgID = requestPayload.orgid;
+        let BranchID = requestPayload.branchid;
+        let CounterID = requestPayload.counterid;
         let CountersInfo = [];
         //Check Current State if allow break
         result = userActivityManager.CounterValidationForOpen(errors, OrgID, BranchID, CounterID);
