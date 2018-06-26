@@ -360,6 +360,18 @@ function getBranchStatisticsData(BranchID) {
     }
 }
 
+function shouldStatisticAdded(tStatistics,FilterStatistics)
+{
+    let Addit = true;
+    //Check the filters
+    Addit = (FilterStatistics.segment_ID > 0 && (FilterStatistics.segment_ID != tStatistics.segment_ID)) ? false: Addit;
+    Addit = (FilterStatistics.service_ID > 0 && (FilterStatistics.service_ID != tStatistics.service_ID)) ? false: Addit;
+    Addit = (FilterStatistics.counter_ID > 0 && (FilterStatistics.counter_ID != tStatistics.counter_ID)) ? false: Addit;
+    Addit = (FilterStatistics.hall_ID > 0 && (FilterStatistics.hall_ID != tStatistics.hall_ID)) ? false: Addit;
+    Addit = (FilterStatistics.user_ID > 0 && (FilterStatistics.user_ID != tStatistics.user_ID)) ? false: Addit;
+    return Addit;
+}
+
 //calculate the Statistics
 function calculateBranchStatistics(statistics, FilterStatistics) {
     try {
@@ -367,14 +379,7 @@ function calculateBranchStatistics(statistics, FilterStatistics) {
         if (statistics) {
             for (let i = 0; i < statistics.length; i++) {
                 let tStatistics = statistics[i];
-                let Addit = true;
-                //Check the filters
-                Addit = (FilterStatistics.segment_ID > 0 && (FilterStatistics.segment_ID != tStatistics.segment_ID)) ? false: Addit;
-                Addit = (FilterStatistics.service_ID > 0 && (FilterStatistics.service_ID != tStatistics.service_ID)) ? false: Addit;
-                Addit = (FilterStatistics.counter_ID > 0 && (FilterStatistics.counter_ID != tStatistics.counter_ID)) ? false: Addit;
-                Addit = (FilterStatistics.hall_ID > 0 && (FilterStatistics.hall_ID != tStatistics.hall_ID)) ? false: Addit;
-                Addit = (FilterStatistics.user_ID > 0 && (FilterStatistics.user_ID != tStatistics.user_ID)) ? false: Addit;
-                if (Addit) {
+                if (shouldStatisticAdded(tStatistics,FilterStatistics)) {
                     SumStatistics(TotalStatistics, tStatistics);
                 }
             }
