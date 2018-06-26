@@ -180,10 +180,6 @@ var counterServeCustomer = async function (message) {
             //Finish serving the current customer
             result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions);
             if (result == common.success) {
-                if (Transactions && Transactions.length > 0) {
-                    counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
-                }
-                Transactions = [];
                 //Get next customer
                 result = transactionManager.serveCustomer(errors, OrgID, BranchID, CounterID, TransactionID, Transactions);
                 if (result == common.success) {
@@ -235,10 +231,6 @@ var counterHoldCustomer = async function (message) {
             //Hold Current Customer
             result = transactionManager.holdCurrentCustomer(errors, OrgID, BranchID, CounterID, holdreasonid, Transactions);
             if (result == common.success) {
-                if (Transactions && Transactions.length > 0) {
-                    counterInfo.ServedDisplayTicketNumber = Transactions[Transactions.length - 1].displayTicketNumber;
-                }
-                Transactions = [];
                 //Get next customer
                 result = transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions);
                 if (result == common.success) {
@@ -246,6 +238,7 @@ var counterHoldCustomer = async function (message) {
                     result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
                     if (result == common.success) {
                         if (Transactions && Transactions.length > 0) {
+                            payload.transactionsInfo.push(Transactions[0]);
                             payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
                         }
                         payload.countersInfo.push(CountersInfo[0]);
@@ -282,7 +275,6 @@ var counterNext = async function (message) {
         //let LanguageIndex = counterInfo["languageindex"];
         let Transactions = [];
         let CountersInfo = [];
-        counterInfo.ServedDisplayTicketNumber = "...";
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
