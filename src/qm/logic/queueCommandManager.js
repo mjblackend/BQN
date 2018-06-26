@@ -10,8 +10,6 @@ var userActivityManager = require("../logic/userActivityManager");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("./statisticsManager");
-var responsePayload = require("../messagePayload/responsePayload");
-var requestPayload = require("../messagePayload/requestPayload");
 var dataPayloadManager = require("../messagePayload/dataPayloadManager");
 var initialized = false;
 
@@ -41,10 +39,8 @@ var issueTicket = async function (message) {
         transactioninst.segment_ID = requestPayload.segmentid;
 
         result = transactionManager.issueSingleTicket(errors, transactioninst);
-        let payload = new responsePayload();
-        payload.transactionsInfo.push(transactioninst);
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,[transactioninst],[],[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, [transactioninst], [], []);
         await FinishingCommand(requestPayload.branchid);
         return result;
     }
@@ -74,15 +70,15 @@ var addService = function (message) {
         let CountersInfo = [];
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
-        if (result == common.success) {
-            result = transactionManager.addService(errors, OrgID, BranchID, CounterID, ServiceID, ModifiedTransactions);
-            if (result == common.success) {
-                //set the state to ready or serving
-                result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-            }
-        }
+
+        //Add service
+        result = (result == common.success) ? transactionManager.addService(errors, OrgID, BranchID, CounterID, ServiceID, ModifiedTransactions) : result;
+
+        //set the state to ready or serving
+        result = (result == common.success) ? userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo) : result;
+
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,ModifiedTransactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, ModifiedTransactions, CountersInfo, []);
         return result;
     }
     catch (error) {
@@ -94,7 +90,6 @@ var addService = function (message) {
 //break customer from counter
 var counterBreak = async function (message) {
     try {
-        let payload = new responsePayload();
         let result = common.error;
         let errors = [];
         let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
@@ -105,17 +100,12 @@ var counterBreak = async function (message) {
         let CountersInfo = [];
         //Check Current State if allow break
         result = userActivityManager.CounterValidationForBreak(errors, OrgID, BranchID, CounterID);
-        if (result == common.success) {
-            //Finish serving the current customer
-            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, FinishedTransaction);
-            if (result == common.success) {
-                //set the state to break
-                result = userActivityManager.ChangeCurrentCounterStateForBreak(errors, OrgID, BranchID, CounterID, CountersInfo);
-            }
-        }
-
+        //Finish serving the current customer
+        result = (result == common.success) ? transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, FinishedTransaction) : result;
+        //set the state to break
+        result = (result == common.success) ? userActivityManager.ChangeCurrentCounterStateForBreak(errors, OrgID, BranchID, CounterID, CountersInfo) : result;
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,FinishedTransaction,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, FinishedTransaction, CountersInfo, []);
         await FinishingCommand(BranchID);
         return result;
     }
@@ -126,7 +116,6 @@ var counterBreak = async function (message) {
 };
 var counterServeCustomer = async function (message) {
     try {
-        let payload = new responsePayload();
         let result = common.error;
         let errors = [];
         let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
@@ -138,21 +127,15 @@ var counterServeCustomer = async function (message) {
         let CountersInfo = [];
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForServe(errors, OrgID, BranchID, CounterID);
-        if (result == common.success) {
-            //Finish serving the current customer
-            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions);
-            if (result == common.success) {
-                //Get next customer
-                result = transactionManager.serveCustomer(errors, OrgID, BranchID, CounterID, TransactionID, Transactions);
-                if (result == common.success) {
-                    //set the state to ready or serving
-                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                }
-            }
-        }
+        //Finish serving the current customer
+        result = (result == common.success) ? transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions) : result;
+        //Get next customer
+        result = (result == common.success) ? transactionManager.serveCustomer(errors, OrgID, BranchID, CounterID, TransactionID, Transactions) : result;
+        //set the state to ready or serving
+        result = (result == common.success) ? userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo) : result;
 
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, Transactions, CountersInfo, []);
 
         await FinishingCommand(BranchID);
         return result;
@@ -165,8 +148,6 @@ var counterServeCustomer = async function (message) {
 
 var counterHoldCustomer = async function (message) {
     try {
-        let payload = new responsePayload();
-        let counterInfo = message.payload;
         let result = common.error;
         let errors = [];
         let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
@@ -178,21 +159,14 @@ var counterHoldCustomer = async function (message) {
         let CountersInfo = [];
         //Check Current State if allow hold
         result = userActivityManager.CounterValidationForHold(errors, OrgID, BranchID, CounterID);
-        if (result == common.success) {
-            //Hold Current Customer
-            result = transactionManager.holdCurrentCustomer(errors, OrgID, BranchID, CounterID, holdreasonid, Transactions);
-            if (result == common.success) {
-                //Get next customer
-                result = transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions);
-                if (result == common.success) {
-                    //Change the status (Ready or Serving depending on next customer)
-                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                }
-            }
-        }
-
+        //Hold Current Customer
+        result = (result == common.success) ? transactionManager.holdCurrentCustomer(errors, OrgID, BranchID, CounterID, holdreasonid, Transactions) : result;
+        //Get next customer
+        result = (result == common.success) ? transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions) : result;
+        //Change the status (Ready or Serving depending on next customer)
+        result = (result == common.success) ? userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo) : result;
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, Transactions, CountersInfo, []);
 
         await FinishingCommand(BranchID);
         return result;
@@ -206,7 +180,6 @@ var counterHoldCustomer = async function (message) {
 //Take break on counter
 var counterNext = async function (message) {
     try {
-        let payload = new responsePayload();
         let result = common.error;
         let errors = [];
         let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
@@ -217,21 +190,14 @@ var counterNext = async function (message) {
         let CountersInfo = [];
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
-        if (result == common.success) {
-            //Finish serving the current customer
-            result = transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions);
-            if (result == common.success) {
-                //Get next customer
-                result = transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions);
-                if (result == common.success) {
-                    //set the state to ready or serving
-                    result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                }
-            }
-        }
-
+        //Finish serving the current customer
+        result = (result == common.success) ? transactionManager.finishCurrentCustomer(errors, OrgID, BranchID, CounterID, Transactions) : result;
+        //Get next customer
+        result = (result == common.success) ? transactionManager.getNextCustomer(errors, OrgID, BranchID, CounterID, Transactions) : result;
+        //set the state to ready or serving
+        result = (result == common.success) ? userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo) : result;
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, Transactions, CountersInfo, []);
 
         await FinishingCommand(BranchID);
         return result;
@@ -245,7 +211,6 @@ var counterNext = async function (message) {
 //Open counter without calling customer
 var counterOpen = async function (message) {
     try {
-        let payload = new responsePayload();
         let result = common.error;
         let errors = [];
         let requestPayload = dataPayloadManager.getQSRequestObject(message.payload);
@@ -261,7 +226,7 @@ var counterOpen = async function (message) {
         }
 
         //Perpare the response
-        dataPayloadManager.setResponsePayload(message,result,errors,[],CountersInfo,[]);
+        dataPayloadManager.setResponsePayload(message, result, errors, [], CountersInfo, []);
 
         await FinishingCommand(BranchID);
         return result;
