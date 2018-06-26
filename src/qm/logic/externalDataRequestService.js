@@ -5,11 +5,13 @@ var enums = require("../../common/enums");
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
 var statisticsManager = require("./statisticsManager");
-
+var responsePayload = require("../messagePayload/responsePayload");
 
 //Get counter status (current ticket and state)
-function getCounterStatus(counterInfo) {
+function getCounterStatus(message) {
     try {
+
+        var counterInfo =  message.payload;
         let result = common.success;
         let errors = [];
         let OrgID = counterInfo["orgid"];
@@ -26,15 +28,16 @@ function getCounterStatus(counterInfo) {
         CounterData = output[1];
         CurrentActivity = output[2];
         CurrentTransaction = output[3];
-        if (CurrentTransaction) {
-            counterInfo.CurrentDisplayTicketNumber = CurrentTransaction.displayTicketNumber;
+
+
+        let payload = new responsePayload();
+        payload.result = result;
+        payload.transactionsInfo.push(CurrentTransaction);
+        payload.countersInfo.push(CurrentActivity);
+        if (payload.result != common.success) {
+            payload.errorCode = errors.join(",");
         }
-        else {
-            counterInfo.CurrentDisplayTicketNumber = "...";
-        }
-        if (CurrentActivity) {
-            counterInfo.CurrentStateType = CurrentActivity.type;
-        }
+        message.payload=payload;
         return result;
     }
     catch (error) {
@@ -63,22 +66,22 @@ function ReadBranchStatistics(apiMessagePayload) {
     return statisticsManager.ReadBranchStatistics(apiMessagePayload);
 };
 
-var getData = async function (apiMessage) {
+var getData = async function (message) {
     try {
         let result = common.error;
-        if (apiMessage) {
-            switch (apiMessage.topicName) {
+        if (message) {
+            switch (message.topicName) {
                 case enums.commands.Read:
-                    result = await Read(apiMessage.payload);
+                    result = await Read(message.payload);
                     break;
                 case enums.commands.GetHeldCustomers:
-                    result = await getHeldCustomers(apiMessage.payload);
+                    result = await getHeldCustomers(message.payload);
                     break;
                 case enums.commands.ReadBranchStatistics:
-                    result = await ReadBranchStatistics(apiMessage.payload);
+                    result = await ReadBranchStatistics(message.payload);
                     break;
                 case enums.commands.GetCounterStatus:
-                    result = await getCounterStatus(apiMessage.payload);
+                    result = await getCounterStatus(message);
                     break;
                 default:
                     result = common.error;

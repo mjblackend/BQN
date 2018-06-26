@@ -11,17 +11,17 @@ var notificationHub=require('../notificationHub');
 router.post('/processCommand', async function (req, res, next) {
   try {
 
-    let apiMessage = req.body;
-    await queueCommandManager.processCommand(apiMessage);
+    let message = req.body;
+    await queueCommandManager.processCommand(message);
 
    
-    console.log(apiMessage.payload);
-    if (apiMessage)
+    console.log(message.payload);
+    if (message)
     {
-      notificationHub.broadcastMessage(apiMessage);
+      notificationHub.broadcastMessage(message);
     }    
-    res.body=apiMessage;
-    res.end(JSON.stringify(apiMessage.payload));
+    res.body=message;
+    res.end(JSON.stringify(message));
   }
   catch (error) {
     logger.log(error);
@@ -34,16 +34,16 @@ router.post('/processCommand', async function (req, res, next) {
 
 router.post('/getData', async function (req, res, next) {
   try {
-    let apiMessage = req.body;
-    await externalDataRequestService.getData(apiMessage);
-    console.log(apiMessage.payload);
-    if (apiMessage)
+    let message = req.body;
+    await externalDataRequestService.getData(message);
+    console.log(message.payload);
+    if (message)
     {
-      notificationHub.broadcastMessage(apiMessage);
+      notificationHub.broadcastMessage(message);
     }
     
-    res.body=apiMessage;
-    res.end(JSON.stringify(apiMessage.payload));
+    res.body=message;
+    res.end(JSON.stringify(message));
   }
   catch (error) {
     logger.log(error);

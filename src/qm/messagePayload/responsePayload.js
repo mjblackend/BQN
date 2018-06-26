@@ -1,4 +1,4 @@
-var common = require("../common/common");
+var common = require("../../common/common");
 class messagePayload {
     constructor() {
         this.result = common.error;

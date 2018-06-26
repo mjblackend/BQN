@@ -10,7 +10,7 @@ var userActivityManager = require("../logic/userActivityManager");
 var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var statisticsManager = require("./statisticsManager");
-var responsePayload = require("../../dataMessage/responsePayload");
+var responsePayload = require("../messagePayload/responsePayload");
 var initialized = false;
 
 
@@ -457,31 +457,31 @@ var counterDeassignFromBMS = function (appointmentInfo) {
 
 
 //Deassign Counter from BMS
-var processCommand = async function (apiMessage) {
+var processCommand = async function (message) {
     try {
         let result = common.error;
-        if (apiMessage) {
-            switch (apiMessage.topicName) {
+        if (message) {
+            switch (message.topicName) {
                 case enums.commands.IssueTicket:
-                    result = await this.issueTicket(apiMessage);
+                    result = await this.issueTicket(message);
                     break;
                 case enums.commands.Next:
-                    result = await this.counterNext(apiMessage);
+                    result = await this.counterNext(message);
                     break;
                 case enums.commands.Hold:
-                    result = await this.counterHoldCustomer(apiMessage);
+                    result = await this.counterHoldCustomer(message);
                     break;
                 case enums.commands.ServeCustomer:
-                    result = await this.counterServeCustomer(apiMessage);
+                    result = await this.counterServeCustomer(message);
                     break;
                 case enums.commands.Break:
-                    result = await this.counterBreak(apiMessage);
+                    result = await this.counterBreak(message);
                     break;
                 case enums.commands.Open:
-                    result = await this.counterOpen(apiMessage);
+                    result = await this.counterOpen(message);
                     break;
                 case enums.commands.AddService:
-                    result = await this.addService(apiMessage);
+                    result = await this.addService(message);
                     break;
                 default:
                     result = common.error;
@@ -501,7 +501,7 @@ var processCommand = async function (apiMessage) {
 
 
 //Initialize everything
-var initialize = async function (ticketInfo) {
+var initialize = async function () {
     try {
         if (this.initialized) {
             return common.success;

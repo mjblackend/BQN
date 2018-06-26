@@ -7,7 +7,7 @@ var dataService = require("../data/dataService");
 var transactionManager = require("../logic/transactionManager");
 var userActivityManager = require("../logic/userActivityManager");
 var queueCommandManager = require("./queueCommandManager");
-var message = require("../../dataMessage/responsePayload");
+var message = require("../../dataMessage/message");
 var autoNextID;
 
 
