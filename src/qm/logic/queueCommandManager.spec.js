@@ -56,6 +56,14 @@ var CounterInfo = {
     holdreasonid: "0"
 };
 
+let CounterInfoAddService = {
+    orgid: OrgID,
+    counterid: CounterID,
+    branchid: BranchID,
+    serviceid: ServiceID,
+    languageindex: "0"
+};
+
 
 console.log("queueCommandManager.spec");
 should.toString();
@@ -124,13 +132,7 @@ describe('Queuing Command Manager Test', function () {
     });
 
     it('Add Service to Customer with the same segment allocated (use direct priority) for counter ID = 120', async function () {
-        let CounterInfoAddService = {
-            orgid: OrgID,
-            counterid: CounterID,
-            branchid: BranchID,
-            serviceid: ServiceID2,
-            languageindex: "0"
-        };
+        CounterInfoAddService.serviceid= ServiceID2;
         let _message = new message();
         _message.payload=CounterInfoAddService;
         let result = await queueCommandManager.addService(_message);
@@ -138,13 +140,7 @@ describe('Queuing Command Manager Test', function () {
     });
 
     it('Add Service to Customer without the same segment allocated (use average priority) for counter ID = 120', async function () {
-        let CounterInfoAddService = {
-            orgid: OrgID,
-            counterid: CounterID,
-            branchid: BranchID,
-            serviceid: ServiceID3,
-            languageindex: "0"
-        };
+        CounterInfoAddService.serviceid= ServiceID3;
 
         let _message = new message();
         _message.payload=CounterInfoAddService;
