@@ -25,7 +25,24 @@ var FinishingCommand = async function (BranchID) {
         return common.error;
     }
 };
-
+function setResponsePayload(message,result,errors,transactionsInfo,countersInfo,statisticsInfo)
+{
+    try{
+        let payload = new responsePayload();
+        payload.transactionsInfo=transactionsInfo;
+        payload.countersInfo = countersInfo ;
+        payload.statisticsInfo = statisticsInfo ;
+        payload.result = result;
+        if (payload.result != common.success) {
+            payload.errorCode = errors.join(",");
+        }
+        message.payload=payload;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
 function getQSRequestObject(MessagePayload) {
     try {
         let t_requestPayload = new requestPayload();
@@ -60,12 +77,9 @@ var issueTicket = async function (message) {
 
         result = transactionManager.issueSingleTicket(errors, transactioninst);
         let payload = new responsePayload();
-        payload.result = result;
         payload.transactionsInfo.push(transactioninst);
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        //Perpare the response
+        setResponsePayload(message,result,errors,[transactioninst],[],[]);
         await FinishingCommand(requestPayload.branchid);
         return result;
     }
@@ -93,8 +107,6 @@ var addService = function (message) {
         let CounterID = requestPayload.counterid;
         let ModifiedTransactions = [];
         let CountersInfo = [];
-        let payload = new responsePayload();
-
         //Check Current State if allow next
         result = userActivityManager.CounterValidationForNext(errors, OrgID, BranchID, CounterID);
         if (result == common.success) {
@@ -102,22 +114,10 @@ var addService = function (message) {
             if (result == common.success) {
                 //set the state to ready or serving
                 result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                if (result == common.success) {
-                    if (ModifiedTransactions && ModifiedTransactions.length > 0) {
-                        payload.transactionsInfo.push(ModifiedTransactions[0]);
-                        payload.transactionsInfo.push(ModifiedTransactions[ModifiedTransactions.length - 1]);
-                    }
-                    payload.countersInfo.push(CountersInfo[0]);
-                }
             }
         }
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
-
+        setResponsePayload(message,result,errors,ModifiedTransactions,CountersInfo,[]);
         return result;
     }
     catch (error) {
@@ -146,20 +146,11 @@ var counterBreak = async function (message) {
             if (result == common.success) {
                 //set the state to break
                 result = userActivityManager.ChangeCurrentCounterStateForBreak(errors, OrgID, BranchID, CounterID, CountersInfo);
-                if (result == common.success) {
-                    if (FinishedTransaction && FinishedTransaction.length > 0) {
-                        payload.transactionsInfo.push(FinishedTransaction[FinishedTransaction.length - 1]);
-                    }
-                    payload.countersInfo.push(CountersInfo[0]);
-                }
             }
         }
+
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        setResponsePayload(message,result,errors,FinishedTransaction,CountersInfo,[]);
         await FinishingCommand(BranchID);
         return result;
     }
@@ -191,23 +182,12 @@ var counterServeCustomer = async function (message) {
                 if (result == common.success) {
                     //set the state to ready or serving
                     result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                    if (result == common.success) {
-                        if (Transactions && Transactions.length > 0) {
-                            payload.transactionsInfo.push(Transactions[0]);
-                            payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                        }
-                        payload.countersInfo.push(CountersInfo[0]);
-                    }
                 }
             }
         }
 
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -242,22 +222,12 @@ var counterHoldCustomer = async function (message) {
                 if (result == common.success) {
                     //Change the status (Ready or Serving depending on next customer)
                     result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                    if (result == common.success) {
-                        if (Transactions && Transactions.length > 0) {
-                            payload.transactionsInfo.push(Transactions[0]);
-                            payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                        }
-                        payload.countersInfo.push(CountersInfo[0]);
-                    }
                 }
             }
         }
+
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -291,23 +261,12 @@ var counterNext = async function (message) {
                 if (result == common.success) {
                     //set the state to ready or serving
                     result = userActivityManager.ChangeCurrentCounterStateForNext(errors, OrgID, BranchID, CounterID, CountersInfo);
-                    if (result == common.success) {
-                        if (Transactions && Transactions.length > 0) {
-                            payload.transactionsInfo.push(Transactions[0]);
-                            payload.transactionsInfo.push(Transactions[Transactions.length - 1]);
-                        }
-                        payload.countersInfo.push(CountersInfo[0]);
-                    }
                 }
             }
         }
 
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        setResponsePayload(message,result,errors,Transactions,CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
@@ -334,17 +293,10 @@ var counterOpen = async function (message) {
         if (result == common.success) {
             //set the state to Open
             result = userActivityManager.ChangeCurrentCounterStateForOpen(errors, OrgID, BranchID, CounterID, CountersInfo);
-            if (result == common.success) {
-                payload.countersInfo.push(CountersInfo[0]);
-            }
         }
 
         //Perpare the response
-        payload.result = result;
-        if (payload.result != common.success) {
-            payload.errorCode = errors.join(",");
-        }
-        message.payload = payload;
+        setResponsePayload(message,result,errors,[],CountersInfo,[]);
 
         await FinishingCommand(BranchID);
         return result;
