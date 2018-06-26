@@ -46,7 +46,7 @@ describe('Test Transaction Repo', function () {
         transactioninst.org_ID = 1;
         let result = await repositoriesManager.entitiesRepo.Add(transactioninst);
         if (result == common.success) {
-            result = await repositoriesManager.entitiesRepo.delete(transactioninst);
+            result = await repositoriesManager.entitiesRepo.remove(transactioninst);
             (result == common.success).should.true();
         }
         else {
@@ -85,7 +85,7 @@ describe('Test User Activity Repo', function () {
         userActivityinst.org_ID = 1;
         let result = await repositoriesManager.entitiesRepo.Update(userActivityinst);
         if (result == common.success) {
-            result = await repositoriesManager.entitiesRepo.delete(userActivityinst);
+            result = await repositoriesManager.entitiesRepo.remove(userActivityinst);
             (result == common.success).should.true();
         }
         else {

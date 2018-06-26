@@ -54,222 +54,232 @@ var GetFilterColumnsFromObject = function (filterKeys, filterValues) {
 
 
 
+var getAll = async function (entity) {
+    let that = this.db;
+    try {
+        let tableName = table_Prefex + entity.constructor.name;
+        let sql = "SELECT * FROM " + tableName;
+        let entities = await that.all(sql);
+        return entities;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+};
+
+
+
+var getFilterBy = async function (entity, filterKeys, filterValues) {
+    let that = this.db;
+    try {
+        if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
+            let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
+            let tableName = table_Prefex + entity.constructor.name;
+            let sql = "SELECT * FROM " + tableName + " where " + filter;
+            let entities = await that.all(sql);
+            return entities;
+        }
+        else {
+            return await this.getAll();
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+};
+
+var remove = async function (entity) {
+    try {
+        let that = this.db;
+        if (entity) {
+            //Do the Query
+
+            let tableName = table_Prefex + entity.constructor.name;
+            let sql = " delete from " + tableName + " where id = " + entity.id;
+            let isSuccess = await that.run(sql);
+            if (isSuccess) {
+                return common.success;
+            }
+            else {
+                return common.error;
+            }
+        }
+        else {
+            return common.error;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+var clear = async function (entity) {
+    try {
+        let that = this.db;
+        if (entity) {
+            //Do the Query
+
+            let tableName = table_Prefex + entity.constructor.name;
+            let sql = " delete from " + tableName;
+            let isSuccess = await that.run(sql);
+            if (isSuccess) {
+                return common.success;
+            }
+            else {
+                return common.error;
+            }
+        }
+        else {
+            return common.error;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+var Update = async function (entity) {
+    try {
+        let that = this.db;
+        if (entity) {
+            let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
+            let attributesStr = attributes.join(",");
+            let tableName = table_Prefex + entity.constructor.name;
+
+            //Prepare the values array
+            let values = GetValuesFromObject(entity, attributes);
+
+            //Do the Query
+            let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
+            let isSuccess = await that.run(sql);
+            if (isSuccess) {
+                //await idGenerator.UpdateSeqOnDB(that);
+                return common.success;
+            }
+            else {
+                return common.error;
+            }
+        }
+        else {
+            return common.error;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+var Add = async function (entity) {
+    try {
+        let that = this.db;
+        if (entity) {
+            let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
+            let attributesStr = attributes.join(",");
+            let tableName = table_Prefex + entity.constructor.name;
+            //Prepare the values array
+            let values = GetValuesFromObject(entity, attributes);
+
+            //Do the Query
+            let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
+            let isSuccess = await that.run(sql);
+            if (isSuccess) {
+                await idGenerator.UpdateSeqOnDB(that);
+                return common.success;
+            }
+            else {
+                return common.error;
+            }
+        }
+        else {
+            return common.error;
+        }
+
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
+
+var UpdateSynch = function (Entity) {
+    try {
+        updateEntities.push(Entity);
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+var AddSynch = function (Entity) {
+    try {
+        addEntities.push(Entity);
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+var clearEntities = async function () {
+    try {
+        addEntities = [];
+        updateEntities = [];
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+var commit = async function () {
+    try {
+        let count = addEntities.length;
+        while (count > 0) {
+            let Entity = addEntities.shift();
+            await this.Add(Entity);
+            count = count - 1;
+        }
+        count = updateEntities.length;
+        while (count > 0) {
+            let Entity = updateEntities.shift();
+            await this.Update(Entity);
+            count = count - 1;
+        }
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+
+
 var entitiesRepo = function (db) {
     try {
         this.db = db;
 
-
-        this.getAll = async function (entity) {
-            let that = this.db;
-            try {
-                let tableName = table_Prefex + entity.constructor.name;
-                let sql = "SELECT * FROM " + tableName;
-                let entities = await that.all(sql);
-                return entities;
-            }
-            catch (error) {
-                logger.logError(error);
-                return undefined;
-            }
-        };
-
-
-
-        this.getFilterBy = async function (entity, filterKeys, filterValues) {
-            let that = this.db;
-            try {
-                if (filterKeys != null && filterKeys != undefined && filterKeys.length > 0 && filterKeys.length == filterValues.length) {
-                    let filter = GetFilterColumnsFromObject(filterKeys, filterValues);
-                    let tableName = table_Prefex + entity.constructor.name;
-                    let sql = "SELECT * FROM " + tableName + " where " + filter;
-                    let entities = await that.all(sql);
-                    return entities;
-                }
-                else {
-                    return await this.getAll();
-                }
-            }
-            catch (error) {
-                logger.logError(error);
-                return undefined;
-            }
-        };
-
-        this.delete = async function (entity) {
-            try {
-                let that = this.db;
-                if (entity) {
-                    //Do the Query
-
-                    let tableName = table_Prefex + entity.constructor.name;
-                    let sql = " delete from " + tableName + " where id = " + entity.id;
-                    let isSuccess = await that.run(sql);
-                    if (isSuccess) {
-                        return common.success;
-                    }
-                    else {
-                        return common.error;
-                    }
-                }
-                else {
-                    return common.error;
-                }
-
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-
-        this.clear = async function (entity) {
-            try {
-                let that = this.db;
-                if (entity) {
-                    //Do the Query
-
-                    let tableName = table_Prefex + entity.constructor.name;
-                    let sql = " delete from " + tableName;
-                    let isSuccess = await that.run(sql);
-                    if (isSuccess) {
-                        return common.success;
-                    }
-                    else {
-                        return common.error;
-                    }
-                }
-                else {
-                    return common.error;
-                }
-
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-
-        this.Update = async function (entity) {
-            try {
-                let that = this.db;
-                if (entity) {
-                    let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
-                    let attributesStr = attributes.join(",");
-                    let tableName = table_Prefex + entity.constructor.name;
-
-                    //Prepare the values array
-                    let values = GetValuesFromObject(entity, attributes);
-
-                    //Do the Query
-                    let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
-                    let isSuccess = await that.run(sql);
-                    if (isSuccess) {
-                        //await idGenerator.UpdateSeqOnDB(that);
-                        return common.success;
-                    }
-                    else {
-                        return common.error;
-                    }
-                }
-                else {
-                    return common.error;
-                }
-
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-
-        this.Add = async function (entity) {
-            try {
-                let that = this.db;
-                if (entity) {
-                    let attributes = Object.getOwnPropertyNames(entity).filter(function (value) { return !value.startsWith("_"); });
-                    let attributesStr = attributes.join(",");
-                    let tableName = table_Prefex + entity.constructor.name;
-                    //Prepare the values array
-                    let values = GetValuesFromObject(entity, attributes);
-
-                    //Do the Query
-                    let sql = " insert or replace into " + tableName + " (" + attributesStr + ") values (" + values + ")";
-                    let isSuccess = await that.run(sql);
-                    if (isSuccess) {
-                        await idGenerator.UpdateSeqOnDB(that);
-                        return common.success;
-                    }
-                    else {
-                        return common.error;
-                    }
-                }
-                else {
-                    return common.error;
-                }
-
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-
-
-
-        this.UpdateSynch = function (Entity) {
-            try {
-                updateEntities.push(Entity);
-                return common.success;
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-        this.AddSynch = function (Entity) {
-            try {
-                addEntities.push(Entity);
-                return common.success;
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-        this.clearEntities = async function () {
-            try {
-                addEntities = [];
-                updateEntities = [];
-                return common.success;
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-        this.commit = async function () {
-            try {
-                let count = addEntities.length;
-                while (count > 0) {
-                    let Entity = addEntities.shift();
-                    await this.Add(Entity);
-                    count = count - 1;
-                }
-                count = updateEntities.length;
-                while (count > 0) {
-                    let Entity = updateEntities.shift();
-                    await this.Update(Entity);
-                    count = count - 1;
-                }
-                return common.success;
-            }
-            catch (error) {
-                logger.logError(error);
-                return common.error;
-            }
-        };
-
-
+        //Functions
+        this.getAll = getAll;
+        this.getFilterBy = getFilterBy;
+        this.remove = remove;
+        this.clear = clear;
+        this.Update = Update;
+        this.Add = Add;
+        this.UpdateSynch = UpdateSynch;
+        this.AddSynch = AddSynch;
+        this.clearEntities = clearEntities;
+        this.commit = commit;
     }
     catch (error) {
         logger.logError(error);
