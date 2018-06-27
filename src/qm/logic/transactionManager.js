@@ -5,7 +5,6 @@ var transaction = require("../data/transaction");
 var repositoriesManager = require("../localRepositories/repositoriesManager");
 var configurationService = require("../configurations/configurationService");
 var dataService = require("../data/dataService");
-var visitData = require("../data/visitData");
 var TicketSeqData = require("../data/ticketSeqData");
 var idGenerator = require("../localRepositories/idGenerator");
 var counterData = require("../data/counterData");
@@ -114,35 +113,28 @@ function getBestHallFromStatistics(branch_ID, HallsToVerfify) {
 }
 
 
+
 //Get Hall Number
 var getHallID = function (transaction, pAllHalls, pAllocatedHalls) {
     try {
         let Hall_ID;
-
-
         //Branch Config
         var branch = configurationService.getBranchConfig(transaction.branch_ID);
-
         var branchesData = dataService.getBranchData(transaction.branch_ID);
-
-        branch.halls.forEach(function (hall) {
-            pAllHalls.push(hall.ID);
-        });
-
+        //Copy IDs
+        branch.halls.forEach(function (hall) { pAllHalls.push(hall.ID); });
         //If there was only one Hall Return in
         if (branch.halls.length == 1) {
             Hall_ID = branch.halls[0].ID;
             pAllocatedHalls.push(branch.halls[0]);
             return Hall_ID;
         }
-
         //Get Allocated Halls and thier allocated Resources
         let allocatedHalls = getHallsAllocatedonServiceSegment(branch, branchesData, transaction.service_ID, transaction.segment_ID);
 
         if (allocatedHalls && allocatedHalls.length > 0) {
-            allocatedHalls.forEach(function (hall) {
-                pAllocatedHalls.push(hall.Hall_ID);
-            });
+            //Copy ID
+            allocatedHalls.forEach(function (hall) { pAllocatedHalls.push(hall.Hall_ID); });
             //Filter the working halls
             let HallsToVerfify = allocatedHalls.filter(function (HallData) { return HallData.WorkingNumber > 0 })
             if (!HallsToVerfify || HallsToVerfify.length == 0) {

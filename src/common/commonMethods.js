@@ -6,4 +6,16 @@ function guid() {
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
+
+function CopyArray(SrcArray,DestArray)
+{
+    if (SrcArray)
+    {
+        SrcArray.forEach(function (hall) {
+            DestArray.push(hall.ID);
+        });
+    }
+}
+
   module.exports.guid = guid;
+  module.exports.CopyArray = CopyArray;
