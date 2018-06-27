@@ -346,13 +346,24 @@ function PrepareTransctionFromOriginal(OriginalTransaction, NewTransaction) {
     }
 
 }
+
+
 function GetProiorityRange(segment_ID, service_ID) {
     try {
+        let PriorityRange;
         let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
             return value.Segment_ID == segment_ID && value.Service_ID == service_ID;
         }
         );
-        return serviceSegmentPriorityRange;
+
+        if (serviceSegmentPriorityRange) {
+            //Get Range properities
+            PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
+                return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
+            }
+            );
+        }
+        return PriorityRange;
     }
     catch (error) {
         logger.logError(error);
@@ -368,15 +379,10 @@ function CreateAddServiceTransaction(ServiceID, OriginalTransaction, AddedServic
         let Service = configurationService.configsCache.services.find(function (service) { return service.ID == ServiceID });
         AddedServiceTransaction.orderOfServing = Service.OrderOfServing;
 
-        let serviceSegmentPriorityRange = GetProiorityRange(AddedServiceTransaction.segment_ID, AddedServiceTransaction.service_ID);
+        let PriorityRange = GetProiorityRange(AddedServiceTransaction.segment_ID, AddedServiceTransaction.service_ID);
 
         //if the service is on the same segment
-        if (serviceSegmentPriorityRange) {
-            //Get Range properities
-            let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
-                return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
-            }
-            );
+        if (PriorityRange) {
             AddedServiceTransaction.priority = PriorityRange.Priority;
         }
         else {
@@ -394,12 +400,10 @@ function CreateAddServiceTransaction(ServiceID, OriginalTransaction, AddedServic
                     );
                     TotalPriority += PriorityRange.Priority;
                 });
-                AddedServiceTransaction.segment_ID = AllServiceRanges[0];
+                AddedServiceTransaction.segment_ID = AllServiceRanges[0].Segment_ID;
                 AddedServiceTransaction.priority = TotalPriority / AllServiceRanges.length;
             }
         }
-
-
         return common.success;
     }
     catch (error) {
@@ -1054,7 +1058,7 @@ function SpiltSequenceRangeOverHall(BracnhData, Allocated_Halls, All_Halls, Min_
     }
 }
 
-function getTransactionSequence(PriorityRange,transaction) {
+function getTransactionSequence(PriorityRange, transaction) {
     try {
         let ticketSequence = 0;
         //Get Branch Data
@@ -1101,23 +1105,17 @@ var issueSingleTicket = function (errors, transaction) {
         transaction.arrivalTime = transaction.creationTime;
         transaction.state = enums.StateType.Pending;
 
-        //Get Range ID
-        let serviceSegmentPriorityRange = GetProiorityRange(transaction.segment_ID, transaction.service_ID);
-
-        if (!serviceSegmentPriorityRange) {
+        //Get Range properities
+        let PriorityRange = GetProiorityRange(transaction.segment_ID, transaction.service_ID);
+        if (!PriorityRange) {
             errors.push("error: the Service is not allocated on Segment");
             return common.error;
         }
 
-        //Get Range properities
-        let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
-            return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
-        }
-        );
         transaction.symbol = PriorityRange.Symbol;
         transaction.priority = PriorityRange.Priority;
         //Get Max Seq
-        transaction.ticketSequence = getTransactionSequence(PriorityRange,transaction);
+        transaction.ticketSequence = getTransactionSequence(PriorityRange, transaction);
         transaction.displayTicketNumber = prepareDisplayTicketNumber(transaction, PriorityRange.MaxSlipNo, Separators[PriorityRange.Separator_LV]);
         //Create on Database
         result = AddTransaction(transaction);
