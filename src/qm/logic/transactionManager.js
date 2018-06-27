@@ -279,13 +279,11 @@ function closeTransaction(BracnhData, CurrentCustomerTransaction) {
 }
 var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
-        let result = common.error;
         let CurrentCustomerTransaction;
         //Get Branch Data
         let BracnhData = dataService.getBranchData(BranchID);
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
-
             //Finish Serving the previous Ticket if exists
             let Current_Counter_Data;
             Current_Counter_Data = dataService.getCounterData(BracnhData, CounterID)
@@ -306,9 +304,7 @@ var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, Finish
             UpdateTransaction(CurrentCustomerTransaction);
             FinishedTransaction.push(CurrentCustomerTransaction);
         }
-
-        result = common.success;
-        return result;
+        return common.success;
     }
     catch (error) {
         logger.logError(error);
@@ -455,11 +451,6 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
         //Branch Config
         let branch = configurationService.getBranchConfig(BranchID);
 
-
-        //Branch Counters to get the specific counter
-        let counter = branch.counters.find(function (value) {
-            return value.ID == CounterID;
-        });
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
             NextCustomerTransaction = BracnhData.transactionsData.find(function (transaction_Data) {
@@ -652,9 +643,6 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
     try {
 
         let NextCustomerTransaction = new transaction();
-        //Get Max Seq
-        let Now = Date.now();
-
         //Get Branch Data
         let BracnhData = dataService.getBranchData(BranchID);
 
@@ -666,8 +654,6 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
             return value.ID == CounterID;
         });
 
-
-
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
             //Get Servable Tickets
@@ -677,6 +663,7 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
             NextCustomerTransaction = GetHighestPriorityTransaction(errors, transactions);
             if (NextCustomerTransaction) {
                 //Start Serving the ticket
+                let Now = Date.now();
                 NextCustomerTransaction.startServingTime = Now;
                 NextCustomerTransaction.state = enums.StateType.Serving;
                 NextCustomerTransaction.counter_ID = CounterID;
@@ -687,7 +674,6 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
                 setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction);
             }
         }
-
 
         //update the new
         if (NextCustomerTransaction) {
