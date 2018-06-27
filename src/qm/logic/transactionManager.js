@@ -781,6 +781,22 @@ function getAllocatedUserssOnService(branch, Service_ID) {
         return [];
     }
 }
+function getWorkingCounters(branchesData, counteronHallIDs) {
+    try {
+        let OpenedCounters;
+        if (branchesData.countersData) {
+            OpenedCounters = branchesData.countersData.filter(function (counter) {
+                return counteronHallIDs.indexOf(counter.id.toString()) > -1 && isCounterWorking(counter);
+            }
+            );
+        }
+        return OpenedCounters;
+    }
+    catch (error) {
+        logger.logError(error);
+        return [];
+    }
+}
 
 function getHallsforUsers(branch, branchesData, Service_ID, Segment_ID) {
     try {
@@ -811,12 +827,7 @@ function getHallsforUsers(branch, branchesData, Service_ID, Segment_ID) {
 
                     if (counteronHall && counteronHall.length > 0) {
                         let counteronHallIDs = counteronHall.map(counter => counter.ID);
-                        let OpenedCounters = branchesData.countersData.filter(function (counter) {
-                            return counteronHallIDs.indexOf(counter.id.toString()) > -1 && isCounterWorking(counter);
-                        }
-                        );
-
-
+                        let OpenedCounters = getWorkingCounters(branchesData, counteronHallIDs);
                         let hallData = {
                             Hall_ID: hall.ID,
                             TotalNumber: counteronHall ? counteronHall.length : 0,
@@ -895,15 +906,9 @@ function getHallsforCounters(branch, branchesData, Service_ID, Segment_ID) {
                     );
 
                     if (counteronHall && counteronHall.length > 0) {
-                        let OpenedCounters = 0;
                         let counteronHallIDs = counteronHall.map(counter => counter.ID);
                         //Get the working counter counts
-                        if (branchesData.countersData) {
-                            OpenedCounters = branchesData.countersData.filter(function (counter) {
-                                return counteronHallIDs.indexOf(counter.id.toString()) > -1 && isCounterWorking(counter);
-                            }
-                            );
-                        }
+                        let OpenedCounters = getWorkingCounters(branchesData, counteronHallIDs);
                         let hallData = {
                             Hall_ID: hall.ID,
                             TotalNumber: counteronHall ? counteronHall.length : 0,
