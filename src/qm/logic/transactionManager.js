@@ -944,9 +944,32 @@ function getHallsAllocatedonServiceSegment(Branch, BranchesData, Service_ID, Seg
     }
 }
 
+//Get the sequence from transactions
+function GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNumber) {
+    try {
+        let ticketSequence = Min_TicketNumber;
+        if (transactions && transactions.length > 0) {
+            let maxTransaction = transactions[0];
+            for (let i = 0; i < transactions.length; i++) {
+                //Check for maximum transaction number today
+                if (transactions[i].ticketSequence > maxTransaction.ticketSequence) {
+                    maxTransaction = transactions[i];
+                }
+            }
+            ticketSequence = maxTransaction.ticketSequence + 1;
+        }
+        if (ticketSequence > Max_TicketNumber) {
+            ticketSequence = Min_TicketNumber;
+        }
+        return ticketSequence;
+    } catch (error) {
+        logger.logError(error);
+        return 0;
+    }
+}
 
 //Get SequenceRange and get sequence
-function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber,EnableHallSlipRange) {
+function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange) {
     try {
         let Now = new Date;
         let Today = Now.setHours(0, 0, 0, 0);
@@ -956,27 +979,7 @@ function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_
                 return value.branch_ID == transaction.branch_ID && (value.hall_ID == transaction.hall_ID || EnableHallSlipRange == "0") && value.symbol == transaction.symbol && value.creationTime > Today;
             }
             );
-            if (transactions && transactions.length > 0) {
-                let maxTransaction = transactions[0];
-                for (let i = 0; i < transactions.length; i++) {
-                    //Check for maximum transaction number today
-                    if (transactions[i].ticketSequence > maxTransaction.ticketSequence) {
-                        maxTransaction = transactions[i];
-                    }
-                }
-                if (maxTransaction) {
-                    ticketSequence = maxTransaction.ticketSequence + 1;
-                    if (ticketSequence > Max_TicketNumber) {
-                        ticketSequence = Min_TicketNumber;
-                    }
-                }
-                else {
-                    ticketSequence = Min_TicketNumber;
-                }
-            }
-            else {
-                ticketSequence = Min_TicketNumber;
-            }
+            ticketSequence = GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNumber);
         }
         else {
             ticketSequence = Min_TicketNumber;
@@ -1021,7 +1024,7 @@ function getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_Ti
             ticketSeqData.sequence = ticketSequence;
         }
         else {
-            ticketSequence = GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber,EnableHallSlipRange);
+            ticketSequence = GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
         }
         return ticketSequence;
 
