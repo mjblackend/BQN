@@ -797,7 +797,15 @@ function getWorkingCounters(branchesData, counteronHallIDs) {
         return [];
     }
 }
-
+function addHallData(hallsData,hallID,counteronHall,OpenedCounters)
+{
+    let hallData = {
+        Hall_ID: hallID,
+        TotalNumber: counteronHall ? counteronHall.length : 0,
+        WorkingNumber: OpenedCounters ? OpenedCounters.length : 0,
+    }
+    hallsData.push(hallData);
+}
 function getHallsforUsers(branch, branchesData, Service_ID, Segment_ID) {
     try {
         let hallsData = [];
@@ -828,12 +836,7 @@ function getHallsforUsers(branch, branchesData, Service_ID, Segment_ID) {
                     if (counteronHall && counteronHall.length > 0) {
                         let counteronHallIDs = counteronHall.map(counter => counter.ID);
                         let OpenedCounters = getWorkingCounters(branchesData, counteronHallIDs);
-                        let hallData = {
-                            Hall_ID: hall.ID,
-                            TotalNumber: counteronHall ? counteronHall.length : 0,
-                            WorkingNumber: OpenedCounters ? OpenedCounters.length : 0,
-                        }
-                        hallsData.push(hallData);
+                        addHallData(hallData,hall.ID,counteronHall,OpenedCounters)
                     }
                 });
             }
@@ -909,12 +912,7 @@ function getHallsforCounters(branch, branchesData, Service_ID, Segment_ID) {
                         let counteronHallIDs = counteronHall.map(counter => counter.ID);
                         //Get the working counter counts
                         let OpenedCounters = getWorkingCounters(branchesData, counteronHallIDs);
-                        let hallData = {
-                            Hall_ID: hall.ID,
-                            TotalNumber: counteronHall ? counteronHall.length : 0,
-                            WorkingNumber: OpenedCounters ? OpenedCounters.length : 0,
-                        }
-                        hallsData.push(hallData);
+                        addHallData(hallsData,hall.ID,counteronHall,OpenedCounters)
                     }
                 });
             }
