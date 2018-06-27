@@ -251,13 +251,44 @@ var holdCurrentCustomer = function (errors, OrgID, BranchID, CounterID, HoldReas
     }
 
 }
+function closeTransaction(BracnhData, CurrentCustomerTransaction) {
+    try {
+        let Now = Date.now();
+        CurrentCustomerTransaction.state = enums.StateType.closed;
+        CurrentCustomerTransaction.endServingTime = Now;
+        CurrentCustomerTransaction.closeTime = Now;
+        CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + ((Now - CurrentCustomerTransaction.startServingTime) / 1000);
 
+        //Get min service time to determine the serving type
+        let serviceConfig = configurationService.getServiceConfigFromService(CurrentCustomerTransaction.service_ID);
+        if (CurrentCustomerTransaction.serviceSeconds < serviceConfig.MinServiceTime) {
+            CurrentCustomerTransaction.servingType = enums.CustomerServingType.NoShow;
+        }
+        else {
+            CurrentCustomerTransaction.servingType = enums.CustomerServingType.Served;
+        }
+
+        //Remove the transaction from memory
+        let CurrentCustomerTransactionID = CurrentCustomerTransaction.id;
+        BracnhData.transactionsData = BracnhData.transactionsData.filter(function (transaction_Data) {
+            return transaction_Data.id != CurrentCustomerTransactionID;
+        }
+        );
+        BracnhData.visitData = BracnhData.visitData.filter(function (visitData) {
+            return visitData.visit_ID != CurrentCustomerTransactionID;
+        }
+        );
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+        return common.error;
+    }
+}
 var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
         let result = common.error;
-        let CurrentCustomerTransaction = new transaction();
-        //Get Max Seq
-        let Now = Date.now();
+        let CurrentCustomerTransaction;
         //Get Branch Data
         let BracnhData = dataService.getBranchData(BranchID);
         //Get the transactions that can be served
@@ -274,37 +305,14 @@ var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, Finish
                 );
                 Current_Counter_Data.currentTransaction_ID = undefined;
                 if (CurrentCustomerTransaction) {
-                    CurrentCustomerTransaction.state = enums.StateType.closed;
-                    CurrentCustomerTransaction.endServingTime = Now;
-                    CurrentCustomerTransaction.closeTime = Now;
-                    CurrentCustomerTransaction.serviceSeconds = CurrentCustomerTransaction.serviceSeconds + ((Now - CurrentCustomerTransaction.startServingTime) / 1000);
-
-                    //Get min service time to determine the serving type
-                    let serviceConfig = configurationService.getServiceConfigFromService(CurrentCustomerTransaction.service_ID);
-                    if (CurrentCustomerTransaction.serviceSeconds < serviceConfig.MinServiceTime) {
-                        CurrentCustomerTransaction.servingType = enums.CustomerServingType.NoShow;
-                    }
-                    else {
-                        CurrentCustomerTransaction.servingType = enums.CustomerServingType.Served;
-                    }
-
-                    //Remove the transaction from memory
-                    let CurrentCustomerTransactionID = CurrentCustomerTransaction.id;
-                    BracnhData.transactionsData = BracnhData.transactionsData.filter(function (transaction_Data) {
-                        return transaction_Data.id != CurrentCustomerTransactionID;
-                    }
-                    );
-                    BracnhData.visitData = BracnhData.visitData.filter(function (visitData) {
-                        return visitData.visit_ID != CurrentCustomerTransactionID;
-                    }
-                    );
+                    closeTransaction(BracnhData, CurrentCustomerTransaction)
                 }
             }
-            //Update the old
-            if (CurrentCustomerTransaction) {
-                UpdateTransaction(CurrentCustomerTransaction);
-                FinishedTransaction.push(CurrentCustomerTransaction);
-            }
+        }
+        //Update the old
+        if (CurrentCustomerTransaction) {
+            UpdateTransaction(CurrentCustomerTransaction);
+            FinishedTransaction.push(CurrentCustomerTransaction);
         }
 
         result = common.success;
