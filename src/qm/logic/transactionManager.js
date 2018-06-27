@@ -1019,6 +1019,32 @@ function getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_Ti
         return -1;
     }
 }
+function SpiltSequenceRangeOverHall(BracnhData,Allocated_Halls,All_Halls,Min_TicketNumber,Max_TicketNumber)
+{
+    try{
+        let RangeLength = 0;
+        let HallIndex = 0;
+        let t_Min_TicketNumber = Min_TicketNumber;
+        let EnableSplitRangeOverAllocatedHalls = configurationService.getCommonSettings(BracnhData.id, common.EnableSplitRangeOverAllocatedHalls);
+        if (EnableSplitRangeOverAllocatedHalls == "1") {
+            //Split them accross allocated halls 
+            RangeLength = (Max_TicketNumber - t_Min_TicketNumber) / Allocated_Halls.length;
+            HallIndex = Allocated_Halls.indexOf(transaction.hall_ID);
+        }
+        else {
+            //Split the range across all halls
+            RangeLength = (Max_TicketNumber - t_Min_TicketNumber) / All_Halls.length;
+            HallIndex = All_Halls.indexOf(transaction.hall_ID);
+        }
+        Min_TicketNumber = Math.floor((RangeLength * HallIndex) + t_Min_TicketNumber);
+        Max_TicketNumber = Math.floor((RangeLength * (HallIndex + 1)) + t_Min_TicketNumber - 1);
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+}
+
+
 //Issue ticket
 var issueSingleTicket = function (errors, transaction) {
     try {
@@ -1073,22 +1099,7 @@ var issueSingleTicket = function (errors, transaction) {
             //Check the split to get the min max depending on hall ID
             let EnableHallSlipRange = configurationService.getCommonSettings(BracnhData.id, common.EnableHallSlipRange);
             if (EnableHallSlipRange == "1") {
-                let RangeLength = 0;
-                let HallIndex = 0;
-                let t_Min_TicketNumber = Min_TicketNumber;
-                let EnableSplitRangeOverAllocatedHalls = configurationService.getCommonSettings(BracnhData.id, common.EnableSplitRangeOverAllocatedHalls);
-                if (EnableSplitRangeOverAllocatedHalls == "1") {
-                    //Split them accross allocated halls 
-                    RangeLength = (Max_TicketNumber - t_Min_TicketNumber) / Allocated_Halls.length;
-                    HallIndex = Allocated_Halls.indexOf(transaction.hall_ID);
-                }
-                else {
-                    //Split the range across all halls
-                    RangeLength = (Max_TicketNumber - t_Min_TicketNumber) / All_Halls.length;
-                    HallIndex = All_Halls.indexOf(transaction.hall_ID);
-                }
-                Min_TicketNumber = Math.floor((RangeLength * HallIndex) + t_Min_TicketNumber);
-                Max_TicketNumber = Math.floor((RangeLength * (HallIndex + 1)) + t_Min_TicketNumber - 1);
+                SpiltSequenceRangeOverHall(BracnhData,Allocated_Halls,All_Halls,Min_TicketNumber,Max_TicketNumber);
             }
             ticketSequence = getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
         }
