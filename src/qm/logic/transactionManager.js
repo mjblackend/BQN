@@ -707,18 +707,18 @@ function isCounterWorking(counter) {
 function MergeAllocationsArrays(allocated_all_segment, allocated_segment) {
     try {
         let MergedArray;
+        //If the two arrays are filled
         if (allocated_all_segment && allocated_segment) {
             MergedArray = allocated_all_segment.concat(allocated_segment.filter(function (item) {
                 return allocated_all_segment.indexOf(item) < 0;
             }));
+            return MergedArray
+        }
+        if (allocated_all_segment) {
+            MergedArray = allocated_all_segment;
         }
         else {
-            if (allocated_all_segment) {
-                MergedArray = allocated_all_segment;
-            }
-            else {
-                MergedArray = allocated_segment;
-            }
+            MergedArray = allocated_segment;
         }
         return MergedArray
     }
