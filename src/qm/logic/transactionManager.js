@@ -485,20 +485,7 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
                 NextCustomerTransaction.lastCallTime = Now;
 
                 //Set the transaction on the current counter
-                let found = false;
-                for (let i = 0; i < BracnhData.countersData.length; i++) {
-                    if (BracnhData.countersData[i].id == CounterID) {
-                        found = true;
-                        BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
-                        break;
-                    }
-                }
-                if (!found) {
-                    let tcounterData = new counterData();
-                    tcounterData.id = NextCustomerTransaction.counter_ID;
-                    tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
-                    BracnhData.countersData.push(tcounterData);
-                }
+                setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction)
 
                 //update the new
                 UpdateTransaction(NextCustomerTransaction);
