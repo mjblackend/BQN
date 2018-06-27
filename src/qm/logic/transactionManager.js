@@ -29,10 +29,8 @@ var UpdateTransaction = function (transaction) {
     try {
         let result = common.error;
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == transaction.branch_ID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(transaction.branch_ID);
+       
         if (BracnhData != null && BracnhData.transactionsData != null) {
 
             //Update branch data
@@ -67,10 +65,7 @@ var AddTransaction = function (transaction) {
             transaction.visit_ID = transaction.id;
         }
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == transaction.branch_ID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(transaction.branch_ID);  
         if (BracnhData != null && BracnhData.transactionsData != null) {
             //To Branch Transactions
             BracnhData.transactionsData.push(transaction);
@@ -212,11 +207,7 @@ var holdCurrentCustomer = function (errors, OrgID, BranchID, CounterID, HoldReas
         //Get Max Seq
         let Now = Date.now();
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
-
+        let BracnhData = dataService.getBranchData(BranchID);
         let result = common.error;
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
@@ -263,18 +254,12 @@ var holdCurrentCustomer = function (errors, OrgID, BranchID, CounterID, HoldReas
 
 var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, FinishedTransaction) {
     try {
-
+        let result = common.error;
         let CurrentCustomerTransaction = new transaction();
-
         //Get Max Seq
         let Now = Date.now();
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
-
-        let result = common.error;
+        let BracnhData = dataService.getBranchData(BranchID);
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
 
@@ -1067,10 +1052,7 @@ var issueSingleTicket = function (errors, transaction) {
         let Now = new Date;
         let Today = Now.setHours(0, 0, 0, 0);
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == transaction.branch_ID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(transaction.branch_ID);
 
         if (BracnhData != null) {
 
