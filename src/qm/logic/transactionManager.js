@@ -531,10 +531,10 @@ function getAllocatedServices(branch, counter) {
         return [];
     }
 }
-function isTransactionAllocated(segment_ID, service_ID,isAllSegments_Allocated, allocated_segments, allocated_services) {
+function isTransactionAllocated(segment_ID, service_ID, isAllSegments_Allocated, allocated_segments, allocated_services) {
     try {
-        let tSegment ;
-        let tService ;
+        let tSegment;
+        let tService;
         let servable = false;
         if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
             tSegment = allocated_segments.find(function (segment) {
@@ -566,7 +566,7 @@ function isTransactionServable(transaction_Data, counter, allocated_segments, al
             if (transaction_Data.hall_ID && counter.Hall_ID.toString() != transaction_Data.hall_ID.toString()) {
                 return false;
             }
-            servable =  isTransactionAllocated(transaction_Data.segment_ID, transaction_Data.service_ID,isAllSegments_Allocated, allocated_segments, allocated_services)
+            servable = isTransactionAllocated(transaction_Data.segment_ID, transaction_Data.service_ID, isAllSegments_Allocated, allocated_segments, allocated_services)
         }
         return servable;
     }
@@ -1054,44 +1054,12 @@ function SpiltSequenceRangeOverHall(BracnhData, Allocated_Halls, All_Halls, Min_
     }
 }
 
-
-//Issue ticket
-var issueSingleTicket = function (errors, transaction) {
+function getTransactionSequence(PriorityRange,transaction) {
     try {
-        let result = common.error;
-        let now = Date.now();
-        transaction.creationTime = now;
-        transaction.waitingStartTime = now;
-        transaction.priorityTime = transaction.creationTime;
-        transaction.arrivalTime = transaction.creationTime;
-        transaction.state = enums.StateType.Pending;
-
-        //Get Range ID
         let ticketSequence = 0;
-        let serviceSegmentPriorityRange = GetProiorityRange(transaction.segment_ID, transaction.service_ID);
-
-        if (!serviceSegmentPriorityRange) {
-            errors.push("error: the Service is not allocated on Segment");
-            return common.error;
-        }
-
-        //Get Range properities
-        let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
-            return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
-        }
-        );
-
-        transaction.symbol = PriorityRange.Symbol;
-        transaction.priority = PriorityRange.Priority;
-
-        //Get Max Seq
-        let Now = new Date;
-        let Today = Now.setHours(0, 0, 0, 0);
         //Get Branch Data
         let BracnhData = dataService.getBranchData(transaction.branch_ID);
-
         if (BracnhData != null) {
-
             let Max_TicketNumber = PriorityRange.MaxSlipNo;
             let Min_TicketNumber = PriorityRange.MinSlipNo;
 
@@ -1113,12 +1081,46 @@ var issueSingleTicket = function (errors, transaction) {
             }
             ticketSequence = getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
         }
-        transaction.ticketSequence = ticketSequence;
+        return ticketSequence;
+    }
+    catch (error) {
+        logger.logError(error);
+        return -1;
+    }
+}
+
+
+//Issue ticket
+var issueSingleTicket = function (errors, transaction) {
+    try {
+        let result = common.error;
+        let now = Date.now();
+        transaction.creationTime = now;
+        transaction.waitingStartTime = now;
+        transaction.priorityTime = transaction.creationTime;
+        transaction.arrivalTime = transaction.creationTime;
+        transaction.state = enums.StateType.Pending;
+
+        //Get Range ID
+        let serviceSegmentPriorityRange = GetProiorityRange(transaction.segment_ID, transaction.service_ID);
+
+        if (!serviceSegmentPriorityRange) {
+            errors.push("error: the Service is not allocated on Segment");
+            return common.error;
+        }
+
+        //Get Range properities
+        let PriorityRange = configurationService.configsCache.priorityRanges.find(function (value) {
+            return value.ID == serviceSegmentPriorityRange.PriorityRange_ID;
+        }
+        );
+        transaction.symbol = PriorityRange.Symbol;
+        transaction.priority = PriorityRange.Priority;
+        //Get Max Seq
+        transaction.ticketSequence = getTransactionSequence(PriorityRange,transaction);
         transaction.displayTicketNumber = prepareDisplayTicketNumber(transaction, PriorityRange.MaxSlipNo, Separators[PriorityRange.Separator_LV]);
         //Create on Database
         result = AddTransaction(transaction);
-
-
         return result;
     }
     catch (error) {
