@@ -672,13 +672,10 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
                 NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((NextCustomerTransaction.startServingTime - NextCustomerTransaction.waitingStartTime) / 1000);
 
                 setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction);
+                //update the new
+                UpdateTransaction(NextCustomerTransaction);
+                resultArgs.push(NextCustomerTransaction);
             }
-        }
-
-        //update the new
-        if (NextCustomerTransaction) {
-            UpdateTransaction(NextCustomerTransaction);
-            resultArgs.push(NextCustomerTransaction);
         }
         return common.success;
     }
