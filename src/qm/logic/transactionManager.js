@@ -361,7 +361,19 @@ function PrepareTransctionFromOriginal(OriginalTransaction, NewTransaction) {
     }
 
 }
-
+function GetProiorityRange(segment_ID, service_ID) {
+    try {
+        let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
+            return value.Segment_ID == segment_ID && value.Service_ID == service_ID;
+        }
+        );
+        return serviceSegmentPriorityRange;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
 function CreateAddServiceTransaction(ServiceID, OriginalTransaction, AddedServiceTransaction) {
     try {
         PrepareTransctionFromOriginal(OriginalTransaction, AddedServiceTransaction);
@@ -371,10 +383,7 @@ function CreateAddServiceTransaction(ServiceID, OriginalTransaction, AddedServic
         let Service = configurationService.configsCache.services.find(function (service) { return service.ID == ServiceID });
         AddedServiceTransaction.orderOfServing = Service.OrderOfServing;
 
-        let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
-            return value.Segment_ID == AddedServiceTransaction.segment_ID && value.Service_ID == AddedServiceTransaction.service_ID;
-        }
-        );
+        let serviceSegmentPriorityRange = GetProiorityRange(AddedServiceTransaction.segment_ID, AddedServiceTransaction.service_ID);
 
         //if the service is on the same segment
         if (serviceSegmentPriorityRange) {
@@ -485,7 +494,7 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
                 NextCustomerTransaction.lastCallTime = Now;
 
                 //Set the transaction on the current counter
-                setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction)
+                setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction)
 
                 //update the new
                 UpdateTransaction(NextCustomerTransaction);
@@ -596,8 +605,7 @@ function getServableTransaction(branch, BracnhData, counter) {
 }
 
 //Set the current counter transaction ID
-function setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction)
-{
+function setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction) {
     try {
         let found = false;
         for (let i = 0; i < BracnhData.countersData.length; i++) {
@@ -678,7 +686,7 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
                 NextCustomerTransaction.lastOfVisit = 1;
                 NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((NextCustomerTransaction.startServingTime - NextCustomerTransaction.waitingStartTime) / 1000);
 
-                setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction);
+                setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction);
             }
         }
 
@@ -712,9 +720,8 @@ function isCounterWorking(counter) {
         return false;
     }
 }
-function MergeAllocationsArrays(allocated_all_segment,allocated_segment)
-{
-    try{
+function MergeAllocationsArrays(allocated_all_segment, allocated_segment) {
+    try {
         let MergedArray;
         if (allocated_all_segment && allocated_segment) {
             MergedArray = allocated_all_segment.concat(allocated_segment.filter(function (item) {
@@ -753,7 +760,7 @@ function getAllocatedUsersOnSegment(branch, Segment_ID) {
         }).map(allocation => allocation.User_ID);
 
         //Merge the 2 arrays to get one users array with this segment allocated
-        let allocated_usersOnSegments = MergeAllocationsArrays(allocated_all_segment_users,allocated_segment_users);
+        let allocated_usersOnSegments = MergeAllocationsArrays(allocated_all_segment_users, allocated_segment_users);
         return allocated_usersOnSegments;
     }
     catch (error) {
@@ -841,7 +848,7 @@ function getAllocatedCountersOnSegment(branch, Segment_ID) {
         }).map(allocation => allocation.Counter_ID);
 
         //Merge the 2 arrays to get one counters array with this segment allocated
-        let allocated_countersOnSegments = MergeAllocationsArrays(allocated_all_segment_counters,allocated_segment_counters);
+        let allocated_countersOnSegments = MergeAllocationsArrays(allocated_all_segment_counters, allocated_segment_counters);
         return allocated_countersOnSegments;
     }
     catch (error) {
@@ -1020,10 +1027,7 @@ var issueSingleTicket = function (errors, transaction) {
 
         //Get Range ID
         let ticketSequence = 0;
-        let serviceSegmentPriorityRange = configurationService.configsCache.serviceSegmentPriorityRanges.find(function (value) {
-            return value.Segment_ID == transaction.segment_ID && value.Service_ID == transaction.service_ID;
-        }
-        );
+        let serviceSegmentPriorityRange = GetProiorityRange(transaction.segment_ID, transaction.service_ID);
 
         if (!serviceSegmentPriorityRange) {
             errors.push("error: the Service is not allocated on Segment");
