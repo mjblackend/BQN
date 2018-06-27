@@ -712,7 +712,30 @@ function isCounterWorking(counter) {
         return false;
     }
 }
-
+function MergeAllocationsArrays(allocated_all_segment,allocated_segment)
+{
+    try{
+        let MergedArray;
+        if (allocated_all_segment && allocated_segment) {
+            MergedArray = allocated_all_segment.concat(allocated_segment.filter(function (item) {
+                return allocated_all_segment.indexOf(item) < 0;
+            }));
+        }
+        else {
+            if (allocated_all_segment) {
+                MergedArray = allocated_all_segment;
+            }
+            else {
+                MergedArray = allocated_segment;
+            }
+        }
+        return MergedArray
+    }
+    catch (error) {
+        logger.logError(error);
+        return [];
+    }
+}
 function getAllocatedUsersOnSegment(branch, Segment_ID) {
     try {
         let ServingUserIDs = branch.usersAllocations.filter(function (user) {
@@ -730,20 +753,7 @@ function getAllocatedUsersOnSegment(branch, Segment_ID) {
         }).map(allocation => allocation.User_ID);
 
         //Merge the 2 arrays to get one users array with this segment allocated
-        let allocated_usersOnSegments;
-        if (allocated_all_segment_users && allocated_segment_users) {
-            allocated_usersOnSegments = allocated_all_segment_users.concat(allocated_segment_users.filter(function (item) {
-                return allocated_all_segment_users.indexOf(item) < 0;
-            }));
-        }
-        else {
-            if (allocated_all_segment_users) {
-                allocated_usersOnSegments = allocated_all_segment_users;
-            }
-            else {
-                allocated_usersOnSegments = allocated_segment_users;
-            }
-        }
+        let allocated_usersOnSegments = MergeAllocationsArrays(allocated_all_segment_users,allocated_segment_users);
         return allocated_usersOnSegments;
     }
     catch (error) {
@@ -831,20 +841,7 @@ function getAllocatedCountersOnSegment(branch, Segment_ID) {
         }).map(allocation => allocation.Counter_ID);
 
         //Merge the 2 arrays to get one counters array with this segment allocated
-        let allocated_countersOnSegments;
-        if (allocated_all_segment_counters && allocated_segment_counters) {
-            allocated_countersOnSegments = allocated_all_segment_counters.concat(allocated_segment_counters.filter(function (item) {
-                return allocated_all_segment_counters.indexOf(item) < 0;
-            }));
-        }
-        else {
-            if (allocated_all_segment_counters) {
-                allocated_countersOnSegments = allocated_all_segment_counters;
-            }
-            else {
-                allocated_countersOnSegments = allocated_segment_counters;
-            }
-        }
+        let allocated_countersOnSegments = MergeAllocationsArrays(allocated_all_segment_counters,allocated_segment_counters);
         return allocated_countersOnSegments;
     }
     catch (error) {
