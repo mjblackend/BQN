@@ -607,6 +607,53 @@ function getServableTransaction(branch, BracnhData, counter) {
         return [];
     }
 }
+
+//Set the current counter transaction ID
+function setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction)
+{
+    try {
+        let found = false;
+        for (let i = 0; i < BracnhData.countersData.length; i++) {
+            if (BracnhData.countersData[i].id == CounterID) {
+                found = true;
+                BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
+                break;
+            }
+        }
+        if (!found) {
+            let tcounterData = new counterData();
+            tcounterData.id = NextCustomerTransaction.counter_ID;
+            tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
+            BracnhData.countersData.push(tcounterData);
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+    }
+}
+
+//Check all servable transactions
+function GetHighestPriorityTransaction(errors, transactions) {
+    try {
+        if (!transactions || transactions.length == 0) {
+            return undefined;
+        }
+        let NextCustomerTransaction = transactions[0];
+        for (let i = 0; i < transactions.length; i++) {
+            if (timeProirityValue(NextCustomerTransaction) < timeProirityValue(transactions[i])) {
+                NextCustomerTransaction = transactions[i];
+            }
+        }
+        return NextCustomerTransaction;
+    }
+    catch (error) {
+        logger.logError(error);
+        errors.push(error.toString());
+        return undefined;
+    }
+}
+
 //Get Next Customer
 var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) {
     try {
@@ -631,19 +678,11 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
         //Get the transactions that can be served
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
             //Get Servable Tickets
-            let transactions = getServableTransaction(branch, BracnhData, counter)
-
+            let transactions = getServableTransaction(branch, BracnhData, counter);
 
             //Get Ticket With max Priority
-            if (transactions && transactions.length > 0) {
-                NextCustomerTransaction = transactions[0];
-                for (let i = 0; i < transactions.length; i++) {
-                    if (timeProirityValue(NextCustomerTransaction) < timeProirityValue(transactions[i])) {
-                        NextCustomerTransaction = transactions[i];
-                    }
-                }
-
-
+            NextCustomerTransaction = GetHighestPriorityTransaction(errors, transactions);
+            if (NextCustomerTransaction) {
                 //Start Serving the ticket
                 NextCustomerTransaction.startServingTime = Now;
                 NextCustomerTransaction.state = enums.StateType.Serving;
@@ -652,20 +691,7 @@ var getNextCustomer = function (errors, OrgID, BranchID, CounterID, resultArgs) 
                 NextCustomerTransaction.lastOfVisit = 1;
                 NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((NextCustomerTransaction.startServingTime - NextCustomerTransaction.waitingStartTime) / 1000);
 
-                let found = false;
-                for (let i = 0; i < BracnhData.countersData.length; i++) {
-                    if (BracnhData.countersData[i].id == CounterID) {
-                        found = true;
-                        BracnhData.countersData[i].currentTransaction_ID = NextCustomerTransaction.id;
-                        break;
-                    }
-                }
-                if (!found) {
-                    let tcounterData = new counterData();
-                    tcounterData.id = NextCustomerTransaction.counter_ID;
-                    tcounterData.currentTransaction_ID = NextCustomerTransaction.id;
-                    BracnhData.countersData.push(tcounterData);
-                }
+                setCounterCurrentTransaction(errors, BracnhData,CounterID, NextCustomerTransaction);
             }
         }
 
