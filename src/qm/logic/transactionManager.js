@@ -30,7 +30,7 @@ var UpdateTransaction = function (transaction) {
         let result = common.error;
         //Get Branch Data
         let BracnhData = dataService.getBranchData(transaction.branch_ID);
-       
+
         if (BracnhData != null && BracnhData.transactionsData != null) {
 
             //Update branch data
@@ -65,7 +65,7 @@ var AddTransaction = function (transaction) {
             transaction.visit_ID = transaction.id;
         }
         //Get Branch Data
-        let BracnhData = dataService.getBranchData(transaction.branch_ID);  
+        let BracnhData = dataService.getBranchData(transaction.branch_ID);
         if (BracnhData != null && BracnhData.transactionsData != null) {
             //To Branch Transactions
             BracnhData.transactionsData.push(transaction);
@@ -531,33 +531,42 @@ function getAllocatedServices(branch, counter) {
         return [];
     }
 }
-
+function isTransactionAllocated(segment_ID, service_ID,isAllSegments_Allocated, allocated_segments, allocated_services) {
+    try {
+        let tSegment ;
+        let tService ;
+        let servable = false;
+        if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
+            tSegment = allocated_segments.find(function (segment) {
+                return segment.Segment_ID == segment_ID;
+            }
+            );
+        }
+        if (allocated_services && allocated_services.length > 0) {
+            tService = allocated_services.find(function (service) {
+                return service.Service_ID == service_ID;
+            }
+            );
+        }
+        if (tSegment && tService) {
+            servable = true;
+        }
+        return servable;
+    }
+    catch (error) {
+        logger.logError(error);
+        return false;
+    }
+}
 function isTransactionServable(transaction_Data, counter, allocated_segments, allocated_services) {
     try {
+        let servable = false;
         let isAllSegments_Allocated = (counter.SegmentAllocationType == enums.SegmentAllocationType.SelectAll);
-        var servable = false;
         if (transaction_Data.state == enums.StateType.Pending || transaction_Data.state == enums.StateType.PendingRecall) {
             if (transaction_Data.hall_ID && counter.Hall_ID.toString() != transaction_Data.hall_ID.toString()) {
                 return false;
             }
-            if (!isAllSegments_Allocated && allocated_segments && allocated_segments.length > 0) {
-                let tSegment = allocated_segments.find(function (segment) {
-                    return segment.Segment_ID == transaction_Data.segment_ID;
-                }
-                );
-                if (!tSegment) {
-                    return servable;
-                }
-            }
-            if (allocated_services && allocated_services.length > 0) {
-                let tService = allocated_services.find(function (service) {
-                    return service.Service_ID == transaction_Data.service_ID;
-                }
-                );
-                if (tService) {
-                    servable = true;
-                }
-            }
+            servable =  isTransactionAllocated(transaction_Data.segment_ID, transaction_Data.service_ID,isAllSegments_Allocated, allocated_segments, allocated_services)
         }
         return servable;
     }
@@ -1019,9 +1028,10 @@ function getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_Ti
         return -1;
     }
 }
-function SpiltSequenceRangeOverHall(BracnhData,Allocated_Halls,All_Halls,Min_TicketNumber,Max_TicketNumber)
-{
-    try{
+
+//Split the range over halls if it was enabled
+function SpiltSequenceRangeOverHall(BracnhData, Allocated_Halls, All_Halls, Min_TicketNumber, Max_TicketNumber) {
+    try {
         let RangeLength = 0;
         let HallIndex = 0;
         let t_Min_TicketNumber = Min_TicketNumber;
@@ -1099,7 +1109,7 @@ var issueSingleTicket = function (errors, transaction) {
             //Check the split to get the min max depending on hall ID
             let EnableHallSlipRange = configurationService.getCommonSettings(BracnhData.id, common.EnableHallSlipRange);
             if (EnableHallSlipRange == "1") {
-                SpiltSequenceRangeOverHall(BracnhData,Allocated_Halls,All_Halls,Min_TicketNumber,Max_TicketNumber);
+                SpiltSequenceRangeOverHall(BracnhData, Allocated_Halls, All_Halls, Min_TicketNumber, Max_TicketNumber);
             }
             ticketSequence = getNextSequenceNumber(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange);
         }
