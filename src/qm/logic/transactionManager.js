@@ -296,13 +296,11 @@ var finishCurrentCustomer = function (errors, OrgID, BranchID, CounterID, Finish
                 Current_Counter_Data.currentTransaction_ID = undefined;
                 if (CurrentCustomerTransaction) {
                     closeTransaction(BracnhData, CurrentCustomerTransaction)
+                    //Update the old
+                    UpdateTransaction(CurrentCustomerTransaction);
+                    FinishedTransaction.push(CurrentCustomerTransaction);
                 }
             }
-        }
-        //Update the old
-        if (CurrentCustomerTransaction) {
-            UpdateTransaction(CurrentCustomerTransaction);
-            FinishedTransaction.push(CurrentCustomerTransaction);
         }
         return common.success;
     }
