@@ -2,7 +2,7 @@ const INT_ZERO = 0;
 const INT_NULL = -1;
 class statisticsData {
     constructor() {
-        this.ID = INT_NULL;
+        this.id = INT_NULL;
         this.branch_ID = INT_NULL;
         this.segment_ID = INT_NULL;
         this.hall_ID = INT_NULL;

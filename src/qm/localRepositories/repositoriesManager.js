@@ -1,8 +1,8 @@
-var sqlite3 = require("./aa-sqlite");
 var common = require("../../common/common");
-var fs = require("fs");
 var logger = require("../../common/logger");
-var entitiesRepo = require("./entitiesRepo");
+var entitiesRepoForSQLlite = require("./entitiesRepoForSQLlite");
+var entitiesRepoForSQL = require("./entityRepoForSQL");
+var entitiesRepo;
 var idGenerator = require("./idGenerator");
 var initialized = false;
 "use strict";
@@ -12,35 +12,22 @@ var initialized = false;
 //Exports (Collection of Repositories or the Repositories themselves) to be used by other classes
 var initialize = async function () {
     try {
-
+        let result = common.error;
         if (initialized) {
             return common.success;
         }
 
-        let result = false;
-
-        // open the database
-        //Run the upgrade script
-        result = await sqlite3.open(common.dbConnection);
-
-        //Run the initialize script
-        let sql = fs.readFileSync("init_database.sql").toString();
-        let scriptArray = sql.replace("\r\n", "").split(";");
-        scriptArray = scriptArray.slice(0, scriptArray.length - 1);
-        if (scriptArray != undefined) {
-            for (let i = 0; i < scriptArray.length; i++) {
-                result = await sqlite3.run(scriptArray[i]);
-                if (result == false) {
-                    return common.error;
-                }
-            }
+        if (common.dbType == "sql") {
+            //Initialize Repos
+            this.entitiesRepo = new entitiesRepoForSQL();
+        }
+        else {
+            //Initialize Repos
+            this.entitiesRepo = new entitiesRepoForSQLlite();
         }
 
-        await idGenerator.initialize(sqlite3);
-
-        //Initialize Repos
-        this.entitiesRepo = new entitiesRepo(sqlite3);
-
+        result =await this.entitiesRepo.initialize();
+        await idGenerator.initialize(this.entitiesRepo.db);
         initialized = true;
         return common.success;
     }
@@ -58,7 +45,21 @@ var commit = async function () {
         return common.error;
     }
 };
-
+var stop = async function () {
+    try {
+        if (this.entitiesRepo) {
+            await this.entitiesRepo.close();
+        }
+        initialized = false;
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
 module.exports.commit = commit;
 module.exports.entitiesRepo = entitiesRepo;
 module.exports.initialize = initialize;
+module.exports.stop = stop;
+

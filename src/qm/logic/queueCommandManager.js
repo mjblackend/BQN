@@ -370,8 +370,19 @@ var initialize = async function () {
         return common.error;
     }
 };
-
-
+//Initialize everything
+var stop = async function () {
+    try {
+        let result = await dataService.stop();
+        this.initialized = false;
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+module.exports.stop = stop;
 module.exports.initialize = initialize;
 module.exports.initialized = initialized;
 module.exports.issueTicket = issueTicket;

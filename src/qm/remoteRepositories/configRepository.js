@@ -51,6 +51,7 @@ async function RecoverConnection()
 
         }
         catch (error) {
+            logger.logError("repclose");
             mssql.close();
             connection=undefined;
             logger.logError(error);
@@ -121,7 +122,6 @@ var GetByFilter = async function (columns, table_name, FilterName, FilterValue) 
         logger.logError(error);
         return undefined;
     }
-
 };
 
 module.exports.GetAll = GetAll;

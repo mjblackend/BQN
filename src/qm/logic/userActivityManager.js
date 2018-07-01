@@ -103,7 +103,7 @@ var CreateNewActivity = function (OrgID, BranchID, CounterID, type) {
 var UpdateActionTime = function (Activity) {
     try {
         Activity.lastActionTime = Date.now();
-        repositoriesManager.entitiesRepo.AddSynch(Activity);
+        repositoriesManager.entitiesRepo.UpdateSynch(Activity);
         return Activity;
     }
     catch (error) {

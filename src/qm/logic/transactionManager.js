@@ -953,17 +953,16 @@ function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_
         let Now = new Date;
         let Today = Now.setHours(0, 0, 0, 0);
         let ticketSequence = 0;
+        let transactions;
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
-            let transactions = BracnhData.transactionsData.filter(function (value) {
+            transactions = BracnhData.transactionsData.filter(function (value) {
                 return value.branch_ID == transaction.branch_ID && (value.hall_ID == transaction.hall_ID || EnableHallSlipRange == "0") && value.symbol == transaction.symbol && value.creationTime > Today;
             }
             );
-            ticketSequence = GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNumber);
-        }
-        else {
-            ticketSequence = Min_TicketNumber;
         }
 
+        ticketSequence = GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNumber);
+        
         //Add sequence to the branch data
         let ticketSeqData = new TicketSeqData();
         ticketSeqData.hall_ID = transaction.hall_ID;

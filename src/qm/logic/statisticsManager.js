@@ -75,7 +75,7 @@ function prepareNewStatistics(transaction) {
     let Statistics = new statisticsData();
     Statistics.StatisticsDate = Date.now();
     if (transaction) {
-        Statistics.ID = generateID(transaction);
+        Statistics.id = generateID(transaction);
         Statistics.branch_ID = transaction.branch_ID;
         Statistics.segment_ID = transaction.segment_ID;
         Statistics.hall_ID = transaction.hall_ID;
@@ -158,7 +158,7 @@ var UpdateStatistics = function (UpdateType, Statistics, transaction) {
     try {
         let ServiceConfig = configurationService.getServiceConfigFromService(transaction.service_ID);
         Statistics.StatisticsDate = Date.now();
-        Statistics.ID = generateID(transaction);
+        Statistics.id = generateID(transaction);
 
 
         //Waiting Customer
@@ -199,14 +199,14 @@ var AddOrUpdateTransaction = function (transaction) {
             //New transaction so add it and set the _StatisticsData
             let Statistics_ID = generateID(transaction);
             let t_Statistics = t_branches_statisticsData.statistics.find(function (value) {
-                return value.ID == Statistics_ID;
+                return value.id == Statistics_ID;
             });
 
             if (transaction._StatisticsData) {
                 //Remove old statistics from the same transaction
                 let oldStatistics_ID = generateID(transaction._StatisticsData);
                 let oldStatistics = t_branches_statisticsData.statistics.find(function (value) {
-                    return value.ID == oldStatistics_ID;
+                    return value.id == oldStatistics_ID;
                 });
                 UpdateStatistics(UpdateTypes.Subtract, oldStatistics, transaction._StatisticsData);
             }
@@ -248,7 +248,7 @@ async function initializeStatisticsFromTransactions(transactionsData) {
                 if (branch_statistics) {
                     //if the branch exists
                     t_Statistics = branch_statistics.statistics.find(function (value) {
-                        return value.ID == Statistics_ID;
+                        return value.id == Statistics_ID;
                     });
                     if (t_Statistics) {
                         UpdateStatistics(UpdateTypes.Add, t_Statistics, transaction);

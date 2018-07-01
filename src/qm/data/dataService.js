@@ -307,10 +307,22 @@ var initialize = async function () {
     }
 };
 
+var stop = async function () {
+    try {
+        let result = await repositoriesManager.stop();
+        return result;
+    }
+    catch (error) {
+        logger.logError(error);
+        return false;
+    }
+};
+
 module.exports.getBranchData = getBranchData;
 module.exports.getHeldCustomers = getHeldCustomers;
 module.exports.getCounterData = getCounterData;
 module.exports.AddorUpdateVisitData = AddorUpdateVisitData;
 module.exports.getCurrentData = getCurrentData;
+module.exports.stop = stop;
 module.exports.initialize = initialize;
 module.exports.branchesData = branchesData;

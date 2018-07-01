@@ -62,5 +62,6 @@ describe('StatisticsManager initialize successfully', async function () {
         let result = await statisticsManager.GetSpecificStatistics(FilterStatistics);
         (!result).should.true();
     });
+
 });
 

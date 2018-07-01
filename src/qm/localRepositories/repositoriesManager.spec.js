@@ -6,6 +6,7 @@ var repositoriesManager = require("./repositoriesManager");
 var transaction = require("../data/transaction");
 var userActivity = require("../data/userActivity");
 var common = require("../../common/common");
+var idGenerator = require("./idGenerator");
 
 should.toString();
 
@@ -18,14 +19,19 @@ describe('Database testing', function () {
 
 describe('Test Transaction Repo', function () {
     it('Get All Transactions successfully', async function () {
-        let result = await repositoriesManager.entitiesRepo.getAll(new transaction());
+        let transactioninst = new transaction();
+        transactioninst.id = idGenerator.getNewID();
+        let result = await repositoriesManager.entitiesRepo.getAll(transactioninst);
+        await idGenerator.UpdateSeqOnDB(repositoriesManager.entitiesRepo.db);
         (result !== undefined).should.true();
     });
 
-    it('Create New transaction successfully', async function () {
+    it('Create New transaction successfully 2', async function () {
         let transactioninst = new transaction();
+        transactioninst.id = idGenerator.getNewID();
         transactioninst.org_ID = 1;
         let result = await repositoriesManager.entitiesRepo.Add(transactioninst);
+        await idGenerator.UpdateSeqOnDB(repositoriesManager.entitiesRepo.db);
         (result == common.success).should.true();
     });
 
@@ -63,8 +69,10 @@ describe('Test User Activity Repo', function () {
 
     it('Create New Activity successfully', async function () {
         let userActivityinst = new userActivity();
+        userActivityinst.id = idGenerator.getNewID();
         userActivityinst.org_ID = 1;
         let result = await repositoriesManager.entitiesRepo.Add(userActivityinst);
+        await idGenerator.UpdateSeqOnDB(repositoriesManager.entitiesRepo.db);
         (result == common.success).should.true();
     });
 

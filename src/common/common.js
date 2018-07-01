@@ -6,7 +6,13 @@ module.exports.noData = -100;
 module.exports.ServiceAllocationTypeKey= "ServiceAllocationType";
 module.exports.EnableHallSlipRange = "EnableHallSlipRange";
 module.exports.EnableSplitRangeOverAllocatedHalls = "EnableSplitRangeOverAllocatedHalls";
-
+module.exports.dbType = "sqllite";
 module.exports.dbConnection = "./db/queuing.db";
+module.exports.sqldbConnection = {
+    user: "sa",
+    password: "sedco@123",
+    server: "majd",
+    database: "new"
+};
 module.exports.mock=true;
 

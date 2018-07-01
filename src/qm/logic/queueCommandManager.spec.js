@@ -230,4 +230,5 @@ describe('Queuing Command Manager Test', function () {
         let result = await queueCommandManager.counterOpen(_message);
         (result === common.not_valid).should.true();
     });
+
 });
