@@ -194,8 +194,8 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            let ValidStates = [enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break,enums.EmployeeActiontypes.NotReady]
-            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,ValidStates)) {
+            let ValidStates = [enums.EmployeeActiontypes.Custom, enums.EmployeeActiontypes.Break, enums.EmployeeActiontypes.NotReady]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type, ValidStates)) {
                 return common.success;
             }
             else {
@@ -270,8 +270,8 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            let ArrayOfInvalidStates = [enums.EmployeeActiontypes.InsideCalenderLoggedOff,enums.EmployeeActiontypes.InsideCalenderLoggedOff,enums.EmployeeActiontypes.TicketDispensing,enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break];
-            if (checkIfValueNotEqualAnyValue(CurrentActivity.type,ArrayOfInvalidStates)) {
+            let ArrayOfInvalidStates = [enums.EmployeeActiontypes.InsideCalenderLoggedOff, enums.EmployeeActiontypes.OutsideCalenderLoggedOff, enums.EmployeeActiontypes.TicketDispensing, enums.EmployeeActiontypes.Custom, enums.EmployeeActiontypes.Break];
+            if (checkIfValueNotEqualAnyValue(CurrentActivity.type, ArrayOfInvalidStates)) {
                 return common.success;
             }
             else {
@@ -334,16 +334,12 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
-
         let counter = configurationService.getCounterConfig(CounterData.id);
-
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing && counter.Type_LV != enums.counterTypes.NoCallServing) {
             return common.not_valid;
@@ -351,13 +347,11 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            let ValidStates = [enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.NoCallServing,enums.EmployeeActiontypes.Ready,enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.Processing]
-            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,ValidStates)) {
+            let ValidStates = [enums.EmployeeActiontypes.Serving, enums.EmployeeActiontypes.NoCallServing, enums.EmployeeActiontypes.Ready, enums.EmployeeActiontypes.Serving, enums.EmployeeActiontypes.Processing]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type, ValidStates)) {
                 return common.success;
             }
-            else {
-                return common.not_valid;
-            }
+            return common.not_valid;
         }
         else {
             CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
@@ -378,11 +372,9 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -396,7 +388,8 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.NoCallServing && CurrentActivity.type != enums.EmployeeActiontypes.TicketDispensing) {
+            let ArrayOfInvalidStates = [enums.EmployeeActiontypes.InsideCalenderLoggedOff, enums.EmployeeActiontypes.OutsideCalenderLoggedOff, enums.EmployeeActiontypes.NoCallServing, enums.EmployeeActiontypes.TicketDispensing]
+            if (checkIfValueNotEqualAnyValue(CurrentActivity.type, ArrayOfInvalidStates)) {
                 return common.success;
             }
             else {
