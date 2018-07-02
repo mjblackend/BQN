@@ -301,16 +301,17 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
         CounterData = output[1];
         CurrentActivity = output[2];
         let counter = configurationService.getCounterConfig(CounterData.id);
+
+        let result = common.success;
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing) {
-            return common.not_valid;
+            result = common.not_valid;
         }
-
         // ths status should be serving
-        if (CurrentActivity && CurrentActivity.type == enums.EmployeeActiontypes.Serving) {
-            return common.success;
+        if (CurrentActivity && CurrentActivity.type != enums.EmployeeActiontypes.Serving) {
+            result = common.not_valid;
         }
-        return common.not_valid;
+        return result;
     }
     catch (error) {
         logger.logError(error);
