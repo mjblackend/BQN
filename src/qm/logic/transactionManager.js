@@ -436,13 +436,35 @@ var addService = function (errors, OrgID, BranchID, CounterID, ServiceID, result
     }
 };
 
+function UpdateTransactionToStartServing(NextCustomerTransaction, CounterID) {
+    try {
+        //Get Max Seq
+        let Now = Date.now();
+        if (NextCustomerTransaction.state == enums.StateType.Pending) {
+            NextCustomerTransaction.state = enums.StateType.Serving;
+        }
+        if (NextCustomerTransaction.state == enums.StateType.PendingRecall) {
+            NextCustomerTransaction.state = enums.StateType.PendingRecall;
+        }
+        if (NextCustomerTransaction.state == enums.StateType.OnHold) {
+            NextCustomerTransaction.state = enums.StateType.Serving;
+            NextCustomerTransaction.holdingSeconds = NextCustomerTransaction.holdingSeconds + ((Now - NextCustomerTransaction.waitingStartTime) / 1000);
+        }
+        NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((Now - NextCustomerTransaction.waitingStartTime) / 1000);
+        NextCustomerTransaction.counter_ID = CounterID;
+        NextCustomerTransaction.startServingTime = Now;
+        NextCustomerTransaction.lastCallTime = Now;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
 var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID, resultArgs) {
     try {
 
         let NextCustomerTransaction = new transaction();
-        //Get Max Seq
-        let Now = Date.now();
-
         //Get Branch Data
         let BracnhData = dataService.getBranchData(BranchID);
 
@@ -456,20 +478,7 @@ var serveCustomer = function (errors, OrgID, BranchID, CounterID, TransactionID,
             });
             if (NextCustomerTransaction) {
                 //Change the state depending on the previous
-                if (NextCustomerTransaction.state == enums.StateType.Pending) {
-                    NextCustomerTransaction.state = enums.StateType.Serving;
-                }
-                if (NextCustomerTransaction.state == enums.StateType.PendingRecall) {
-                    NextCustomerTransaction.state = enums.StateType.PendingRecall;
-                }
-                if (NextCustomerTransaction.state == enums.StateType.OnHold) {
-                    NextCustomerTransaction.state = enums.StateType.Serving;
-                    NextCustomerTransaction.holdingSeconds = NextCustomerTransaction.holdingSeconds + ((Now - NextCustomerTransaction.waitingStartTime) / 1000);
-                }
-                NextCustomerTransaction.waitingSeconds = NextCustomerTransaction.waitingSeconds + ((Now - NextCustomerTransaction.waitingStartTime) / 1000);
-                NextCustomerTransaction.counter_ID = CounterID;
-                NextCustomerTransaction.startServingTime = Now;
-                NextCustomerTransaction.lastCallTime = Now;
+                UpdateTransactionToStartServing(NextCustomerTransaction);
 
                 //Set the transaction on the current counter
                 setCounterCurrentTransaction(errors, BracnhData, CounterID, NextCustomerTransaction)
