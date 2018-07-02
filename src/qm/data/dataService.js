@@ -170,6 +170,28 @@ function AddorUpdateVisitData(branchData, transaction) {
     }
 }
 
+
+function SetCounterDataUsingTransaction(branch,transaction)
+{
+    try{
+        if (transaction.counter_ID > 0) {
+            let CurrentCounterData = getCounterData(branch, transaction.counter_ID)
+            if (CurrentCounterData) {
+                CurrentCounterData.currentTransaction_ID = transaction.id;
+            }
+            else {
+                CurrentCounterData = new counterData();
+                CurrentCounterData.id = transaction.counter_ID;
+                CurrentCounterData.currentTransaction_ID = transaction.id;
+                branch.countersData.push(CurrentCounterData);
+            }
+        }
+    }
+    catch (error) {
+        logger.logError(error);
+    }
+}
+
 async function cacheBranchTransactions(branch) {
     try {
         branch.transactionsData = await getTodaysTransactionFromDB(branch.id);
@@ -178,18 +200,7 @@ async function cacheBranchTransactions(branch) {
                 let transaction = branch.transactionsData[i];
 
                 //Set the counter data
-                if (transaction.counter_ID > 0) {
-                    let CurrentCounterData = getCounterData(branch, transaction.counter_ID)
-                    if (CurrentCounterData) {
-                        CurrentCounterData.currentTransaction_ID = transaction.id;
-                    }
-                    else {
-                        CurrentCounterData = new counterData();
-                        CurrentCounterData.id = transaction.counter_ID;
-                        CurrentCounterData.currentTransaction_ID = transaction.id;
-                        branch.countersData.push(CurrentCounterData);
-                    }
-                }
+                SetCounterDataUsingTransaction(branch, transaction);
 
                 //To Visit Data
                 AddorUpdateVisitData(branch, transaction);
