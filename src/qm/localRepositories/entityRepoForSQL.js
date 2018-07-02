@@ -132,14 +132,9 @@ var remove = async function (entity) {
             if (isSuccess) {
                 return common.success;
             }
-            else {
-                return common.error;
-            }
-        }
-        else {
-            return common.error;
-        }
 
+        }
+        return common.error;
     }
     catch (error) {
         logger.logError(error);

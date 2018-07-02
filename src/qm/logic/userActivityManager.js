@@ -194,8 +194,8 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            let States = [enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break,enums.EmployeeActiontypes.NotReady]
-            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,States)) {
+            let ValidStates = [enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break,enums.EmployeeActiontypes.NotReady]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,ValidStates)) {
                 return common.success;
             }
             else {
@@ -270,8 +270,8 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff && CurrentActivity.type != enums.EmployeeActiontypes.InsideCalenderLoggedOff
-                && CurrentActivity.type != enums.EmployeeActiontypes.TicketDispensing && CurrentActivity.type != enums.EmployeeActiontypes.Custom && CurrentActivity.type != enums.EmployeeActiontypes.Break) {
+            let ArrayOfInvalidStates = [enums.EmployeeActiontypes.InsideCalenderLoggedOff,enums.EmployeeActiontypes.InsideCalenderLoggedOff,enums.EmployeeActiontypes.TicketDispensing,enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break];
+            if (checkIfValueNotEqualAnyValue(CurrentActivity.type,ArrayOfInvalidStates)) {
                 return common.success;
             }
             else {
@@ -351,8 +351,8 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            let States = [enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.NoCallServing,enums.EmployeeActiontypes.Ready,enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.Processing]
-            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,States)) {
+            let ValidStates = [enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.NoCallServing,enums.EmployeeActiontypes.Ready,enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.Processing]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,ValidStates)) {
                 return common.success;
             }
             else {
