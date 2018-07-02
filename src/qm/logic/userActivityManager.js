@@ -165,6 +165,19 @@ var checkIfValueNotEqualAnyValue = function (Value, ArrayOfValues) {
     }
 };
 
+function InitializeCounterActivity(OrgID, BranchID, CounterData, EmployeeActionType)
+{
+    try{
+        let CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterData.id, EmployeeActionType);
+        CounterData.currentState = CurrentActivity;
+        return common.success;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+}
+
 //Check Counter Validation For Open
 var isCounterValidForAutoNext = function (CurrentActivity) {
     try {
@@ -204,9 +217,7 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
             }
         }
         else {
-            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState = CurrentActivity;
-            return common.success;
+            return InitializeCounterActivity(OrgID, BranchID, CounterData,enums.EmployeeActiontypes.Ready);
         }
     }
     catch (error) {
@@ -253,8 +264,6 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
     }
 };
 
-
-
 //Check Counter Validation ForNext
 var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
     try {
@@ -280,9 +289,7 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
             }
         }
         else {
-            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState = CurrentActivity;
-            return common.success;
+            return InitializeCounterActivity(OrgID, BranchID, CounterData,enums.EmployeeActiontypes.Ready);
         }
     }
     catch (error) {
@@ -354,9 +361,7 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
             return common.not_valid;
         }
         else {
-            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState = CurrentActivity;
-            return common.success;
+            return InitializeCounterActivity(OrgID, BranchID, CounterData,enums.EmployeeActiontypes.Ready);
         }
     }
     catch (error) {
@@ -397,9 +402,7 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
             }
         }
         else {
-            CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Ready);
-            CounterData.currentState = CurrentActivity;
-            return common.success;
+            return InitializeCounterActivity(OrgID, BranchID, CounterData,enums.EmployeeActiontypes.Ready);
         }
     }
     catch (error) {
