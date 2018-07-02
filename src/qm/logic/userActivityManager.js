@@ -7,15 +7,8 @@ var userActivity = require("../data/userActivity");
 var idGenerator = require("../localRepositories/idGenerator");
 var configurationService = require("../configurations/configurationService");
 
-
-//Update Activity
-var UpdateActivity = function (userActivity) {
+var updateUserAvitivityInData = function (BracnhData, userActivity) {
     try {
-        //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == userActivity.branch_ID;
-        }
-        );
         if (BracnhData != null && BracnhData.userActivitiesData != null) {
             for (let i = 0; i < BracnhData.userActivitiesData.length; i++) {
                 if (BracnhData.userActivitiesData[i].id == userActivity.id) {
@@ -26,7 +19,27 @@ var UpdateActivity = function (userActivity) {
                     break;
                 }
             }
-            //Update To data base
+            return common.success;
+        }
+        return common.error;
+    }
+    catch (error) {
+        logger.logError(error);
+        return common.error;
+    }
+};
+//Update Activity
+var UpdateActivity = function (userActivity) {
+    try {
+        //Get Branch Data
+        let BracnhData = dataService.branchesData.find(function (value) {
+            return value.id == userActivity.branch_ID;
+        }
+        );
+        //Update in memory
+        let result = updateUserAvitivityInData(BracnhData, userActivity);
+        if (result == common.success) {
+            //Update in DB
             repositoriesManager.entitiesRepo.UpdateSynch(userActivity);
             return common.success;
         }
@@ -104,12 +117,15 @@ var UpdateActionTime = function (Activity) {
 
 var CloseActivity = function (Activity) {
     try {
-        Activity.endTime = Date.now();
-        Activity.duration = (Activity.endTime - Activity.startTime) / 1000;
-        Activity.calenderDuration = (Activity.endTime - Activity.startTime) / 1000;
-        Activity.closed = 1;
-        UpdateActivity(Activity);
-        return Activity;
+        if (Activity)
+        {
+            Activity.endTime = Date.now();
+            Activity.duration = (Activity.endTime - Activity.startTime) / 1000;
+            Activity.calenderDuration = (Activity.endTime - Activity.startTime) / 1000;
+            Activity.closed = 1;
+            UpdateActivity(Activity);
+            return Activity;
+        }
     }
     catch (error) {
         logger.logError(error);
@@ -180,9 +196,7 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
         CounterData = output[1];
         CurrentActivity = output[2];
 
-        if (CurrentActivity) {
-            CloseActivity(CurrentActivity);
-        }
+        CloseActivity(CurrentActivity);
 
         let counter = configurationService.getCounterConfig(CounterID);
 
@@ -268,13 +282,8 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
         }
 
         // ths status should be serving
-        if (CurrentActivity) {
-            if (CurrentActivity.type == enums.EmployeeActiontypes.Serving) {
-                return common.success;
-            }
-            else {
-                return common.not_valid;
-            }
+        if (CurrentActivity && CurrentActivity.type == enums.EmployeeActiontypes.Serving) {
+            return common.success;
         }
         return common.not_valid;
     }
@@ -388,9 +397,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
         CounterData = output[1];
         CurrentActivity = output[2];
 
-        if (CurrentActivity) {
-            CloseActivity(CurrentActivity);
-        }
+        CloseActivity(CurrentActivity);
 
         CurrentActivity = CreateNewActivity(OrgID, BranchID, CounterID, enums.EmployeeActiontypes.Break);
         CounterData.currentState = CurrentActivity;
