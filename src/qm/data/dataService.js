@@ -250,10 +250,7 @@ function getHeldCustomers(OrgID, BranchID, CounterID, output) {
         let CurrentTransaction;
 
         //Get Branch Data
-        BracnhData = branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
+        BracnhData = getBranchData(BranchID);
         let heldTransactions = BracnhData.transactionsData.filter(function (transaction) {
             return transaction.state == enums.StateType.OnHold && transaction.heldByCounter_ID == CounterID;;
         });
@@ -282,10 +279,8 @@ function getCurrentData(OrgID, BranchID, CounterID, output) {
         let CurrentTransaction;
 
         //Get Branch Data
-        BracnhData = branchesData.find(function (value) {
-            return value.id == BranchID;
-        }
-        );
+        BracnhData = getBranchData(BranchID);
+        
         //Get current State
         CounterData = getCounterData(BracnhData, CounterID);
 

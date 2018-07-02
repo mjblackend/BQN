@@ -32,10 +32,7 @@ var updateUserAvitivityInData = function (BracnhData, userActivity) {
 var UpdateActivity = function (userActivity) {
     try {
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == userActivity.branch_ID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(userActivity.branch_ID);
         //Update in memory
         let result = updateUserAvitivityInData(BracnhData, userActivity);
         if (result == common.success) {
@@ -60,10 +57,7 @@ var AddActivity = function (userActivity) {
             userActivity.id = idGenerator.getNewID();
         }
         //Get Branch Data
-        let BracnhData = dataService.branchesData.find(function (value) {
-            return value.id == userActivity.branch_ID;
-        }
-        );
+        let BracnhData = dataService.getBranchData(userActivity.branch_ID);
         if (BracnhData != null && BracnhData.userActivitiesData != null) {
             //To Branch Transactions
             BracnhData.userActivitiesData.push(userActivity);
@@ -197,11 +191,9 @@ var isCounterValidForAutoNext = function (CurrentActivity) {
 var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
     try {
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -232,11 +224,9 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -269,11 +259,9 @@ var CounterValidationForBreak = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -305,11 +293,9 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -419,11 +405,9 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
     try {
 
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
@@ -493,11 +477,9 @@ var updateServingUserActivity = function (OrgID, BranchID, CounterData, CurrentA
 var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, CounterID, CountersInfo) {
     try {
         let output = [];
-        let BracnhData;
         let CounterData;
         let CurrentActivity;
         dataService.getCurrentData(OrgID, BranchID, CounterID, output);
-        BracnhData = output[0];
         CounterData = output[1];
         CurrentActivity = output[2];
 
