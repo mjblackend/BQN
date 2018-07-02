@@ -5,7 +5,6 @@ var repositoriesManager = require("../localRepositories/repositoriesManager");
 var dataService = require("../data/dataService");
 var userActivity = require("../data/userActivity");
 var idGenerator = require("../localRepositories/idGenerator");
-var counterData = require("../data/counterData");
 var configurationService = require("../configurations/configurationService");
 
 
@@ -52,7 +51,6 @@ var AddActivity = function (userActivity) {
         if (userActivity.id <= 0) {
             userActivity.id = idGenerator.getNewID();
         }
-
         //Get Branch Data
         let BracnhData = dataService.branchesData.find(function (value) {
             return value.id == userActivity.branch_ID;
@@ -66,10 +64,7 @@ var AddActivity = function (userActivity) {
             repositoriesManager.entitiesRepo.AddSynch(userActivity);
             return common.success;
         }
-        else {
-            return common.error;
-        }
-
+        return common.error;
     }
     catch (error) {
         logger.logError(error);
@@ -131,10 +126,8 @@ var CloseActivity = function (Activity) {
 var isCounterValidForAutoNext = function (CurrentActivity) {
     try {
         // Change the Current activity
-        if (CurrentActivity) {
-            if (CurrentActivity.type == enums.EmployeeActiontypes.Ready) {
-                return true;
-            }
+        if (CurrentActivity && CurrentActivity.type == enums.EmployeeActiontypes.Ready) {
+            return true;
         }
         return false;
     }
@@ -289,11 +282,7 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
                 return common.not_valid;
             }
         }
-        else
-        {
-            return common.not_valid;
-        }
-
+        return common.not_valid;
     }
     catch (error) {
         logger.logError(error);
