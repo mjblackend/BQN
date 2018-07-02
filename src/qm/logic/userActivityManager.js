@@ -26,16 +26,11 @@ var UpdateActivity = function (userActivity) {
                     break;
                 }
             }
-
-
             //Update To data base
             repositoriesManager.entitiesRepo.UpdateSynch(userActivity);
             return common.success;
         }
-        else {
-            return common.error;
-        }
-
+        return common.error;
     }
     catch (error) {
         logger.logError(error);
@@ -410,7 +405,7 @@ var ChangeCurrentCounterStateForBreak = function (errors, OrgID, BranchID, Count
 };
 
 
-var firstUserActivity = function (OrgID, BranchID,CounterData) {
+var firstUserActivity = function (OrgID, BranchID, CounterData) {
     try {
         let CurrentActivity;
         if (CounterData.currentTransaction_ID > 0) {
@@ -427,7 +422,7 @@ var firstUserActivity = function (OrgID, BranchID,CounterData) {
     }
 };
 
-var updateServingUserActivity = function (OrgID, BranchID,CounterData, CurrentActivity) {
+var updateServingUserActivity = function (OrgID, BranchID, CounterData, CurrentActivity) {
     try {
         if (CounterData.currentTransaction_ID > 0) {
             if (CurrentActivity.type != enums.EmployeeActiontypes.Serving) {
@@ -470,7 +465,7 @@ var ChangeCurrentCounterStateForNext = function (errors, OrgID, BranchID, Counte
         CurrentActivity = output[2];
 
         if (CurrentActivity) {
-            CurrentActivity = updateServingUserActivity(OrgID, BranchID,CounterData, CurrentActivity)
+            CurrentActivity = updateServingUserActivity(OrgID, BranchID, CounterData, CurrentActivity)
         }
         else {
             CurrentActivity = firstUserActivity(OrgID, BranchID, CounterData);
