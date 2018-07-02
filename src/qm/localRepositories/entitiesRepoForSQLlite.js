@@ -5,7 +5,6 @@ var common = require("../../common/common");
 var idGenerator = require("./idGenerator");
 var sqliteDB = require("./aa-sqlite");
 var fs = require("fs");
-var DB;
 const table_Prefex = "t_";
 //collections for update
 var updateEntities = [];

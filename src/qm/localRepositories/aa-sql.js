@@ -4,6 +4,7 @@ var fs = require("fs");
 var logger = require("../../common/logger");
 var connection = null;
 var db;
+
 exports.db = db;
 
 exports.open = async function (config) {
@@ -12,9 +13,8 @@ exports.open = async function (config) {
         try {
             if (connection == null) {
                 connection = await mssql.connect(config);
-                return;
             }
-
+            return;
         }
         catch (error) {
             mssql.close();

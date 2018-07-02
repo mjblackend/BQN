@@ -4,6 +4,7 @@ var logger = require("../../common/logger");
 var common = require("../../common/common");
 var idGenerator = require("./idGenerator");
 var sqlDB = require("./aa-sql");
+var fs = require("fs");
 const table_Prefex = "t_";
 //collections for update
 var updateEntities = [];
@@ -297,6 +298,19 @@ var initialize = async function () {
         // open the database
         this.db = sqlDB;
         result = await this.db.open(common.sqldbConnection);
+
+        //Run the initialize script
+        let sql = fs.readFileSync("sql_database.sql").toString();
+        let scriptArray = sql.replace("\r\n", "").split(";");
+        scriptArray = scriptArray.slice(0, scriptArray.length - 1);
+        if (scriptArray != undefined) {
+            for (let i = 0; i < scriptArray.length; i++) {
+                result = await this.db.run(scriptArray[i]);
+                if (result == false) {
+                    return common.error;
+                }
+            }
+        }
         return result;
     }
     catch (error) {

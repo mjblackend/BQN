@@ -1,25 +1,9 @@
 "use strict";
 //for now when working on DB, we will use Getall to retrieve everything
 //later when the repository returns data from server, the server will implement getbyFilter API.
-var mssql = require("mssql");
-var fs = require("fs");
 var logger = require("../../common/logger");
-
-
-var filepath = "dbconfig.txt";
-var config = {
-    user: "sa",
-    password: "sedco@123",
-    server: "majd",
-    database: "new"
-};
-
-if (fs.exists(filepath)) {
-    let content = fs.readFileSync(filepath);
-    config = JSON.parse(content);
-}
-var connection = null;
-
+var sqlDB = require("../localRepositories/aa-sql");
+var common = require("../../common/common");
 
 //Add 
 var FilterTheReservedColumnNames = async function (columns) {
@@ -29,8 +13,7 @@ var FilterTheReservedColumnNames = async function (columns) {
             if (columns[i].toLowerCase() == "identity" || columns[i].toLowerCase() == "key" || columns[i].toLowerCase() == "value") {
                 Filtered.push("[" + columns[i] + "]");
             }
-            else
-            {
+            else {
                 Filtered.push(columns[i]);
             }
         }
@@ -38,50 +21,41 @@ var FilterTheReservedColumnNames = async function (columns) {
     return Filtered;
 };
 
-async function RecoverConnection()
-{
-    let tries=3;
-    while(tries > 0 )
-    {
-        try{
-            if (connection == null) {
-                connection = await mssql.connect(config);
-                return ;
-            }
-
+async function CheckDBConn() {
+    let tries = 3;
+    while (tries > 0) {
+        try {
+            let result = await sqlDB.open(common.sqldbConnection);
+            return result;
         }
         catch (error) {
-            logger.logError("repclose");
-            mssql.close();
-            connection=undefined;
             logger.logError(error);
         }
-        finally{
+        finally {
             tries -= 1;
         }
     }
 }
 
+var getColumnsAsString  = async function (columns)
+{
+    let columnsstr = "*";
+    if (columns && columns.length > 0) {
+        columns = await FilterTheReservedColumnNames(columns);
+        columnsstr = columns.join(",");
+    }
+    return columnsstr;
+};
 
 //Get entities
 var GetAll = async function (columns, table_name) {
     try {
-
-        let columnsstr = "*";
-        if (columns && columns.length > 0) {
-            columns = await FilterTheReservedColumnNames(columns);
-            columnsstr = columns.join(",");
-        }
-
-        if (connection == null) {
-            await RecoverConnection();
-        }
-
-        let request = new mssql.Request();
+        await CheckDBConn();
+        let columnsstr = getColumnsAsString(columns);
         let command = "select " + columnsstr + " from " + table_name;
-        let Results = await request.query(command);
-        if (Results && Results.recordset && Results.recordset.length > 0) {
-            return Results.recordset;
+        let Results = await sqlDB.get(command);
+        if (Results && Results.length > 0) {
+            return Results;
         }
         else {
             return undefined;
@@ -97,22 +71,12 @@ var GetAll = async function (columns, table_name) {
 var GetByFilter = async function (columns, table_name, FilterName, FilterValue) {
 
     try {
-
-        let columnsstr = "*";
-        if (columns && columns.length > 0) {
-            columns = await FilterTheReservedColumnNames(columns);
-            columnsstr = columns.join(",");
-        }
-
-        if (connection == null) {
-           await RecoverConnection();
-        }
-
-        let request = new mssql.Request();
+        await CheckDBConn();
+        let columnsstr = getColumnsAsString(columns);
         let command = "select " + columnsstr + " from " + table_name + " where " + FilterName + " = " + FilterValue;
-        let Results = await request.query(command);
-        if (Results && Results.recordset && Results.recordset.length > 0) {
-            return Results.recordset;
+        let Results = await sqlDB.get(command);
+        if (Results && Results.length > 0) {
+            return Results;
         }
         else {
             return undefined;
