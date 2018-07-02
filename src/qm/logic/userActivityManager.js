@@ -196,10 +196,8 @@ var ChangeCurrentCounterStateForOpen = function (errors, OrgID, BranchID, Counte
             CloseActivity(CurrentActivity);
         }
 
-        let counter = configurationService.configsCache.counters.find(function (value) {
-            return value.ID == CounterID;
-        }
-        );
+        let counter = configurationService.getCounterConfig(CounterID);
+
         //Check for correct type
         if (counter && counter.Type_LV == enums.counterTypes.CustomerServing) {
 
@@ -274,10 +272,7 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
         CounterData = output[1];
         CurrentActivity = output[2];
 
-        let counter = configurationService.configsCache.counters.find(function (value) {
-            return value.ID == CounterData.id;
-        }
-        );
+        let counter = configurationService.getCounterConfig(CounterData.id);
 
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing) {
@@ -320,10 +315,7 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
         CounterData = output[1];
         CurrentActivity = output[2];
 
-        let counter = configurationService.configsCache.counters.find(function (value) {
-            return value.ID == CounterData.id;
-        }
-        );
+        let counter = configurationService.getCounterConfig(CounterData.id);
 
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing &&  counter.Type_LV != enums.counterTypes.NoCallServing) {
@@ -368,10 +360,7 @@ var CounterValidationForNext = function (errors, OrgID, BranchID, CounterID) {
         CounterData = output[1];
         CurrentActivity = output[2];
 
-        let counter = configurationService.configsCache.counters.find(function (value) {
-            return value.ID == CounterData.id;
-        }
-        );
+        let counter = configurationService.getCounterConfig(CounterData.id);
 
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing) {

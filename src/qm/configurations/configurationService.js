@@ -101,6 +101,15 @@ var getCommonSettings = function (BranchID, Key) {
     }
 };
 
+function getCounterConfig(CounterID) {
+    //counter Config
+    let counter = this.configsCache.counters.find(function (value) {
+        return value.ID == CounterID;
+    }
+    );
+    return counter;
+}
+
 function getBranchConfig(BranchID) {
     //Branch Config
     var branch = this.configsCache.branches.find(function (value) {
@@ -273,6 +282,8 @@ var initialize = async function () {
         return common.error;
     }
 };
+
+module.exports.getCounterConfig = getCounterConfig;
 module.exports.getBranchConfig = getBranchConfig;
 module.exports.getService = getService;
 module.exports.getServiceConfig = getServiceConfig;
