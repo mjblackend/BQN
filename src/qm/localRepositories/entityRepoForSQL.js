@@ -297,18 +297,16 @@ var initialize = async function () {
     try {
         // open the database
         this.db = sqlDB;
-        result = await this.db.open(common.sqldbConnection);
+        let result = await this.db.open(common.sqldbConnection);
 
         //Run the initialize script
         let sql = fs.readFileSync("sql_database.sql").toString();
         let scriptArray = sql.replace("\r\n", "").split(";");
         scriptArray = scriptArray.slice(0, scriptArray.length - 1);
-        if (scriptArray != undefined) {
-            for (let i = 0; i < scriptArray.length; i++) {
-                result = await this.db.run(scriptArray[i]);
-                if (result == false) {
-                    return common.error;
-                }
+        for (let i = 0; i < scriptArray.length; i++) {
+            let result2 = await this.db.run(scriptArray[i]);
+            if (result2 == false) {
+                return common.error;
             }
         }
         return result;

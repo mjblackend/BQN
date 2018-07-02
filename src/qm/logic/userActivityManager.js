@@ -117,8 +117,7 @@ var UpdateActionTime = function (Activity) {
 
 var CloseActivity = function (Activity) {
     try {
-        if (Activity)
-        {
+        if (Activity) {
             Activity.endTime = Date.now();
             Activity.duration = (Activity.endTime - Activity.startTime) / 1000;
             Activity.calenderDuration = (Activity.endTime - Activity.startTime) / 1000;
@@ -130,6 +129,39 @@ var CloseActivity = function (Activity) {
     catch (error) {
         logger.logError(error);
         return undefined;
+    }
+};
+
+var checkIfValueEqualAtLeastOne = function (Value, ArrayOfValues) {
+    try {
+        let Exists = false;
+        let ItemValue = ArrayOfValues.find(function (tValue) {
+            return tValue == Value;
+        });
+        if (ItemValue) {
+            Exists = true;
+        }
+        return Exists;
+    }
+    catch (error) {
+        logger.logError(error);
+        return false;
+    }
+};
+var checkIfValueNotEqualAnyValue = function (Value, ArrayOfValues) {
+    try {
+        let NotExists = false;
+        let ItemValue = ArrayOfValues.find(function (tValue) {
+            return tValue == Value;
+        });
+        if (!ItemValue) {
+            NotExists = true;
+        }
+        return NotExists;
+    }
+    catch (error) {
+        logger.logError(error);
+        return false;
     }
 };
 
@@ -162,7 +194,8 @@ var CounterValidationForOpen = function (errors, OrgID, BranchID, CounterID) {
 
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type == enums.EmployeeActiontypes.Custom || CurrentActivity.type == enums.EmployeeActiontypes.Break || CurrentActivity.type == enums.EmployeeActiontypes.NotReady) {
+            let States = [enums.EmployeeActiontypes.Custom,enums.EmployeeActiontypes.Break,enums.EmployeeActiontypes.NotReady]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,States)) {
                 return common.success;
             }
             else {
@@ -294,6 +327,8 @@ var CounterValidationForHold = function (errors, OrgID, BranchID, CounterID) {
     }
 };
 
+
+
 //Check Counter Validation ForNext
 var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
     try {
@@ -311,14 +346,13 @@ var CounterValidationForServe = function (errors, OrgID, BranchID, CounterID) {
 
         //Check for correct type
         if (counter && counter.Type_LV != enums.counterTypes.CustomerServing && counter.Type_LV != enums.counterTypes.NoCallServing) {
-
             return common.not_valid;
         }
 
         // Change the Current activity
         if (CurrentActivity) {
-            if (CurrentActivity.type == enums.EmployeeActiontypes.Serving || CurrentActivity.type == enums.EmployeeActiontypes.NoCallServing ||
-                CurrentActivity.type == enums.EmployeeActiontypes.Ready || CurrentActivity.type == enums.EmployeeActiontypes.Serving || CurrentActivity.type == enums.EmployeeActiontypes.Processing) {
+            let States = [enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.NoCallServing,enums.EmployeeActiontypes.Ready,enums.EmployeeActiontypes.Serving,enums.EmployeeActiontypes.Processing]
+            if (checkIfValueEqualAtLeastOne(CurrentActivity.type,States)) {
                 return common.success;
             }
             else {
