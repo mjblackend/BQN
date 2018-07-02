@@ -10,28 +10,39 @@ var queueCommandManager = require("./queueCommandManager");
 var message = require("../../dataMessage/message");
 var autoNextID;
 
-
-var performAutoNextForBranch = async function (branchData) {
-    try {
+function getReadyCountersActivities(branchData)
+{
+    try{
+        let readyCountersActivities;
         if (branchData.userActivitiesData && branchData.transactionsData && branchData.transactionsData.length) {
-            let readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
+            readyCountersActivities = branchData.userActivitiesData.filter(function (value) {
                 return userActivityManager.isCounterValidForAutoNext(value);
             }
             );
-            if (readyCountersActivities) {
-                for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
-                    let activity = readyCountersActivities[iActivity];
-                    var counterInfo = {
-                        orgid: activity.org_ID,
-                        counterid: activity.counter_ID.toString(),
-                        branchid: branchData.id.toString()
-                    };
-                    let _message = new message();
-                    _message.payload=counterInfo;
-                    queueCommandManager.counterNext(_message);
-                }
-            }
+        }
+        return readyCountersActivities;
+    }
+    catch (error) {
+        logger.logError(error);
+        return undefined;
+    }
+}
 
+var performAutoNextForBranch = async function (branchData) {
+    try {
+        let readyCountersActivities = getReadyCountersActivities(branchData);
+        if (readyCountersActivities) {
+            for (let iActivity = 0; iActivity < readyCountersActivities.length; iActivity++) {
+                let activity = readyCountersActivities[iActivity];
+                var counterInfo = {
+                    orgid: activity.org_ID,
+                    counterid: activity.counter_ID.toString(),
+                    branchid: branchData.id.toString()
+                };
+                let _message = new message();
+                _message.payload=counterInfo;
+                queueCommandManager.counterNext(_message);
+            }
         }
         return common.success;
     }
