@@ -947,6 +947,12 @@ function GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNum
     }
 }
 
+function isTransactionFromSameSequence(transactionData, NewTransaction) {
+    let Now = new Date;
+    let Today = Now.setHours(0, 0, 0, 0);
+    return transactionData.branch_ID == NewTransaction.branch_ID && transactionData.symbol == NewTransaction.symbol && transactionData.creationTime > Today;
+}
+
 //Get SequenceRange and get sequence
 function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_TicketNumber, EnableHallSlipRange) {
     try {
@@ -956,13 +962,13 @@ function GetSequenceForFirstTime(BracnhData, transaction, Max_TicketNumber, Min_
         let transactions;
         if (BracnhData != null && BracnhData.transactionsData != null && BracnhData.transactionsData.length > 0) {
             transactions = BracnhData.transactionsData.filter(function (value) {
-                return value.branch_ID == transaction.branch_ID && (value.hall_ID == transaction.hall_ID || EnableHallSlipRange == "0") && value.symbol == transaction.symbol && value.creationTime > Today;
+                return isTransactionFromSameSequence(value, transaction) && (value.hall_ID == transaction.hall_ID || EnableHallSlipRange == "0");
             }
             );
         }
 
         ticketSequence = GetMaxTransactionSequence(transactions, Max_TicketNumber, Min_TicketNumber);
-        
+
         //Add sequence to the branch data
         let ticketSeqData = new TicketSeqData();
         ticketSeqData.hall_ID = transaction.hall_ID;
